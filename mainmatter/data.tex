@@ -13,32 +13,41 @@ Datasets are taken from the \citetitle{snapnets}~\cite{snapnets}, containing hun
     
     \subsection{Static Data}
     
-        Initial positions are sampled from three two-dimensional Gaussians with means (-2,2), (2,2) and (0,-2) and variance $0.5^2$, as illustrated in \Cref{fig:Synthetic-Initial-0},
+        Initial positions are sampled from three multivariate Gaussians with means (-2,2), (2,2) and (0,-2) and covariance $0.5^2\bm{I}$, as illustrated in \Cref{fig:Synthetic-Initial-0}.
 
-        \xfig{Synthetic-Initial-0}
+        \xfig{Synthetic-Initial-0}[Initial positions drawn from three Gaussians with ten samples each]
                 
         Links are determined by calculating link probabilities as inverse proportional to the distance between observations and a bias of 0.5.
         
         The impact of bias
         
-        \xfig{Synthetic-Bias-Low}
-        \xfig{Synthetic-Bias-High}
+        \xfigfig{Synthetic-Bias-Low}[Links using a bias of 0.5]{Synthetic-Bias-High}[Links using a bias of 1]
     
-    \subsection{Diffusion Data}
+    \subsection{Dynamic Data}
     
         The diffusion model considers the observation at time $T$ to be equal to the observation at time $T-1$ with added white noise.
     
         The synthetic diffusion data uses the same initial positions as the static data, with positions for subsequent time steps determined by adding diffusion as $N(0,0.01^2)$. 
         
+        \xfig{Synthetic-Dynamic-Links}
+        
         Impact of diffusion rate
-        % \xanim{Synthetic-Diffusion-Data}
+        \xanim{Synthetic-Dynamic-Low}[Animation of the generated dynamic data]
+        \xanim{Synthetic-Dynamic-High}[Animation of subsequent time steps adding diffusion with $\sigma=0.25$]
     
-    \subsection{Autoregressive Data}
+    \subsection{Periodic Data}
     
-        The autoregressive model is capable of capturing periodic patterns, such that the synthetic autoregressive data should include periodicity. This is achieved by defining initial positions for the first three time steps, simulating an AR(3) process. 
+        The autoregressive model is capable of capturing periodic patterns, such that the dynamic data should include periodicity. This is achieved by defining initial positions for the first three time steps, simulating an AR(3) process. 
         
         The first set of initial positions are the same as for the static data, while the second and third set of positions are defined using two and four Gaussians with means $(\pm2,0)$ and $(\pm2,\pm2)$ respectively and a variance of $0.5^2$.
-        \xfig{Synthetic-Initial-1}
-        \xfig{Synthetic-Initial-2}
+       
+        \xfigfig{Synthetic-Initial-1}[Positions at $t=2$]{Synthetic-Initial-2}[Positions at $t=3$]
         
         Similar to the diffusion model, the autoregressive model also includes diffusion, where the same rate of $\sigma=0.01$ is used. Furthermore, the positions for subsequent time steps are calculated according to REF using $\phi=[0.95, 0.05, 0]$
+        
+        
+        \xfig{Synthetic-Periodic-Links}
+        
+        \xanim|4|{Synthetic-Periodic-Data}[Animation of the generated periodic data]
+        
+        \xfigfig{Synthetic-Periodic-Low}[Positions at $t=4$ using $\phi=[0,0,0]$, resulting in white noise with $\sigma=0.01$.]{Synthetic-Periodic-High}[Positions at $t=4$ using $\phi=[1,1,1]$]
