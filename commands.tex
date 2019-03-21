@@ -1,0 +1,38 @@
+\usepackage{xparse}
+
+\NewDocumentCommand{\link}{ s D(){i} D(){j} }{
+    \IfBooleanTF{#1}
+        {#2 \not\rightarrow #3}
+        {#2     \rightarrow #3}
+}
+
+\NewDocumentCommand{\sub}{ d() D(){ij} }{ #1_{#2} }
+
+\NewDocumentCommand{\xfig}{ D(){!htb} s O{width=0.7\textwidth} D//{figures} m O{} }{
+    \begin{figure}[#1]
+        \centering
+        \IfBooleanTF {#2}
+            { \input{#4/#5} }
+            { \includegraphics[#3]{#4/#5} }
+        \caption{#6} 
+        \label{fig:#5}
+    \end{figure}
+}
+
+\NewDocumentCommand{\xtab}{ D(){!htb} D//{tables} m O{} }{
+    \begin{table}[#1]
+        \centering
+        \input{#2/#3}
+        \caption{#4}
+        \label{tab:#3}
+    \end{table}
+}
+
+\NewDocumentCommand{\xanim}{ D(){!htb} O{width=0.7\textwidth} m D(){00} D(){99} O{} }{
+    \begin{figure}[#1]
+        \centering
+        \animategraphics[autoplay,loop, #2]{12}{figures/#3/}{#4}{#5}
+        \caption{#6 (Hint: Open in Adobe Reader)}
+        \label{fig:#3}
+    \end{figure}
+}

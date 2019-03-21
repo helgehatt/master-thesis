@@ -1,0 +1,151 @@
+\documentclass[]{article}
+\usepackage[utf8]{inputenc}
+
+\input{tables/!style}
+
+\usepackage{parskip}
+% \usepackage{geometry}
+\usepackage{multicol}
+\usepackage{enumitem}
+\usepackage{biblatex}
+\addbibresource{backmatter/references.bib}
+\DeclareFieldFormat*{citetitle}{\emph{#1}}
+\setlength\bibitemsep{.5\baselineskip}
+
+\pagestyle{empty}
+\setlength{\textheight}{600pt}
+
+\begin{document}
+
+\section*{Project Plan}
+
+The project is based on the BSc thesis by \citeauthor{zangenberg2018a} \cite{zangenberg2018a} on \citetitle{zangenberg2018a} as well as the MSc thesis by \citeauthor{jacobsen2018a} \cite{jacobsen2018a} on \citetitle{jacobsen2018a}. The idea is to scale up the autoregressive (AR) latent space modeling framework developed by \citeauthor{zangenberg2018a}, using maximum likelihood inference opposed to Bayesian. This is achieved by adapting \citeauthor{jacobsen2018a}'s approach where the maximum likelihood optimization problem is solved by gradient descent. Doing so, the goal is to utilize high-performance computing to allow the modeling of large-scale dynamic models of complex networks.
+
+By analyzing temporal (dynamic) networks, we can observe how interactions between entities change over time, and potentially be able to predict these changes. An autoregressive model is essentially a linear regression model based on previous values of the same variable. In this case, we consider the modeling of latent (unobserved) variables, with the intuition that similar entities are more likely to interact, thus using a similarity measure to model a latent space.
+The dynamic latent space models are evaluated in terms of link prediction, aiming to predict new links or deleted links between entities for a future time steps, or missing links in the current network.
+% where a small portion of links at different time steps are removed. 
+% An accurate model will be able to tell which links are likely to be present, attempting to predict the existence of the removed links.
+
+The AR model allows us to detect the behavior of dynamic networks, while at the same time being quite simple. More complex models can also be considered, however due to the additional time dimension, complex models quickly become infeasible to apply to large networks. Using an AR model opposed to a static model or diffusion model enables the modeling of a fixed set of lags, capturing diffusion, acceleration as well as periodic behavior of the considered network.
+
+The thesis aims to answer the following questions:
+\begin{itemize}\itshape
+    \item Will a GPU-based framework allow the modeling of large dynamic complex networks for several time steps?
+    \item Is a simple AR model sufficient to capture dynamic relations of complex networks, or will the task require more advanced models?
+\end{itemize}
+
+% Introduction
+%     Extend Nicolaj's work
+%     Port whole model to GPU
+%     Use a simple AR model
+%     Diffusion, acceleration, periodicity
+%     Directed networks, reciprocity
+
+
+% Scientific questions:
+%     GPU-framework for dynamic latent space model prediction
+%     Simple AR model vs more complex models
+%     Closer look at each agent (bias and diffusion)
+
+% hvorfor er det interessant at kigge på dynamiske netværk, hvad er ideen ved en AR model, hvad vil vi gerne med en dynamisk latent space model for netværk.
+
+% Hvordan vil vi evaluere vores modeller, i.e. link prediction af næste tiders netværk.  Hvad forventer vi en AR model kan gøre af forskel i forhold til simpel statisk eller en diffusionsmodel....
+
+
+\section*{Learning Objectives}
+
+A graduate of the MSc Eng programme from DTU:
+\begin{itemize}
+    \item can identify and reflect on technical scientific issues and understand the interaction between the various components that make up an issue.\par
+    The project comprise several technical scientific issues, such as developing an autoregressive latent space model and a GPU framework for link prediction in temporal networks. The latter relies on the interaction between components such as pairwise distance calculation, gradient descent, various GPU techniques and much more.
+    
+    \item can, on the basis of a clear academic profile, apply elements of current research at international level to develop ideas and solve problems.\par
+    International state-of-the-art research is used in the development of models and frameworks, finding solutions to common problems such as how to most efficiently compute a distance matrix, as well as getting inspiration on how to solve more unusual problems.
+    
+    \item masters technical scientific methodologies, theories and tools, and has the capacity to take a holistic view of and delimit a complex, open issue, see it in a broader academic and societal perspective and, on this basis, propose a variety of possible actions.\par
+    Theory acquisition and the application of scientific methodologies is an essential part of the project. On the basis of this knowledge, every decision is a result of carefully weighing possible actions in a broad academic perspective.
+    
+    \item can, via analysis and modeling, develop relevant models, systems and processes for solving technological problems.\par
+    Performing link prediction in complex networks relies on the development of appropriate models.
+    
+    \item can communicate and mediate research-based knowledge both orally and in writing.\par
+    The project includes a written report to elaborate on how the various issues are solved and discuss findings. At last, the report is defended orally.
+    
+    \item is familiar with and can seek out leading international research within his/her specialist area.\par
+    A literature study is carried out to get familiar with leading international research within dynamic latent space modeling, link prediction, GPU optimization and more.
+    
+    \item can work independently and reflect on own learning, academic development and specialization.\par
+    Background knowledge of machine learning, deep learning, time series analysis, high-performance computing and non-linear signal processing has been acquired during the MSc in \emph{Computer Science and Engineering} and will be used throughout the project.
+    
+    \item masters technical problem-solving at a high level through project work, and has the capacity to work with and manage all phases of a project – including preparation of timetables, design, solution and documentation.\par
+    Technical problem-solving is applied throughout the project, as well as having prepared a time schedule for the various phases of the project, considering designing a solution and documenting every step.
+    
+    
+\end{itemize}
+
+
+\section*{Time Schedule}
+
+The first few weeks of the project are used to finish the fall semester, having the last exam 8th of February.
+
+\begin{multicols}{2}
+\begin{tabular}{r|l}
+    23.01 & Project start \\
+     4.02 & Literature study \\
+    11.02 & Write project plan \\
+    14.02 & Meet with \citeauthor{jacobsen2018a} \\
+    18.02 & Write introduction \\
+    22.02 & Submit project plan \\
+     4.03 & Develop starting solution \\
+    11.03 & Write methodology \\
+    18.03 & Develop AR model \\
+\end{tabular}
+
+\columnbreak
+
+\begin{tabular}{r|l}
+     1.04 & Develop GPU framework \\
+    22.04 & Write results \\
+    29.04 & Apply GPU optimizations \\
+    13.05 & Investigate alternate models \\
+    20.05 & Write discussion \\
+     3.06 & Write conclusion \\
+    22.06 & Submit thesis \\
+    23.06 & Project end 
+\end{tabular}
+\end{multicols}
+
+\subsection*{Gant Chart}
+
+\begin{tabular}{~l|*{12}{^c}}
+\toprule
+\rowstyle{\bfseries}
+Activity / Week     & 1  & 2  & 3  & 4  & 5  & 6  & 7  & 8  & 9  & 10 & 11 & 12 \\
+\midrule
+Literature study    &    & x  & x  & x  & x  & x  & x  & x  &    &    &    &    \\
+Project plan        &    &    & x  & x  &    &    &    &    &    &    &    &    \\
+Introduction        &    &    &    & x  & x  & x  &    &    &    &    &    &    \\
+Starting solution   &    &    &    &    &    & x  & x  &    &    &    &    &    \\
+Methodology         &    &    &    &    &    &    & x  & x  & x  & x  &    &    \\
+AR model            &    &    &    &    &    &    &    & x  & x  &    &    &    \\
+GPU framework       &    &    &    &    &    &    &    &    &    & x  & x  & x  \\
+\end{tabular}
+\newline
+\begin{tabular}{~l|*{10}{^c}}
+\midrule
+\rowstyle{\bfseries}
+Activity / Week     & 13 & 14 & 15 & 16 & 17 & 18 & 19 & 20 & 21 & 22 \\
+\midrule
+Results             & x  & x  & x  & x  & x  &    &    &    &    &    \\
+GPU optimization    &    & x  & x  &    &    &    &    &    &    &    \\
+Alternate models    &    &    &    & x  & x  &    &    &    &    &    \\
+Discussion          &    &    &    &    & x  & x  &    &    &    &    \\
+Conclusion          &    &    &    &    &    &    & x  & x  &    &    \\
+Finalize            &    &    &    &    &    &    &    &    & x  & x  \\
+\bottomrule
+\end{tabular}
+
+% \nocite{*}
+\printbibliography
+
+\end{document}

@@ -1,0 +1,92 @@
+\chapter{Introduction}\label{ch:Introduction}
+    
+Network analysis is becoming increasingly important in many fields, including intelligence analysis, marketing and recommender systems.
+
+Surrounded by networks, circuitry in the phone connecting hardware, the electricity grid supplying the phone's power as well as the telecommunications network linking people all over the world. These are just a few examples of the vast amount of networks incorporated into our lives.
+
+\section{Complex Networks}
+
+    Networks are represented as graphs, having a set of vertices as the objects or actors in the network and a set of edges as relationships between the vertices. Considering a social network such as Facebook, the graph is comprised of user profiles and friendships as vertices and edges respectively. Friendship between users is considered a mutual link, thus the links have no orientation and the network is undirected. In many cases however, edges have a direction, where Twitter users can follow other users without being followed back. This is also the case in most communication networks, where the actors comprise senders and receivers. 
+    
+    Given a directed graph, an undirected link is essentially two directed links with opposite orientation. The likelihood of such double links occurring is a measure of \emph{reciprocity}, being one of many quantitative measures used to study complex networks. Other measures include \emph{clustering coefficient}, being the degree to which vertices in a graph tend to cluster together, as well as \emph{scale-free degree distribution} and \emph{community structure}. Analyzing these measures can reveal organizing principles that shape the observed network's topology.
+    
+    % When analyzing directed networks, people often treat them as undirected for simplicity. 
+    Undirected graphs consist of one or more connected components, being a subgraph in which any two vertices are connected by paths. 
+    In case of directed graphs, components are either weakly or strongly connected. A strongly connected component has paths in both directions between the vertices, while a weakly connected component has paths in at least one direction. 
+    
+    Connected components can also be defined in terms of \emph{reachability}, where every vertice is reachable by all other vertices in a connected component. Reachability is an equivalence relation since it satisfies
+    \par\begin{tabular}{>{\itshape}l p{.76\textwidth}}
+        Reflexivity  & There is a trivial path of length zero from any vertex to itself. \\
+        Symmetricity & If there is a path from $u$ to $v$, the same edges form a path from $v$ to $u$. \\
+        Transitivity & If there is a path from $u$ to $v$ and a path from $v$ to $w$, the two paths may be concatenated together to form a path from $u$ to $w$.
+    \end{tabular}
+    
+    Real-life networks have a tendency to produce high density clusters, having several large connected components. Hence, symmetricity and transitivity applies not only in terms of reachability, but to the links in the network as well. It is more likely that $u$ is connected to $v$ if $v$ is connected to $u$, and similarly, that $u$ and $w$ are connected if both $(u,v)$ and $(v,w)$ are connected. These are some of the properties we attempt to capture by creating models of the networks.
+
+\section{Dynamic Models}
+
+    Dynamic networks have complex underlying structures, where entities and relationships appear and disappear over time. To be able to analyze a specific state of a network, a snapshot is created and a static model is developed to capture the inherent structures.
+    Doing so does however leave out all the temporal information, such as how the structures evolve over time.
+    
+    Instead of analyzing a single snapshot of a network, the thesis is concerned with dynamic models capable of capturing the temporal aspects of a network. This is achieved using an \emph{autoregressive} (AR) model, performing a simple linear regression of previous network states to find a correlation between past and present. More complex models can also be considered, however due to the additional time dimension, complex models quickly become infeasible to apply to large networks.
+    
+    Using an AR model opposed to a static model or diffusion model enables the modeling of a fixed set of lags, capturing diffusion, acceleration as well as periodic behavior of the considered network.
+    
+    Studying the underlying structures within a network can help better understand the interactions between actors, being able to predict missing links as well as how the networks evolve over time.
+
+\section{Link Prediction}
+    % The dynamic latent space models are evaluated in terms of link prediction, aiming to predict new links or deleted links between entities for a future time steps, or missing links in the current network.
+
+    The performance of a static model is evaluated in terms of \emph{missing} link prediction, where a small portion of links are removed. The goal of a static model is to tell which links are likely to be present, predicting which links were initially removed. The missing link performance measure is however only suitable for models having no temporal aspect.
+    
+    Another alternative is \emph{temporal} link prediction, where the goal is to predict the relationships at time $T+1$ given link data for the $T$ previous time steps.
+    This measure can also be extended to \emph{periodic} temporal link prediction, where the aim is to predict the relationships at times $T+1, T+2, ..., T+L$ for a periodic pattern of length $L$. Such problems arise in many real-life scenarios, where  the periodic behavior differs from weekdays and weekends.  communication networks 
+
+
+% \section{Scope}
+
+%     The project is inspired by \citeauthor{zangenberg2018a}'s BSc thesis \cite{zangenberg2018a} on \citetitle{zangenberg2018a} as well as \citeauthor{jacobsen2018a}'s MSc thesis \cite{jacobsen2018a} on \citetitle{jacobsen2018a}. 
+%     The goal is to combine the two ideas of dynamic latent space models and a GPU-based modeling framework to be able to perform temporal link prediction in large networks.
+
+    % The idea is to scale up the autoregressive (AR) latent space modeling framework developed by \citeauthor{zangenberg2018a}, using maximum likelihood inference opposed to Bayesian. This is achieved by adapting \citeauthor{jacobsen2018a}'s approach where the maximum likelihood optimization problem is solved by gradient descent. Doing so, the goal is to utilize high-performance computing to allow the modeling of large-scale dynamic models of complex networks.
+    
+    % By analyzing temporal (dynamic) networks, we can observe how interactions between entities change over time, and potentially be able to predict these changes. An autoregressive model is essentially a linear regression model based on previous values of the same variable. In this case, we consider the modeling of latent (unobserved) variables, with the intuition that similar entities are more likely to interact, thus using a similarity measure to model a latent space.
+    
+    
+    % The thesis aims to answer the following questions:
+    % \begin{itemize}\itshape
+    %     \item Will a GPU-based framework allow the modeling of large dynamic complex networks for several time steps?
+    %     \item Is a simple AR model sufficient to capture dynamic relations of complex networks, or will the task require more advanced models?
+    % \end{itemize}
+
+\section{Scope \& Related Work}
+
+    The project is inspired by \citeauthor{zangenberg2018a}'s BSc thesis \cite{zangenberg2018a} on \citetitle{zangenberg2018a} as well as \citeauthor{jacobsen2018a}'s MSc thesis \cite{jacobsen2018a} on \citetitle{jacobsen2018a}. 
+    The goal is to combine the two ideas of dynamic latent space models and a GPU-based modeling framework to be able to perform temporal link prediction in large networks.
+
+    The goal of \citeauthor{zangenberg2018a}'s thesis is to examine whether additional information can be captured by a dynamic model opposed to a static model when analyzing temporal networks. This is achieved by developing three different models; a static latent space model using no temporal information, a dynamic social network latent space model as proposed in \cite{sarkar2005dynamic} where the links at time $T+1$ depend only on the previous time step $T$ assuming the future is conditionally independent of the past given the present (Markov property), and lastly a dynamic autoregressive latent space model where the assumption of conditional independence is replaced with several autoregressive lags to capture periodic structure.
+    
+    The models are implemented in Stan, a probabilistic programming language where Bayesian inference is used to perform temporal link prediction. Doing so, results on synthetic data showed that the autoregressive model was able to identify periodic changes over time, however with a limited network size of 30 entities over 23 time steps. The models were also tested on a real communication network comprised of 40 entities over 22 time steps, providing a reasonable fit for the first two models, while the autoregressive model proved too computationally expensive. 
+    
+    \citeauthor{jacobsen2018a}'s work focuses on non-temporal networks, comparing variations of the static latent space model proposed in \cite{hoff2002latent} to capture the inherent structures of large-scale networks. 
+    Similarity between entities in the latent space is determined by Euclidean distance, allowing for easy interpretation and visualization.
+    The models are implemented in PyTorch, where maximum likelihood techniques involving gradient descent are used for optimization. Doing so allows the use of GPUs to greatly improve computational capabilities.
+    
+    By implementing \citeauthor{zangenberg2018a}'s models in \citeauthor{jacobsen2018a}'s GPU-based modeling framework, the objective is to inspect much larger temporal networks over a longer period of time. This will in turn give rise to new experiments, where the initial aims are to answer the following questions:
+    \begin{itemize}\itshape
+        \item Will a GPU-based framework allow the modeling of large dynamic complex networks for several time steps?
+        \item Is a simple AR model sufficient to capture dynamic relations of complex networks, or will the task require more advanced models?
+    \end{itemize}
+    
+    There are several other attempts at performing temporal link prediction, e.g. using tensor decompositions in \cite{dunlavy2011temporal}, a deep learning approach in \cite{li2014deep} and a review of dynamic network models with latent variables in \cite{kim2018review}
+    
+\section{Thesis Outline}
+
+    The thesis is structured as follows:
+    \begin{itemize}
+        \item \Cref{ch:Method} introduces the relevant methodology for developing dynamic models.
+        \item \Cref{ch:Data} describes the datasets used in the project as well as from where the data is acquired.
+        \item \Cref{ch:Results} lists the results from applying the models to the data.
+        \item \Cref{ch:Discussion} summarizes the results and discusses main observations and extensions.
+        \item At last, \Cref{ch:Conclusion} concludes the project.
+    \end{itemize}

@@ -1,0 +1,46 @@
+
+\chapter{Method}\label{ch:Method}
+
+This chapter introduces the methodology 
+
+\section{Model Development}
+
+    \subsection{Latent Space Model}
+    
+        The latent space approach to social network analysis is introduced in \cite{hoff2002latent}, using a model similar to Multidimensional Scaling in which entities are associated with locations in a $k$-dimensional space and links are more likely if the entities are close in latent space.
+        Given two entities $i$ and $j$, linkage is denoted by $\link$ and absence of a link by $\link*$, while $p(\link)$ or just $\sub(p)$ denotes the probability of observing the link. 
+        Euclidean distance is used to measure the similarity between entities in the latent space, denoted as $\sub(d)$, however any distance metric satisfying the triangle inequality can be used.
+        The latent space model is inherently reciprocal, where a small $\sub(d)$ follows from $\link$, making the link $\link(j)(i)$ more probable. Similarly, small $\sub(d)$ and $\sub(d)(jk)$ results in small $\sub(d)(ik)$, making the model inherently transitive as well.
+        
+        % Distances between a set of points in Euclidean space are invariant under rotation, reflection, and translation. Therefore, for each k x n matrix of latent positions Z there is an infinite number of other positions giving the same log-likelihood
+        
+        
+        \[ y = b - |z_i - z_j| \]
+        Model interpretation
+            The observations are placed in a latent space, where a distance metric is used to measure how far two observations are from one another in the latent space. The bias acts as the threshold determining how close two observations must be in the latent space for a link to occur. The model optimization procedure moves the observations around in the latent space and adjust the bias according to which observations are linked in the training data.
+        
+    \subsection{Diffusion Model}
+    
+    % Secondly they use a standard Markov assumption, i.e. the future is conditional independent of the past given the present
+    
+        The diffusion determines how much observations drift over time, such that a fairly low diffusion rate results in the observations staying more or less in place, while a high diffusion rate results in relationships changing radically.
+        
+    
+    \subsection{Autoregressive Model}
+    
+    \subsubsection{Estimating AR Coefficients}
+    % http://www-stat.wharton.upenn.edu/~steele/Courses/956/Resource/YWSourceFiles/YW-Eshel.pdf
+
+\section{Case-Control Approximate Likelihood}
+
+\section{Model Optimization}
+    
+    \subsection{Supervised Learning}
+
+    \subsection{Gradient Descent}
+
+    \subsubsection{Binary Cross-Entropy Loss}
+    
+    \subsubsection{Learning Rate Decay}
+    
+    \subsubsection{Early Stopping Criteria}

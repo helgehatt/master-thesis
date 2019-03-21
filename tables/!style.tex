@@ -1,0 +1,13 @@
+
+\usepackage{array}
+\newcolumntype{~}{>{\global\let\currentrowstyle\relax}}
+\newcolumntype{^}{>{\currentrowstyle}}
+\newcommand{\rowstyle}[1]{\gdef\currentrowstyle{#1}%
+  #1\ignorespaces
+}
+
+\def\arraystretch{1.2}
+
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{multirow}
