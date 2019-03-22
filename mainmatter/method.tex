@@ -7,17 +7,44 @@ This chapter introduces the methodology
 
     \subsection{Latent Space Model}
     
-        The latent space approach to social network analysis is introduced in \cite{hoff2002latent}, using a model similar to Multidimensional Scaling in which entities are associated with locations in a $k$-dimensional space and links are more likely if the entities are close in latent space.
+        The latent space approach to social network analysis is introduced by \citeauthor{hoff2002latent} \cite{hoff2002latent}, using a model similar to Multidimensional Scaling in which entities are associated with locations in a $k$-dimensional space and links are more likely if the entities are close in latent space.
         Given two entities $i$ and $j$, linkage is denoted by $\link$ and absence of a link by $\link*$, while $p(\link)$ or just $\sub(p)$ denotes the probability of observing the link. 
         Euclidean distance is used to measure the similarity between entities in the latent space, denoted as $\sub(d)$, however any distance metric satisfying the triangle inequality can be used.
         The latent space model is inherently reciprocal, where a small $\sub(d)$ follows from $\link$, making the link $\link(j)(i)$ more probable. Similarly, small $\sub(d)$ and $\sub(d)(jk)$ results in small $\sub(d)(ik)$, making the model inherently transitive as well.
         
+        The method proposed in \cite{hoff2002latent} uses a conditional independence approach, assuming that the presence or absence of a link between two individuals is independent of all other links in the network, given the latent space positions $Z$, the covariate information $X$ and parameters $\theta$ as seen in \Cref{eq:link-proba}. 
+        
+        \begin{equation}\label{eq:link-proba}
+            P(Y|Z,X,\theta) = \prod_{i\neq j} P(\sub(y)|z_i,z_j,\sub(x),\theta)
+        \end{equation}
+        
+        Covariate information includes pair-specific characteristics such as an indicator of actors $i$ and $j$ are of the same sex. This was used by \citeauthor{hoff2002latent} when analyzing strong friendship ties between boys and girls in a sixth-grade classroom. Providing such information can help increase model accuracy without adding much more complexity. However, the goal is to devise generalized models applicable to any type of network, such that supplying covariate information is disregarded. 
+        
+        Deciding whether links are present or absent can be considered a binary classification task, making the logistic regression model suitable to compute the odds of a link $\eta$ using the latent space positions $Z$ and a single parameter $\beta$ for the bias (intercept), as in \Cref{eq:link-odds}.
+        
+        \begin{equation}\label{eq:link-odds}
+            \begin{split}
+                \sub(\eta) &= \log \odds(\sub(y)=1|z_i,z_j,\beta) \\
+                           &= \beta - |z_i-z_j|
+            \end{split}
+        \end{equation}
+        
+        To transform the odds to a probability measure, the sigmoid function is applied to $\eta$ in \Cref{eq:link-sigmoid}, restricting its output to the interval $[0,1]$.
+        
+        \begin{equation}\label{eq:link-sigmoid}
+            \sub(p) = \sigma(\sub(\eta)) = \frac{1}{1 + e^{-(\beta - |z_i-z_j|)}}
+        \end{equation}
+        
+        The link probability $\sub(p)$ is thus inverse proportional to the distance between the observations in the latent space, with a bias term as the threshold deciding when the distance is small enough for a link to take place. Using a conditional independence model, the log-likelihood is simply defined as
+        
+        \begin{equation}
+            \log P(Y|\eta) = \sum_{i\neq j}\{ \sub(\eta)\sub(y) - \log(1+e^{\sub(\eta)}) \}
+        \end{equation}
+        
         % Distances between a set of points in Euclidean space are invariant under rotation, reflection, and translation. Therefore, for each k x n matrix of latent positions Z there is an infinite number of other positions giving the same log-likelihood
         
         
-        \[ y = b - |z_i - z_j| \]
-        Model interpretation
-            The observations are placed in a latent space, where a distance metric is used to measure how far two observations are from one another in the latent space. The bias acts as the threshold determining how close two observations must be in the latent space for a link to occur. The model optimization procedure moves the observations around in the latent space and adjust the bias according to which observations are linked in the training data.
+        % The observations are placed in a latent space, where a distance metric is used to measure how far two observations are from one another in the latent space. The bias acts as the threshold determining how close two observations must be in the latent space for a link to occur. The model optimization procedure moves the observations around in the latent space and adjust the bias according to which observations are linked in the training data.
         
     \subsection{Diffusion Model}
     
