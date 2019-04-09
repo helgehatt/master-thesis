@@ -1,1 +1,64 @@
 \chapter{Results}\label{ch:Results}
+
+\section{Synthetic Data}
+
+The generated data comprised of 30 nodes over 100 time steps is split into a training set with the first 80 time steps and a test set with the remaining 20. The convergence of the models is depicted for each dataset, showing the average loss per batch, the average training and test AUC scores as well as the model's current AUC scores for each individual time step. Given the small number of entities in the synthetic datasets, each batch includes all nodes, where each epoch computes the loss of each batch 80 times, once for each time step in the training data. The models are trained for a minimum of 200 epochs, using an early stopping criteria to decide when the training has converged. The requirement is an increase in test AUC of 0.001 over 30 epochs, terminating the optimization procedure if this criteria is not met. 
+
+When the training stops for the first time, the number of time steps to include in a single step of the optimizer increases from 1 to 10, continuing training with accumulated gradients to further improve performance. Since the change in diffusion rate and AR coefficients has an impact on all time steps, optimizing for a single time step can result in a negative impact overall. Hence, accumulating the gradients makes the training more stable, however it also makes the optimizer more prone to end in local minima, and including more than 10 time steps has not proved to benefit performance.
+
+The performance of the models are compared for each dataset, computing the receiver operating characteristics (ROC) on all links for the 20 time steps in the test set.
+
+\subsection{Static Data}
+
+    \subsubsection{Latent Space Model}
+    
+        \xanim{Synthetic-Static-Train-StaticModel-Undirected}
+    
+    \subsubsection{Diffusion Model}
+    
+        \xanim{Synthetic-Static-Train-DiffusionModel-Undirected}
+    
+    \subsubsection{Autoregressive Model}
+    
+        \xanim{Synthetic-Static-Train-AutoregressiveModel-Undirected}
+        
+    \subsubsection{Summary}
+    
+        \xfig{Synthetic-Static-ROC}
+
+\subsection{Dynamic Data}
+
+    \subsubsection{Latent Space Model}
+    
+        \xanim{Synthetic-Dynamic-Train-StaticModel-Undirected}
+    
+    \subsubsection{Diffusion Model}
+    
+        \xanim{Synthetic-Dynamic-Train-DiffusionModel-Undirected}
+    
+    \subsubsection{Autoregressive Model}
+    
+        \xanim{Synthetic-Dynamic-Train-AutoregressiveModel-Undirected}
+        
+    \subsubsection{Summary}
+    
+        \xfig{Synthetic-Dynamic-ROC}
+
+\subsection{Periodic Data}
+
+    \subsubsection{Latent Space Model}
+    
+        \xanim{Synthetic-Periodic-Train-StaticModel-Undirected}
+    
+    \subsubsection{Diffusion Model}
+    
+        \xanim{Synthetic-Periodic-Train-DiffusionModel-Undirected}
+        
+    \subsubsection{Autoregressive Model}
+    
+        Prone to get stuck in local minima.
+        \xanim{Synthetic-Periodic-Train-AutoregressiveModel-Undirected}
+        
+    \subsubsection{Summary}
+    
+        \xfig{Synthetic-Periodic-ROC}

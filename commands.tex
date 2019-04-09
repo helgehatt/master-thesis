@@ -28,11 +28,11 @@
     \end{table}
 }
 
-\NewDocumentCommand{\xanim}{ D(){!htb} O{width=0.7\textwidth} D||{12} m D(){00} D(){99} O{} }{
+\NewDocumentCommand{\xanim}{ D(){H} O{width=\textwidth} D||{3} m O{} }{
     \begin{figure}[#1]
         \centering
-        \animategraphics[autoplay,loop, #2]{#3}{figures/#4/}{#5}{#6}
-        \caption{#7 (view in Adobe Reader)}
+        \animategraphics[#2]{#3}{figures/#4}{}{}
+        \caption{#5 (view in Adobe Reader)}
         \label{fig:#4}
     \end{figure}
 }
@@ -41,17 +41,36 @@
     \begin{figure}[#1]
         \centering
         \begin{minipage}[t]{.48\textwidth}
-          \centering
-          \includegraphics[#2, width=\textwidth]{figures/#3}
-          \captionof{figure}{#4}
-          \label{fig:#3}
+            \centering
+            \includegraphics[#2, width=\textwidth]{figures/#3}
+            \captionof{figure}{#4}
+            \label{fig:#3}
         \end{minipage}%
         \hfill%
         \begin{minipage}[t]{.48\textwidth}
-          \centering
-          \includegraphics[#2, width=\textwidth]{figures/#5}
-          \captionof{figure}{#6}
-          \label{fig:#5}
+            \centering
+            \includegraphics[#2, width=\textwidth]{figures/#5}
+            \captionof{figure}{#6}
+            \label{fig:#5}
+        \end{minipage}
+    \end{figure}
+}
+
+\NewDocumentCommand{\xanimanim}{ D(){!htb} O{} D||{12} m O{} m O{} }{
+    \begin{figure}[#1]
+        \centering
+        \begin{minipage}[t]{.48\textwidth}
+            \centering
+            \animategraphics[#2, width=\textwidth]{#3}{figures/#4}{}{}
+            \captionof{figure}{#5 (view in Adobe Reader)}
+            \label{fig:#3}
+        \end{minipage}%
+        \hfill%
+        \begin{minipage}[t]{.48\textwidth}
+            \centering
+            \animategraphics[#2, width=\textwidth]{#3}{figures/#6}{}{}
+            \captionof{figure}{#7 (view in Adobe Reader)}
+            \label{fig:#6}
         \end{minipage}
     \end{figure}
 }

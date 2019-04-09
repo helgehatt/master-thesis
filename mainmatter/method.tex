@@ -1,9 +1,11 @@
 
 \chapter{Method}\label{ch:Method}
 
-This chapter introduces the methodology 
+This chapter describes the methodology, introducing relevant approaches to latent space modeling and how these are adapted to solve temporal link prediction. The chapter also explains how the developed models are evaluated and compared, as well as how the models are trained and optimized.
 
 \section{Model Development}
+
+    We consider three different models, the first one being a static latent space model. The latent space model forms the foundation for the dynamic models, where few additions are required to capture the temporal aspect with respect to diffusion. The diffusion model is one of the simplest dynamic models, which is extended to an autoregressive model capable of identifying periodic patterns in temporal data.
 
     \subsection{Latent Space Model}
     
@@ -12,57 +14,188 @@ This chapter introduces the methodology
         Euclidean distance is used to measure the similarity between entities in the latent space, denoted as $\sub(d)$, however any distance metric satisfying the triangle inequality can be used.
         The latent space model is inherently reciprocal, where a small $\sub(d)$ follows from $\link$, making the link $\link(j)(i)$ more probable. Similarly, small $\sub(d)$ and $\sub(d)(jk)$ results in small $\sub(d)(ik)$, making the model inherently transitive as well.
         
-        The method proposed in \cite{hoff2002latent} uses a conditional independence approach, assuming that the presence or absence of a link between two individuals is independent of all other links in the network, given the latent space positions $Z$, the covariate information $X$ and parameters $\theta$ as seen in \Cref{eq:link-proba}. 
+        The method proposed in \cite{hoff2002latent} uses a conditional independence approach, assuming that the presence or absence of a link between two individuals is independent of all other links in the network, given the latent space positions $Z$, the covariate information $X$ and parameters $\theta$ as seen in \Cref{eq:lsm-link-proba}. 
         
-        \begin{equation}\label{eq:link-proba}
+        \begin{equation}\label{eq:lsm-link-proba}
             P(Y|Z,X,\theta) = \prod_{i\neq j} P(\sub(y)|z_i,z_j,\sub(x),\theta)
         \end{equation}
         
-        Covariate information includes pair-specific characteristics such as an indicator of actors $i$ and $j$ are of the same sex. This was used by \citeauthor{hoff2002latent} when analyzing strong friendship ties between boys and girls in a sixth-grade classroom. Providing such information can help increase model accuracy without adding much more complexity. However, the goal is to devise generalized models applicable to any type of network, such that supplying covariate information is disregarded. 
+        Covariate information includes pair-specific characteristics such as an indicator of actors $i$ and $j$ are of the same sex. This was used by \citeauthor*{hoff2002latent} when analyzing strong friendship ties between boys and girls in a sixth-grade classroom. Providing such information can help increase model accuracy without adding much more complexity. However, the goal is to devise generalized models applicable to any type of network, such that supplying covariate information is disregarded. 
         
-        Deciding whether links are present or absent can be considered a binary classification task, making the logistic regression model suitable to compute the odds of a link $\eta$ using the latent space positions $Z$ and a single parameter $\beta$ for the bias (intercept), as in \Cref{eq:link-odds}.
+        Deciding whether links are present or absent can be considered a binary classification task, making the logistic regression model suitable to compute the odds of a link $\eta$ using the latent space positions $Z$ and a single parameter $\beta$ for the bias (intercept), as in \Cref{eq:lsm-link-odds}.
         
-        \begin{equation}\label{eq:link-odds}
+        \begin{equation}\label{eq:lsm-link-odds}
             \begin{split}
                 \sub(\eta) &= \log \odds(\sub(y)=1|z_i,z_j,\beta) \\
                            &= \beta - |z_i-z_j|
             \end{split}
         \end{equation}
         
-        To transform the odds to a probability measure, the sigmoid function is applied to $\eta$ in \Cref{eq:link-sigmoid}, restricting its output to the interval $[0,1]$.
+        To transform the odds to a probability measure, the sigmoid function is applied to $\eta$ in \Cref{eq:lsm-link-sigmoid}, restricting the output to the interval $[0,1]$.
         
-        \begin{equation}\label{eq:link-sigmoid}
+        \begin{equation}\label{eq:lsm-link-sigmoid}
             \sub(p) = \sigma(\sub(\eta)) = \frac{1}{1 + e^{-(\beta - |z_i-z_j|)}}
         \end{equation}
         
-        The link probability $\sub(p)$ is thus inverse proportional to the distance between the observations in the latent space, with a bias term as the threshold deciding when the distance is small enough for a link to take place. Using a conditional independence model, the log-likelihood is simply defined as
+        The link probability $\sub(p)$ is thus inverse proportional to the distance between the observations in the latent space, with a bias term as the threshold deciding when the distance is small enough for a link to take place. Note that the distance is always positive, such that the bias should be positive as well. 
+        The bias and latent space positions are estimated by moving the observations around in the latent space and adjusting the bias according to the links present in the training data.
+        By using a conditional independence model, the log-likelihood is simply defined as
         
-        \begin{equation}
+        \begin{equation}\label{eq:lsm-log-likelihood}
             \log P(Y|\eta) = \sum_{i\neq j}\{ \sub(\eta)\sub(y) - \log(1+e^{\sub(\eta)}) \}
         \end{equation}
         
-        % Distances between a set of points in Euclidean space are invariant under rotation, reflection, and translation. Therefore, for each k x n matrix of latent positions Z there is an infinite number of other positions giving the same log-likelihood
+        Note that the distances between a set of points in Euclidean space are invariant under rotation, reflection, and translation. Hence, there is an infinite number of latent space positions giving the same log-likelihood. The number of parameters to estimate depends on the number of entities $N$ in the network as well as the chosen dimensionality $k$ of the latent space, resulting in $N \times k + 1$ parameters. The $+1$ is due to the bias, which is kept as a single scalar. \citeauthor{jacobsen2018a} experimented with specific biases for each row and column of the sociomatrix, corresponding to two vectors of dimensions $N\times 1$ and $1\times N$, although the results showed a single scalar to generalize better.
         
         
         % The observations are placed in a latent space, where a distance metric is used to measure how far two observations are from one another in the latent space. The bias acts as the threshold determining how close two observations must be in the latent space for a link to occur. The model optimization procedure moves the observations around in the latent space and adjust the bias according to which observations are linked in the training data.
         
     \subsection{Diffusion Model}
-    
-    % Secondly they use a standard Markov assumption, i.e. the future is conditional independent of the past given the present
-    
-        The diffusion determines how much observations drift over time, such that a fairly low diffusion rate results in the observations staying more or less in place, while a high diffusion rate results in relationships changing radically.
+        
+        A dynamic latent space model for social network analysis is presented by \citeauthor{sarkar2005dynamic} in \cite{sarkar2005dynamic} using a standard Markov assumption, i.e. that the latent locations at time $t+1$ are conditionally independent of all previous locations given the latent locations at time $t$. The solution is comprised of two parts, an observation model and a transition model. As before, $\sub(d)=|z_i-z_j|$ is the Euclidean distance between observations in the latent space at a given time $t$.
+        
+        The observation model is similar to the latent space model, however with two important alterations. Firstly, each entity is associated with a radius $r_i$, allowing entities to vary their sociability by limiting their sphere of interaction within the latent space.
+        Secondly, the link probability is weighed by a kernel function to ensure a high probability of linkage if latent positions are within $\sub(r)=max(r_i,r_j)$ of one another, and a constant noise probability $\epsilon$ otherwise.
+        
+        For optimization purposes, the kernelized function must be continuous and differentiable at $\sub(d)=\sub(r)$, making \citeauthor{sarkar2005dynamic} pick the biquadratic kernel as follows
+        \begin{equation}\label{eq:biquadratic-kernel}
+            K(\sub(d))=
+            \begin{cases}
+                (1-(\sub(d)/\sub(r))^2)^2 & \text{when } \sub(d) \leq \sub(r) \\
+                \ 0 & \text{otherwise}
+            \end{cases}
+        \end{equation}
+        resulting in the link probability shown in \Cref{eq:dsnl-link-proba}.
+        
+        \begin{equation}\label{eq:dsnl-link-proba}
+            \sub(p)=\frac{1}{1 + e^{-(\sub(r)-\sub(d))}} K(\sub(d)) + \epsilon(1-K(\sub(d)))
+        \end{equation}
+        
+        
+        The second part, namely the transition model, penalizes large displacements from the previous time step by having each coordinate of each latent position independently subjected to a Gaussian perturbation with mean 0 and variance $\sigma^2$. This results in the following Gaussian model
+        \begin{equation}\label{eq:dsnl-transition}
+            \log P(Z_t|Z_{t-1}) = c - \sum_{i=1}^n |Z_{i,t}-Z_{i,t-1}|^2 / \sigma^2
+        \end{equation}
+        where the goal is to optimize log-likelihood of the graphs given by $Y_{0..t}$ conditioned on the latent positions $Z_{0..t}$.
+        
+        Using these elements to account for the temporal aspect, a simple diffusion model is formalized by applying a standard Markov assumption, modeling the latent space at each time step to be similar to the previous latent space with added diffusion. The diffusion follows a Gaussian with mean 0 and variance $\sigma_\epsilon^2$, known as the diffusion rate.
+        
+        \begin{equation}\label{eq:dsnl-model}
+            Z_t = Z_{t-1} + \epsilon_t \qquad\qquad \epsilon \sim N(0,\sigma_\epsilon^2)
+        \end{equation}
+        
+        The diffusion rate determines how far observations drift in a single time step, such that a fairly low diffusion rate results in the observations staying more or less in place, while a high diffusion rate makes the observations drift apart, resulting in radical changes to the relationships. With the addition of the diffusion rate, the number of parameters to estimate for the diffusion model is increased by one, to $n \times k + 2$.
         
     
     \subsection{Autoregressive Model}
     
-    \subsubsection{Estimating AR Coefficients}
-    % http://www-stat.wharton.upenn.edu/~steele/Courses/956/Resource/YWSourceFiles/YW-Eshel.pdf
+        Temporal autoregressive (AR) network models are discussed by \citeauthor{sewell2018simultaneous} in \cite{sewell2018simultaneous}, arguing that the assumption of conditional independence can be quite strong and difficult to justify. Their proposal is a general observation-driven model using a flexible autoregressive approach, extending the diffusion model by allowing predictions to be based on a number of past observations, thus moving away from the standard Markov assumption. 
+        
+        The autoregressive model is formalized in \Cref{eq:ar-model}, where $c$ is a constant, $p$ indicates the order of the AR process and the $\phi$s are the coefficients weighting the previous observations. 
+        \begin{equation}\label{eq:ar-model}
+            Z_t = c + \sum_{i=1}^p \phi_i Z_{t-i} + \epsilon_t \qquad\qquad \epsilon \sim N(0,\sigma_\epsilon^2)
+        \end{equation}
+        A first-order autoregressive process, denoted AR(1), with $\phi_1=1$ is identical to the diffusion process as previously described, using only the most recent value in its prediction. Hence, the AR model is capable of capturing diffusion, while extending to periodic behavior as well for higher-order processes. An AR(2) process is able to model a signal which spikes every second time step, while an AR(3) process detects periodicity with an interval of 3, and so on. The order of the process is usually predetermined according to the expected periodic frequency of the data, often referred to as the seasonality. For instance, monthly data has a seasonal interval of 12, as there are 12 months in a year, while daily data has a seasonal interval of 7, corresponding to a week.
+        
+        Increasing the order of the autoregressive model does however also increase model complexity, where an AR(3) process requires three sets of latent space positions to produce predictions for time steps $t>3$. Hence, the number of parameters to estimate has increased by a three-fold, in addition to multiple AR coefficients. For the general AR($p$) model, the number of parameters is $p\times (n\times k + 1) + 2$, requiring an additional set of latent space positions and an extra coefficient as the order increments.
+        Using all AR coefficients is however not necessary and the basis for predictions can be limited to a fixed set of previous values, also called lags. Considering daily data, an AR(7) process is required to capture the expected weekly seasonality, where the lags 5 and 6, corresponding to the values at $t-5$ and $t-6$, contain little information. Therefore, a sufficient restriction is for instance to simply model the lags at 1, 2, 3 and 7.
+        
+        An important concept of time series models such as the autoregressive process is stationarity, where a stationary process is considered stable. For an AR(1) model, the condition $-1<\phi<1$ is necessary for the process to be stationary. This is proven in \cite{alonso2012autoregressive} by assuming that the process begins with an arbitrary fixed value $Z_0=x$, and writing up subsequent values by successive substitution.
+        \begin{equation}
+            \begin{split}
+                Z_1 & = c + \phi x + \epsilon_1 \\
+                Z_2 & = c(1+\phi) + \phi^2x+\phi\epsilon_1 + \epsilon_2 \\
+                Z_3 & = c(1+\phi+\phi^2) + \phi^3x + \phi^2\epsilon_1 + \phi\epsilon_2 + \epsilon_3 \\
+                & \vdotswithin{=}\qquad\qquad\qquad \vdots \\
+                Z_t & = c\sum_{i=0}^{t-1}\phi^i + \phi^tx + \sum_{i=0}^{t-1}\phi^i\epsilon_{t-i}
+            \end{split}
+        \end{equation}
+        The mean, or expected value, of $Z_t$ is shown in \Cref{eq:ar-expectation} as $E[\epsilon_t]=0$.
+        \begin{equation}\label{eq:ar-expectation}
+            E[Z_t] = c\sum_{i=0}^{t-1}\phi^i+\phi^tx
+        \end{equation}
+        For the process to be stationary, the mean must remain constant over time, hence both terms must converge to constants. This is the case if $|\phi|<1$, as the first term $\sum_{i=0}^{t-1}\phi^i$ becomes the sum of a geometric progression with ratio $\phi$ and converges to $c/(1-\phi)$, while the second term $\phi^t$ converges to zero. In this case, as $t\rightarrow\infty$, all the variables $Z_t$ have the same expectation $\mu=c/(1-\phi)$.
+        
+        Other stationarity conditions apply for autoregressive processes of higher order, which are calculated in \cite{giles2012stationarity} for an AR(2) model, resulting in the constraints forming the region in \Cref{eq:ar-2-constraints}.
+        \begin{equation}\label{eq:ar-2-constraints}
+            -1<\phi_2<1 \qquad \phi_1+\phi_2<1 \qquad \phi_2-\phi_1<1
+        \end{equation}
+        While these restrictions can be used to control the estimation of the AR parameters, it is not necessarily beneficial to limit the model to only capture stationary processes. Instead, by allowing the autoregressive model to estimate the coefficients freely, the parameters can be used to determine the stationarity of the underlying process.
+        
+        % Using the lag operator $B$, defined as $BZ_t=Z_{t-1}$, and letting $\tilde{Z}_t=Z_t-\mu$ the general AR(p) process is expressed as 
+        % \begin{equation}\label{eq:ar-lag-model}
+        %     (1-\phi_1B-...-\phi_pB^p)\tilde{Z}_t=\epsilon_t
+        % \end{equation}
+        
+    
+\section{Model Evaluation}
+    
+    The models are evaluated in terms of temporal link prediction, where link data for $T$ time steps is used to predict the links at time steps $T+1$, $T+2$ and so on. Hence, the first step is to split the dataset into a training and a test set, using roughly the first 80\% of the data for training, and the remainder for model evaluation. A dataset with $N$ entities consists of an $N\times N$ sociomatrix $Y$ at each time step, where $\sub(y)$ is 1 if entities $i$ and $j$ are linked at that time step, and 0 otherwise. As a result, the task boils down to a binary classification problem, predicting which entities are linked at future time steps.
+    
+    One metric for evaluating binary classifiers is accuracy, defined as the proportion of true results among the total number of cases examined, shown in \Cref{eq:eval-accuracy} where $TP$, $TN$, $FP$ and $FN$ are True/False Positives/Negatives.
+    
+    \begin{equation}\label{eq:eval-accuracy}
+        Accuracy = \frac{TP+TN}{TP+TN+FP+FN}
+    \end{equation}
+    
+    Many complex networks are however quite sparse, such that simply predicting the absence of links would give a fairly high accuracy. As an example, one of the datasets considered has $N=986$ entities with at most 24,929 links at a given time step, resulting in a sparsity of 97.4\%. To account for the class imbalance, a more appropriate measurement is AUC, known as the area under the ROC (Receiver Operating Characteristics) curve. The ROC curve is defined by plotting the true positive rate (TPR) against the false positive rate (FPR) at several classification thresholds, computed as shown in \Cref{eq:eval-tpr-fpr}. By lowering the classification threshold, more observations are classified as positive, thus increasing both the number of False Positives as well as True Positives.
+    
+    \begin{equation}\label{eq:eval-tpr-fpr}
+        TPR = \frac{TP}{TP + FN} \qquad\qquad FPR = \frac{FP}{FP + TN}
+    \end{equation}
+    
+    A sample ROC curve is depicted in \Cref{fig:Evaluation-AUC-ROC-Curve} as the solid blue line, with the area under the curve in light blue.
+    The AUC metric indicates how well a model distinguishes between classes, where an AUC score of 0.5 corresponds to simply making random guesses, illustrated by the black dashed line. As the model's AUC score increase, the better it is at predicting 0s as 0s and 1s as 1s, such that an AUC score of 1 corresponds to perfect class separation.
+    
+    \xfig{Evaluation-AUC-ROC-Curve}
 
 \section{Case-Control Approximate Likelihood}
 
-\section{Model Optimization}
+    Due to the structure of the latent space model's likelihood function (eq.~\ref{eq:lsm-log-likelihood}), the computational complexity is $O(N^2)$, having to sum over $N(N-1)$ terms. This issue is studied in \cite{raftery2012fast} by \citeauthor{raftery2012fast}, where a case-control idea from epidemiology is used to estimate the full likelihood at a cost of only $O(N)$. This is achieved by exploiting the fact that large networks are usually sparse, having a small number of highly connected hub nodes while the majority of nodes have low degree.
     
-    \subsection{Supervised Learning}
+    In epidemiology, case-control studies are used to compare a \emph{case} group having the outcome of interest to a \emph{control} group with regard to one or more characteristics. The cases are often so rare that it is infeasible to draw a random sample with enough cases to draw conclusions.
+    By considering the presence of links between entities as cases and absence of links as controls, determining which factors distinguish these two populations is similar to identifying the risk factors of disease in an epidemiological study.
+    
+    This analogy suggests an approximation to the log-likelihood function, which \citeauthor*{raftery2012fast} writes as follows:
+    \begin{equation}
+    \label{eq:case-likelihood-approx}
+        \ell \equiv \log P(Y|\eta)=\sum_{i=1}^n \ell_i
+    \end{equation}
+    where
+    \begin{equation}
+        \setlength{\jot}{0.5\baselineskip}
+        \begin{split}
+            \ell_i &\equiv \sum_{i\neq j}\{\sub(\eta)\sub(y)-\log(1+e^{\sub(\eta)})\} = \sub(\ell)(i,1) + \sub(\ell)(i,0)\\
+            &= \sum_{i\neq j, \sub(Y)=1} \{\sub(\eta)-\log(1+e^{\sub(\eta)}) \} + \sum_{i\neq j, \sub(Y)=0} \{-\log(1+e^{\sub(\eta)}) \} \\
+            % &= \sub(\ell)(i,1) + \sub(\ell)(i,0)
+        \end{split}
+    \end{equation}
+    such that \Cref{eq:case-likelihood-approx} sums over the rows of the sociomatrix $Y$. The quantity $\sub(\ell)(i,0)$ can be viewed as a population total statistic, which is estimated by a random sample of the population:
+    \begin{equation}
+        \sub(\tilde{\ell})(i,0)=\frac{\sub(N)(i,0)}{\sub(n)(i,0)} \sum_{k=1}^{\sub(n)(i,0)} \{ -\log(1+e^{\sub(\eta)(ik)}) \}
+    \end{equation}
+    where $\sub(N)(i,0)$ is the total number of 0s in the $i$th row and $\sub(n)(i,0)$ is the number of samples selected from the $i$th row, summarizing the selected entries. Since $\sub(\tilde{\ell})(i,0)$ is based on a random sample from the 0s, $E[\sub(\tilde{\ell})(i,0)] = \sub(\ell)(i,0)$. Hence, the computation needed to estimate $\sub(\ell)(i,0)$ can be reduced significantly for large networks by choosing a relatively small $\sub(n)(i,0)$.
+    
+    However, this estimator does not consider the \emph{closeness} of nodes, where the latent space model assumes that nodes closer in latent space are more likely to form links than those far apart. As a result, the population of 0s is not homogeneous, where the nodes closest to node $i$ are more relevant when estimating its latent position. To remedy this, the shortest path length from node $i$ to node $j$ in the network is precomputed, $\sub(D)$, as a measure of closeness. Then, a stratified sampling approach is used, dividing the 0s into $M$ strata according to $\sub(D)$, leading to the decomposition of the contribution to the log-likelihood in \Cref{eq:case-stratified-likelihood}.
+    \begin{equation}
+    \label{eq:case-stratified-likelihood}
+        \setlength{\jot}{0.5\baselineskip}
+        \begin{split}
+            \ell_i = & \sum_{j:\sub(Y)=1} \{\sub(\eta)-\log(1+e^{\sub(\eta)}) \} + \sum_{j:\sub(D)=2} \{-\log(1+e^{\sub(\eta)}) \} \\
+                     & + \ldots + \sum_{j:\sub(D)=M} \{-\log(1+e^{\sub(\eta)}) \}
+        \end{split}
+    \end{equation}
+    Such that an unbiased estimator of $\ell_i$ based on stratified sampling is defined in \Cref{eq:case-stratified-estimate}.
+    \begin{equation}
+    \label{eq:case-stratified-estimate}
+        \hat{\ell}_i = \sum_{j:\sub(Y)=1} \{\sub(\eta)-\log(1+e^{\sub(\eta)}) \} + \sum_{h=2}^M \frac{\sub(N)(i,h)}{\sub(n)(i,h)} \sum_{j:\sub(D)=h} \{-\log(1+e^{\sub(\eta)}) \}
+    \end{equation}
+    
+    
+
+\section{Model Optimization}
+
+    The model parameters are estimated using maximum likelihood estimation.
 
     \subsection{Gradient Descent}
 
@@ -71,3 +204,5 @@ This chapter introduces the methodology
     \subsubsection{Learning Rate Decay}
     
     \subsubsection{Early Stopping Criteria}
+    
+\section{PyTorch Implementation}
