@@ -1,5 +1,22 @@
 \chapter{Discussion}\label{ch:Discussion}
 
+\section{Model Convergence}
+
+One of the most challenging tasks is getting the models to converge properly, which entails a high convergence limit, stable progress and as quickly as possible.
+
+Modeling each subsequent time step as its own set of positions versus relating each subsequent time step directly to the initial positions.
+
+Local minima, especially in terms of the autoregressive model, where small modifications to the AR coefficients have a huge impact.
+
+
+Training on the first few time steps before training on the rest.
+
+
+Tried accumulating gradients, however the issue was with the computation graph
+
+One of the biggest issues, including the initial positions in the computation graph
+
+
 \section{Hyperparameters}
 
 The model converges much faster training on smaller batches at the time. Doing so, the optimizer tunes a limited number of parameters at each iteration, instead of making changes to all parameters, possibly making several mistakes.
@@ -7,4 +24,5 @@ The model converges much faster training on smaller batches at the time. Doing s
 The learning rate has a huge impact on the time it takes the model to converge, benefiting from an adaptive learning rate schedule to quickly get close to the convergence limit before reducing the step size.
 
 
-Accumulating gradient
+
+Training on the last half of the training data yields much faster convergence
