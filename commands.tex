@@ -30,19 +30,6 @@
     \end{wrapfigure}
 }
 
-\NewDocumentCommand{\xdouble}{ O{!htb} m m }{
-    \begin{figure}[#1]
-        \centering
-        \begin{minipage}[t]{.48\textwidth}
-            #2
-        \end{minipage}%
-        \hfill%
-        \begin{minipage}[t]{.48\textwidth}
-            #3
-        \end{minipage}
-    \end{figure}
-}
-
 % CONTENT
 
 \NewDocumentCommand{\ximg}{ O{width=\textwidth} D//{figures} m O{} }{
@@ -64,4 +51,69 @@
     \animategraphics[#1]{#2}{figures/#3}{}{}
     \captionof{figure}{#4 (view in Adobe Reader)}
     \label{#3}
+}
+
+% MULTIPLES
+
+\NewDocumentCommand{\xdouble}{ O{!htb} m m }{
+    \begin{figure}[#1]
+        \centering
+        \begin{minipage}[t]{.48\textwidth}
+            #2
+        \end{minipage}%
+        \hfill%
+        \begin{minipage}[t]{.48\textwidth}
+            #3
+        \end{minipage}
+    \end{figure}
+}
+
+\NewDocumentCommand{\xquad}{ O{!htb} m m m m }{
+    \begin{figure}[#1]
+        \centering
+        \begin{minipage}[t]{.48\textwidth}
+            #2
+        \end{minipage}%
+        \hfill%
+        \begin{minipage}[t]{.48\textwidth}
+            #3
+        \end{minipage}
+        \vskip\baselineskip
+        \begin{minipage}[t]{.48\textwidth}
+            #4
+        \end{minipage}%
+        \hfill%
+        \begin{minipage}[t]{.48\textwidth}
+            #5
+        \end{minipage}
+    \end{figure}
+}
+
+\NewDocumentCommand{\xhex}{ O{!htb} m m m m m m }{
+    \begin{figure}
+        \centering
+        \begin{minipage}[t]{.48\textwidth}
+            #2
+        \end{minipage}%
+        \hfill%
+        \begin{minipage}[t]{.48\textwidth}
+            #3
+        \end{minipage}
+        \vskip\baselineskip
+        \begin{minipage}[t]{.48\textwidth}
+            #4
+        \end{minipage}%
+        \hfill%
+        \begin{minipage}[t]{.48\textwidth}
+            #5
+        \end{minipage}
+        \vskip\baselineskip
+        \begin{minipage}[t]{.48\textwidth}
+            #6
+        \end{minipage}%
+        \hfill%
+        \begin{minipage}[t]{.48\textwidth}
+            #7
+        \end{minipage}
+    \end{figure}
 }
