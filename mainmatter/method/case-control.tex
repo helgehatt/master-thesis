@@ -1,0 +1,54 @@
+\section{Case-Control Approximate Likelihood}
+
+Due to the structure of the latent space model's likelihood function (eq.~\ref{eq:lsm-log-likelihood}), the computational complexity is $O(N^2)$, having to sum over $N(N-1)$ terms. This issue is studied in \cite{raftery2012fast} by \citeauthor{raftery2012fast}, where a case-control idea from epidemiology is used to estimate the full likelihood at a cost of only $O(N)$. This is achieved by exploiting the fact that large networks are usually sparse, having a small number of highly connected hub nodes while the majority of nodes have low degree.
+
+In epidemiology, case-control studies are used to compare a \emph{case} group having the outcome of interest to a \emph{control} group. The cases are often so rare that it is infeasible to draw a random sample with enough cases to draw conclusions.
+By considering the presence of links between entities as cases and absence of links as controls, determining which factors distinguish these two populations is similar to identifying the risk factors of disease in an epidemiological study.
+
+This analogy suggests an approximation to the log-likelihood function, which \citeauthor*{raftery2012fast} formalizes as
+\begin{equation}
+\label{eq:case-likelihood-approx}
+    \ell \equiv \log P(Y|\eta)=\sum_{i=1}^n \ell_i
+\end{equation}
+where
+\begin{equation}
+    \setlength{\jot}{0.5\baselineskip}
+    \begin{split}
+        \ell_i &\equiv \sum_{i\neq j}\{\sub(\eta)\sub(y)-\log(1+e^{\sub(\eta)})\} = \sub(\ell)(i,1) + \sub(\ell)(i,0)\\
+        &= \sum_{i\neq j, \sub(Y)=1} \{\sub(\eta)-\log(1+e^{\sub(\eta)}) \} + \sum_{i\neq j, \sub(Y)=0} \{-\log(1+e^{\sub(\eta)}) \} \\
+        % &= \sub(\ell)(i,1) + \sub(\ell)(i,0)
+    \end{split}
+\end{equation}
+such that \Cref{eq:case-likelihood-approx} sums over the rows of the sociomatrix $Y$. The quantity $\sub(\ell)(i,0)$ can be viewed as a population total statistic, which is estimated by a random sample of the population:
+\begin{equation}
+    \sub(\tilde{\ell})(i,0)=\frac{\sub(N)(i,0)}{\sub(n)(i,0)} \sum_{k=1}^{\sub(n)(i,0)} \{ -\log(1+e^{\sub(\eta)(ik)}) \}
+\end{equation}
+where $\sub(N)(i,0)$ is the total number of 0s in the $i$th row and $\sub(n)(i,0)$ is the number of samples selected from the $i$th row, summarizing the selected entries. Since $\sub(\tilde{\ell})(i,0)$ is based on a random sample from the 0s, $E[\sub(\tilde{\ell})(i,0)] = \sub(\ell)(i,0)$. Hence, the computation needed to estimate $\sub(\ell)(i,0)$ can be reduced significantly for large networks by choosing a relatively small $\sub(n)(i,0)$.
+
+One drawback, is the fact that this estimator does not consider the \emph{closeness} of nodes, while the latent space model assumes that nodes closer in latent space are more likely to form links than those far apart. As a result, the population of 0s is not homogeneous, where the nodes closest to node $i$ are more relevant when estimating its latent position. To remedy this, the shortest path length from node $i$ to node $j$ in the network is precomputed, $\sub(D)$, as a measure of closeness. Then, a stratified sampling approach is used, dividing the 0s into $M$ strata according to $\sub(D)$, leading to the decomposition of the contribution to the log-likelihood in \Cref{eq:case-stratified-likelihood}.
+\begin{equation}
+\label{eq:case-stratified-likelihood}
+    \setlength{\jot}{0.5\baselineskip}
+    \begin{split}
+        \ell_i = & \sum_{j:\sub(Y)=1} \{\sub(\eta)-\log(1+e^{\sub(\eta)}) \} + \sum_{j:\sub(D)=2} \{-\log(1+e^{\sub(\eta)}) \} \\
+                 & + \ldots + \sum_{j:\sub(D)=M} \{-\log(1+e^{\sub(\eta)}) \}
+    \end{split}
+\end{equation}
+such that an unbiased estimator of $\ell_i$ based on stratified sampling is defined as
+\begin{equation}
+\label{eq:case-stratified-estimate}
+    \hat{\ell}_i = \sum_{j:\sub(Y)=1} \{\sub(\eta)-\log(1+e^{\sub(\eta)}) \} + \sum_{h=2}^M \frac{\sub(N)(i,h)}{\sub(n)(i,h)} \sum_{j:\sub(D)=h} \{-\log(1+e^{\sub(\eta)}) \}
+\end{equation}
+where $\sub(N)(i,h)$ is the total number of nodes $j$ with $\sub(D)=h$ and $\sub(n)(i,h)$ is the number of selected samples in the $h$th stratum.
+
+The only remaining task is to determine $\sub(n)(i,h)$ for each value of $h$. 
+This is done by picking a global control-to-case rate $r$ and setting the total control size of each node $\sub(n)(i,h)=r\bar{d}\equiv n_0$, where $\bar{d}$ is the mean degree of the entire network. Having a fixed value of $\sub(n)(i,0)=\sum_{h=1}^M\sub(n)(i,h)$, the number of samples selected in each stratum $\sub(n)(i,h)$ is set to be proportional to the $h$th stratum's contribution to the change in log-likelihood when sampling latent positions.
+
+\citeauthor{raftery2012fast} does so by conducting a pilot MCMC run, where the change in log-likelihood is calculated at each iteration and the values of $\sub(n)(i,h)$ are updated accordingly. Hence, the stratified case-control log-likelihood is computed by summing over $O(n_0)$ terms, which does not grow with the network size $N$. Typically $n_0$ is small compared to $N$, thus resulting in a computational cost reduction from $O(N^2)$ to $O(N)$.
+
+% \begin{equation}\label{eq:case-likelihhod-change}
+%     \def\z{(z_i^{(t)})}
+%     \def\zs{(z_i^{(t)*})}
+%     \Delta\tilde{\ell}_i^{(t)}\equiv \tilde{\ell}_i\zs-\tilde{\ell}_i\z=\sub(\ell)(i,1)\zs-\sub(\ell)(i,1)\z + \sum_h\{\sub(\tilde{\ell})(i,h)\zs-\sub(\tilde{\ell})(i,h)\zs-\sub(\tilde{\ell})(i,h)\z\}
+% \end{equation}
+

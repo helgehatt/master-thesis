@@ -1,0 +1,21 @@
+\section{Model Evaluation}
+
+The models are evaluated in terms of temporal link prediction, where link data for $T$ time steps is used to predict the links at time steps $T+1$, $T+2$ and so on. Hence, the first step is to split the dataset into a training and a test set, using roughly the first 80\% of the data for training, and the remainder for model evaluation. A dataset with $N$ entities consists of an $N\times N$ sociomatrix $Y$ at each time step, where $\sub(y)$ is 1 if entities $i$ and $j$ are linked at that time step, and 0 otherwise. As a result, the task boils down to a binary classification problem, predicting which entities are linked at which time steps.
+
+One metric for evaluating binary classifiers is accuracy, defined as the proportion of true results among the total number of cases examined, shown in \Cref{eq:eval-accuracy} where $TP$, $TN$, $FP$ and $FN$ are True/False Positives/Negatives.
+
+\begin{equation}\label{eq:eval-accuracy}
+    Accuracy = \frac{TP+TN}{TP+TN+FP+FN}
+\end{equation}
+
+Many complex networks are however quite sparse, such that simply predicting the absence of any links would give a fairly high accuracy. As an example, one of the datasets considered has $N=986$ entities with at most 24,929 links at a given time step, resulting in a sparsity of 97.4\%. To account for the class imbalance, a more appropriate measurement is AUC, known as the area under the ROC (Receiver Operating Characteristics) curve. The ROC curve is defined by plotting the true positive rate (TPR) against the false positive rate (FPR) at several classification thresholds, computed as shown in \Cref{eq:eval-tpr-fpr}. By gradually lowering the classification threshold, more observations are classified as positive, thus increasing both the number of False Positives as well as True Positives.
+
+\begin{equation}\label{eq:eval-tpr-fpr}
+    TPR = \frac{TP}{TP + FN} \qquad\qquad FPR = \frac{FP}{FP + TN}
+\end{equation}
+
+A sample ROC curve is depicted in \Cref{Method/AUC-ROC-Curve} as the solid blue line, with the area under the curve in light blue.
+The AUC metric indicates how well a model distinguishes between classes, where an AUC score of 0.5 corresponds to simply making random guesses, illustrated by the dashed line. As the model's AUC score increase, the better it is at predicting 0s as 0s and 1s as 1s, such that an AUC score of 1 corresponds to perfect class separation.
+
+\xfig{\ximg[width=0.7\textwidth]{Method/AUC-ROC-Curve}}
+

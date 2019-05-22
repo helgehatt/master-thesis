@@ -1,0 +1,121 @@
+\section{Model Optimization}
+
+The latent space positions and model parameters are estimated using maximum likelihood estimation (MLE). The inference for the latent space model introduced by \citeauthor*{hoff2002latent} and for the case-control approximate likelihood by \citeauthor*{raftery2012fast} is based on Markov chain Monte Carlo (MCMC) algorithms, while the dynamic model developed by \citeauthor{sarkar2005dynamic} uses KD-trees as an adaptation of multidimensional scaling. Here, we consider an alternative approach presented by \citeauthor{jacobsen2018a} for static latent space models, adapting the method to account for the temporal aspect. The main advantage is that this approach facilitates the use of GPU computability, allowing for analysis of much larger networks.
+
+\subsection{Gradient Descent}
+
+    The open-source \href{https://ml-cheatsheet.readthedocs.io/en/latest/index.html}{Machine Learning Cheatsheet} website describes gradient descent very succinctly as follows:
+    \begin{displayquote}\itshape
+        Gradient descent is an optimization algorithm used to minimize a function by iteratively moving in the direction of the steepest descent as defined by the negative of the gradient. 
+    \end{displayquote}
+    
+    To understand how this is achieved, \citeauthor{nielsen2018neural} introduces the concept using an example cost function in \cite{nielsen2018neural}.
+    Consider a function $C(v)$ of many variables $v = v_1, v_2, \dots$ shaping a multi-dimensional landscape. For a function of just two variables, the landscape can be illustrated in a three-dimensional plot as shown in \Cref{Method/Gradient-Descent}. 
+    \xfig{\ximg{Method/Gradient-Descent}}
+    Starting at an arbitrary point on the graph, the goal is to find the values for $v_1$ and $v_2$ where $C$ achieves its global minimum. One way of doing so, is computing the derivatives and find for which pair of $(v_1,v_2)$ values $C$ is an extremum, analyzing the given minima and maxima for a global minimum. This approach does however quickly become computationally infeasible as the number of variables increases. 
+    
+    While the derivatives cannot be used directly to show where the minimum is, they can tell us exactly how the graph is shaped at that specific point. 
+    Knowing this, the optimizer can move a small amount $\Delta v_1$ in the $v_1$ direction, and a small amount $\Delta v_2$ in the $v_2$ direction, for which \Cref{eq:mopt-DeltaC} defines the change in $C$.
+    \begin{equation}\label{eq:mopt-DeltaC}
+        \Delta C \approx \frac{\partial C}{\partial v_1}\Delta v_1 + \frac{\partial C}{\partial v_2} \Delta v_2
+    \end{equation}
+    
+    The only task is then to find a way of choosing $\Delta v\equiv (\Delta v_1, \Delta v_2)^T$ making $\Delta C$ negative, as we aim to minimize $C$. Consider the gradient of $C$ to be the vector of partial derivatives, defined in the following equation.
+    \begin{equation}\label{eq:mopt-gradient}
+        \nabla C \equiv \left(\frac{\partial C}{\partial v_1}, \frac{\partial C}{\partial v_2}\right)^T
+    \end{equation}
+    
+    Now, $\Delta C$ can be rewritten as
+    \begin{equation}\label{eq:mopt-DeltaC-gradient}
+        \Delta C \approx \Delta v \cdot \nabla C
+    \end{equation}
+    which shows how to choose $\Delta v$ with respect to making $\Delta C$ negative. By introducing a small positive parameter $\eta$, known as the step size or learning rate, $\Delta v$ is selected as follows
+    \begin{equation}
+        \Delta v = -\eta \nabla C
+    \end{equation}
+    such that 
+    \begin{equation}
+        \Delta C \approx -\eta \nabla C \cdot \nabla C = -\eta \Vert\nabla C\Vert^2
+    \end{equation}
+    
+    This guarantees that $\Delta C \leq 0$ as $\Vert\nabla C\Vert^2 \geq 0$. Hence, $C$ will always decrease, taking steps toward its minimum. 
+    
+    \subsubsection{Learning Rate}
+    
+        The learning rate $\eta$ controls how big steps the optimizer takes down the slope, where a too large step may result in moving past the minimum. On the contrary, a too small step size makes $\Delta C$ so tiny that the optimization algorithm barely makes progress. There are several techniques to facilitate the convergence of optimizers, including separate learning rates for different parameters and adaptive learning rates.
+        
+        Using an adaptive learning rate can be highly beneficial, starting with a large step size to quickly approach a solution, and then slowly decay to fine tune the parameters. Other uses involve schedules, adjusting $\eta$ when reaching a specific evaluation score, or when the optimizer has reached a plateau.
+    
+    \subsubsection{Optimizers}
+    
+        Note that the landscape defined by the cost function $C$ is usually a lot more rigid, having several minima, maxima, saddle points and plateaus. Hence, finding the global minimum is still a non-trivial task, where several adaptations of the gradient descent have been developed with various extensions to overcome vanishing gradients and local minima issues. 
+        \citeauthor{ruder2017overview} provides an overview of gradient descent optimization algorithms in \cite{ruder2017overview}.
+        
+        In particular, Adam (Adaptive Moment Estimation) is a state-of-the-art optimizer, including several key additions. As the name suggests, the algorithm computes adaptive learning rates for each parameter. Furthermore, the method stores an exponentially decaying average of past squared gradients, as well as a decaying average of past gradients, similar to momentum.
+        
+        Momentum is an analogy from physics, where a ball going downhill accelerates and rolls past flat minima until it is stopped by friction. By using the same concept in gradient descent, the optimizer is less prone to end up in local minima, while the global minimum is presumably too steep for the ball to escape from.
+
+    \subsubsection{Cost Functions}
+    
+        There are several popular cost functions (also referred to as objective functions or loss functions), and which function to use often depends on the problem the optimizer is attempting to solve. 
+        In terms of a linear regression problem, the goal involve finding a linear mapping between input and output, such that the cost (or loss) should be minimum for the line of best fit. Hence, an appropriate cost function penalizes the difference between the target output $y$ and the predicted output $\hat{y}$ given by the line. 
+        There are several ways of penalizing this difference, and some of the most common measures are \emph{Mean Aboslute Error (MAE)} and \emph{Mean Squared Error (MSE)}. The latter is shown in \Cref{eq:mopt-mseloss} as an example.
+        \begin{equation}\label{eq:mopt-mseloss}
+            MSE = \frac{1}{N}\sum_{i=1}^N(y_i-\hat{y}_i)^2
+        \end{equation}
+        
+        For classification tasks the essence is similar, however the cost function is quite dissimilar. The biggest difference is that the predicted output $\hat{y}$ is not a quantity, but a probability. Knowing that a probability ranges from zero to one, we can use the fact that the logarithm becomes increasingly negative as $\hat{y}\rightarrow0$. Then, by taking the negative of the logarithm, we have a function that increases as $\hat{y}$ becomes less certain, depicted in \Cref{Method/Negative-Log-Probability}.
+        \xfig{\ximg[width=0.7\textwidth]{Method/Negative-Log-Probability}}
+        This is the foundation of the most common cost function for classification problems, which is referred to as \emph{Binary Cross-Entropy (BCE)} for the two-class scenario, shown in \Cref{eq:mopt-bceloss} for targets $\sub(y)$ and predictions (or probabilities) $\sub(p)$ in matrix-form, excluding the diagonal.
+        \begin{equation}\label{eq:mopt-bceloss}
+            BCE = -\sum_{i\neq j} \sub(y)\log(\sub(p))+(1-\sub(y))\log(1-\sub(p))
+        \end{equation}
+        The first term $\sub(y)\log(\sub(p))$ penalizes a low probability $\sub(p)$ when the target $\sub(y)$ is 1, while the second term penalizes a high probability when the target is 0. As a result, the cost function facilitates class separation when minimized by an optimizer.
+        
+        Considering that $\sub(p)=\sigma(\sub(\eta))$, where $\sigma$ is the sigmoid function (cf. eq. \ref{eq:lsm-link-sigmoid}), the binary cross-entropy can be rewritten in the log-domain to omit the sigmoid function entirely, and for numerical stability. The log-domain cross-entropy function is defined as follows
+        \begin{equation}\label{eq:bce-log-domain}
+            BCE = -\sum_{i\neq j} \sub(y)\log\left(\frac{\sub(p)}{1-\sub(p)}\right) + \log(1-\sub(p))
+        \end{equation}
+        where (full rewriting shown in \Cref{eq:bce-rewrite-first-full})
+        \begin{equation}\label{eq:bce-rewrite-first}
+            \log\left(\frac{\sub(p)}{1-\sub(p)}\right) =
+            \log\left(\frac{\sigma(\sub(\eta))}{1-\sigma(\sub(\eta))}\right) = \sub(\eta)
+        \end{equation}
+        and (full rewriting shown in \Cref{eq:bce-rewrite-second-full})
+        \begin{equation}\label{eq:bce-rewrite-second}
+            \log(1-\sub(p))=-\log(1+e^{\sub(\eta)})=-\log(e^0+e^{\sub(\eta)})
+        \end{equation}
+        
+        The rewriting in \Cref{eq:bce-rewrite-second} allows the use of the \emph{LogSumExp (LSE)} trick to compute the logarithm of the sum of exponentials numerically stable. Similar to how multiplication in linear-scale becomes addition in log-scale, addition in linear-scale becomes the \emph{LSE} in the log-domain. Log-domain computations are used to increase accuracy by avoiding underflow and overflow when very small or large numbers are represented in a linear domain using limited-precision floating point numbers. Hence, the resulting binary cross-entropy is shown in \Cref{eq:bce-log-domain-rewrite}.
+        
+        \begin{equation}\label{eq:bce-log-domain-rewrite}
+            BCE = -\sum_{i\neq j}\{ \sub(y) \sub(\eta) - LSE(0,\sub(\eta)) \}
+        \end{equation}
+        
+        \begin{equation}\label{eq:bce-rewrite-first-full}
+            \setlength{\jot}{\baselineskip}
+            \begin{split}
+                \log\left(\frac{\sigma(x)}{1-\sigma(x)}\right) &= \log\left(\frac{\frac{e^x}{e^x+1}}{1-\frac{e^x}{e^x+1}}\right) \\ &=
+                \log\left(\frac{e^x}{(e^x+1)\left(1-\frac{e^x}{e^x+1}\right)}\right) \\ &=
+                \log\left(\frac{e^x}{e^x-\frac{e^x}{e^x+1}-\frac{e^{2x}}{e^x+1}+1}\right) \\ &=
+                \log\left(\frac{e^x}{\frac{e^{2x}+e^x-e^x-e^{2x}+e^x+1}{e^x+1}}\right) \\ &=
+                \log\left(\frac{e^x}{\frac{e^x+1}{e^x+1}}\right) = \log(e^x) = x
+            \end{split}
+        \end{equation}
+        
+        \begin{equation}\label{eq:bce-rewrite-second-full}
+            \setlength{\jot}{\baselineskip}
+            \begin{split}
+                \log(1-\sigma(x)) &= \log\left(1-\frac{e^x}{e^x+1}\right)
+                \\ &= \log\left(\frac{e^x+1-e^x}{e^x+1}\right)
+                \\ &= \log\left(\frac{1}{e^x+1}\right)
+                \\ &= \log(1) - \log(e^x+1) \\ &= -\log(1+e^x)
+            \end{split}
+        \end{equation}
+    
+    \subsubsection{Stopping Criteria}
+    
+        The last topic worthy of mentioning is stopping criteria, deciding when to stop the optimization procedure. This is most often used to prevent overfitting, which is when the optimizer makes increasingly accurate predictions for the training samples, at the cost of inaccurate test predictions. However, stopping criteria can be used for more than just stopping, deciding when to alter the learning rate as opposed to a plateau, or when to make other alterations to the optimization algorithm. 
+        
+        A stopping criterion is based on an evaluation metric and hyperparameters such as a minimum delta and a patience. The metric is assessed at each validation step, where the current value is compared to the best score achieved so far. The minimum delta indicates how much the metric must decrease (when using loss as the evaluation metric) or increase (in terms of accuracy or AUC) to be considered a new best. Lastly, the patience is the number of validation steps the metric is assessed without improvement before flagging stop.
+
