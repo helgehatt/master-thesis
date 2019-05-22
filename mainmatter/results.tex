@@ -13,50 +13,39 @@ The performance of the models are compared for each dataset, computing the recei
 
 \subsection{Static Data}
 
-    \xfig{\ximg{Results/Static/Train/StaticModel-AR(1)-Undirected-NoLoss}}
+    \xfig{\xanim{Results/Static/Train/StaticModel-AR(1)-Undirected-NoLoss}}
     
-    \xhex{\ximg{Results/Static/Proba/StaticModel-AR(1)-Undirected-True}[True]}
+    \xhex
+    {\ximg{Results/Static/Proba/StaticModel-AR(1)-Undirected-True}[True]}
     {\ximg{Results/Static/Proba/StaticModel-AR(1)-Undirected-NoLoss}[S-LSM]}
-    {\ximg{Results/Static/Proba/DiffusionModel-AR(1)-Undirected-NoLoss}[D-LSM]}
-    {\ximg{Results/Static/Proba/AutoregressiveModel-AR(1)-Undirected-NoLoss}[AR(1)]}
-    {\ximg{Results/Static/Proba/AutoregressiveModel-AR(2)-Undirected-NoLoss}[AR(2)]}
-    {\ximg{Results/Static/Proba/AutoregressiveModel-AR(3)-Undirected-NoLoss}[AR(3)]}
+    {\xanim{Results/Static/Proba/DiffusionModel-AR(1)-Undirected-NoLoss}[D-LSM]}
+    {\xanim{Results/Static/Proba/AutoregressiveModel-AR(1)-Undirected-NoLoss}[AR(1)]}
+    {\xanim{Results/Static/Proba/AutoregressiveModel-AR(2)-Undirected-NoLoss}[AR(2)]}
+    {\xanim{Results/Static/Proba/AutoregressiveModel-AR(3)-Undirected-NoLoss}[AR(3)]}
 
-    % \subsubsection{Latent Space Model}
-    
-%         \xanim{Synthetic-Static-Train-StaticModel-Undirected}
-    
-%     \subsubsection{Diffusion Model}
-    
-%         \xanim{Synthetic-Static-Train-DiffusionModel-Undirected}
-    
-%     \subsubsection{Autoregressive Model}
-    
-%         \xanim{Synthetic-Static-Train-AutoregressiveModel-Undirected}
-        
-%     \subsubsection{Summary}
-    
-%         \xfig{Synthetic-Static-ROC}
+    \xfig{\ximg{Results/Static/AUC-NoLoss}}
 
-% \subsection{Dynamic Data}
+\subsection{Dynamic Data}
 
-%     \subsubsection{Latent Space Model}
-    
-%         \xanim{Synthetic-Dynamic-Train-StaticModel-Undirected}
-    
-%     \subsubsection{Diffusion Model}
-    
-%         \xanim{Synthetic-Dynamic-Train-DiffusionModel-Undirected}
-    
-%     \subsubsection{Autoregressive Model}
-    
-%         \xanim{Synthetic-Dynamic-Train-AutoregressiveModel-Undirected}
-        
-%     \subsubsection{Summary}
-    
-%         \xfig{Synthetic-Dynamic-ROC}
+    \xhex
+    {\xanim{Results/Dynamic/Train/DiffusionModel-AR(1)-Undirected-NoLoss}[NLP]}
+    {\xanim{Results/Dynamic/Space/DiffusionModel-AR(1)-Undirected-NoLoss}[NLP]}
+    {\xanim{Results/Dynamic/Train/DiffusionModel-AR(1)-Undirected-GaussianLoss}[GLP]}
+    {\xanim{Results/Dynamic/Space/DiffusionModel-AR(1)-Undirected-GaussianLoss}[GLP]}
+    {\xanim{Results/Dynamic/Train/DiffusionModel-AR(1)-Undirected-GaussianLossNoVar}[GLP-NV]}
+    {\xanim{Results/Dynamic/Space/DiffusionModel-AR(1)-Undirected-GaussianLossNoVar}[GLP-NV]}
 
-% \subsection{Periodic Data}
+    \xhex
+    {\xanim{Results/Dynamic/Proba/DiffusionModel-AR(1)-Undirected-True}[True]}
+    {\ximg {Results/Dynamic/Proba/StaticModel-AR(1)-Undirected-NoLoss}[S-LSM]}
+    {\xanim{Results/Dynamic/Proba/DiffusionModel-AR(1)-Undirected-GaussianLossNoVar}[D-LSM]}
+    {\xanim{Results/Dynamic/Proba/AutoregressiveModel-AR(1)-Undirected-GaussianLossNoVar}[AR(1)]}
+    {\xanim{Results/Dynamic/Proba/AutoregressiveModel-AR(2)-Undirected-GaussianLossNoVar}[AR(2)]}
+    {\xanim{Results/Dynamic/Proba/AutoregressiveModel-AR(3)-Undirected-GaussianLossNoVar}[AR(3)]}
+    
+    \xfig{\ximg{Results/Dynamic/AUC-GaussianLossNoVar}}
+
+\subsection{Periodic Data}
 
 %     \subsubsection{Latent Space Model}
     

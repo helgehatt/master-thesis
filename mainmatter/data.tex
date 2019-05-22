@@ -41,13 +41,17 @@ Before testing on real-life networks, synthetic datasets are generated based on 
     
         The autoregressive model is able to simulate periodic behavior by defining additional sets of initial positions and using appropriate values for $\phi$. Note that $\phi$ is a $p\times k$-dimensional matrix, while described as a vector of size $p$ when there is no distinction between any of the $k$ latent dimensions.
         The first set of initial positions is the same as the static and dynamic data, while the second and third sets of positions are defined using two Gaussians with means $(\pm2,0)$ and four Gaussians with means $(\pm2,\pm2)$ respectively and a variance of $0.5^2$, illustrated in Figures \ref{Data/Periodic/Initial1} and \ref{Data/Periodic/Initial2}.
-        \xdouble{\ximg{Data/Periodic/Initial1}[Positions at $t_1$]}{\ximg{Data/Periodic/Initial2}[Positions at $t_2$]}
+        \xdouble
+        {\ximg{Data/Periodic/Initial1}[Second set of initial positions]}
+        {\ximg{Data/Periodic/Initial2}[Third set of initial positions]}
         Having predefined the initial positions for the first three time steps, a periodic pattern emerges using $\phi=[0, 0, 1]$, such that the latent positions for time step $t$ is equal to those at $t-3$, cf. \Cref{eq:ar-model}.
         Hence, the autoregressive model simulates an AR(3) process, including a small amount of diffusion using $\sigma_\epsilon=0.01$, emphasizing the periodicity of the dataset.
         
         The AR-coefficients, $\phi$, have a significant impact on the predictions of the model, where minor changes to the values is the difference between a stationary and non-stationary process. Depending on the underlying process, stationarity is not always desirable, however using too high or too low $phi$s the predictions can quickly converge to infinity or zero over time. 
         To illustrate these two scenarios, \Cref{Data/Periodic/ARNone} shows the positions at the next time step using $\phi=[0,0,0]$ where the observations are separated according to the diffusion rate, being so low that all nodes are connected. 
-        \xdouble{\ximg{Data/Periodic/ARNone}[Positions at $t_3$ using $\phi=[0,0,0]$, resulting in white noise with $\sigma=0.01$.]}{\ximg{Data/Periodic/ARAll}[Positions at $t_3$ using $\phi=[1,1,1]$]}
+        \xdouble
+        {\ximg{Data/Periodic/ARNone}[Positions at $t_3$ using $\phi=[0,0,0]$, resulting in white noise with $\sigma=0.01$.]}
+        {\ximg{Data/Periodic/ARAll}[Positions at $t_3$ using $\phi=[1,1,1]$]}
         The other scenario is depicted in \Cref{Data/Periodic/ARAll} using $\phi=[1,1,1]$, where the latent positions at the next time step is a sum of all three most recent sets of positions, resulting in too large distances to barely connect a few nodes.
         
         The generated periodic data has abrupt changes to the number of links over time, as can be expected with the large variations between the sets of initial positions. The changes do however follow a distinct pattern, as shown in \Cref{Data/Periodic/Links}, indicating the periodic behavior animated in \Cref{Data/Periodic/Data}.

@@ -49,7 +49,7 @@
 \NewDocumentCommand{\xanim}{ O{width=\textwidth} D||{12} m O{} }{
     \centering
     \animategraphics[#1]{#2}{figures/#3}{}{}
-    \captionof{figure}{#4 (view in Adobe Reader)}
+    \captionof{animation}{#4}
     \label{#3}
 }
 
@@ -90,7 +90,7 @@
 }
 
 \NewDocumentCommand{\xhex}{ O{!htb} m m m m m m }{
-    \begin{figure}
+    \begin{figure}[#1]
         \centering
         \begin{minipage}[t]{.48\textwidth}
             #2
