@@ -15,7 +15,10 @@ The models and the MLE framework are implemented in PyTorch, an open-source deep
     The squared norm of a matrix $A$ is computed by squaring all $N\times k$ entries and summing over the last dimension, resulting in a vector of size $N$. Viewing $\Vert A\Vert^2$ as a column vector and $\Vert B\Vert^2$ as a row vector, the full $N\times N$ distance matrix is computed as $\Vert A\Vert^2 + \Vert B\Vert^2 - 2AB^T$. Doing so, the memory consumption is $O(N^2)$ for the final distance matrix (assuming $k\ll N$), down from $O(N^2k)$ for the intermediary results of the direct approach.
     
     To illustrate the difference in computational complexity between the two methods, \Cref{Method/Pairwise-Distance-N} shows the time it takes to compute the calculations (in µs) as a function of $N$ and as a function of $k$ in \Cref{Method/Pairwise-Distance-k}. The timings are the mean of 7 runs with 100-1000 loops each, carried out on an RTX-2080 GPU. Both the direct approach and the approach utilizing quadratic expansion scale exponentially with $N$, however with a much lower rate in terms of the second. Additionally, the first method scales linearly with $k$, while the second remains constant. Hence, empirical tests show that using quadratic expansion is a much more efficient way of computing the pairwise distances as the number of nodes in a batch and the dimensionality of the latent space increases.
-    \xdouble{\ximg{Method/Pairwise-Distance-N}}{\ximg{Method/Pairwise-Distance-k}}
+    \xfig{\xdirow
+        {\ximg{Method/Pairwise-Distance-N}}
+        {\ximg{Method/Pairwise-Distance-k}}
+    }
     
 \subsection{Latent Space Positions}
 
@@ -101,73 +104,108 @@ The models and the MLE framework are implemented in PyTorch, an open-source deep
     
     \subsubsection{Sampling Prior Distribution}
     
-        One way of handling errors 
+        % One way of handling errors 
+        The simple approach to error handling
     
     \subsubsection{Infer Noise Variable}
+    
+\subsection{Node Batching}
+
+    Node batching is the procedure of selecting a subset of nodes for which to compute the log-likelihood and update the model. Many real-life networks contain thousands if not millions of nodes, such that processing the entire network on a GPU at once is infeasible. However, even for smaller networks it is desirable to perform batching, such that the log-likelihood is computed faster and the time between model updates is reduced. Optimizing with a batch size of one is referred to as stochastic training, where a single sample is randomly selected and used to update the model. Using a very small part of the dataset introduces noise in system, as the difference from batch to batch is much larger. While too much noise slows down the optimization procedure, noise is beneficial in terms of escaping local minima and saddle points. Hence, the optimal batch size is large enough to result in progressive updates, while small enough to update quickly and benefit from the noise on a plateau. The optimum differs for each dataset and should preferably be cross-validated.
+    
+    \subsubsection{The Batching Problem}
+    
+        There are two key components in a successful batching strategy, namely making sure all pairs of nodes are compared and that the negative log-likelihood loss of diagonal nodes ($i=j$) is zero. 
+        Comparing all pairs of nodes is necessary to learn the whole representation of the underlying network, where $\sub(y)$ is not necessarily equal to $\sub(y)(ji)$ for directed networks. 
+        An entity is never linked to itself, such that the diagonal of the sociomatrix $Y$ is always empty. As previously stated, the link probability $\sub(p)$ is inversely proportional to the distance between two nodes $i$ and $j$. However, when $i=j$, the distance from the node to itself is zero, which should coincide with a high link probability. To remedy this, the loss should be removed when comparing a node with itself.
         
-\subsection{Operation Profiling}
-
-    The operations are profiled on an RTX-2080 GPU running seven times with 1.000-100.000 loops depending on the run-time of the operation, showing timings as \verb|mean ± std|.
-
     \subsubsection{Indexing}
+    
+        \citeauthor{jacobsen2018a} devised a batching strategy in \cite{jacobsen2018a}, where a set of $n$ numbers are randomly drawn from a uniform distribution with replacement. These numbers are then used as both row and column indices to extract an $n\times n$ submatrix $y$ from the much larger $N\times N$ sociomatrix $Y$. An example with an $8\times 8$ sociomatrix and the indices $\{1,4,6\}$ is shown in \Cref{eq:BatchIndex}. Each index corresponds to a node with a given latent positions, which are used to compute the link probabilities for all pairs, resulting in an $n\times n$ matrix $\hat{y}$. Finally, the negative log-likelihood loss is calculated based on $y$ and $\hat{y}$. Since the row indices and the column indices are equal, the pairs for which $i=j$ are guaranteed to lie on the main diagonal of the loss matrix. Hence, correct behavior is ensured by simply removing the entries on the main diagonal before summarizing the total loss. 
+    
+        \xeq{BatchIndex}
         
-        \begin{verbatim}
-%timeit E[:,idx]
-%timeit E.index_select(1,LongTensor(idx))
-%timeit FloatTensor(1,len(idx),2)
-        \end{verbatim}
-        \begin{verbatim}
-642 µs ± 5.82 µs
-72.5 µs ± 987 ns
-2.3 µs ± 19.4 ns
-        \end{verbatim}
+        This strategy is easy to implement, making sure all combinations of nodes are compared over time by random sampling indices. By using the same set of indices to index the sociomatrix along both dimensions, the placement of the $i=j$ pairs is fixed, thus allowing for quick removal of the desired loss entries.
+        An immediate improvement is to sample without replacement, avoiding duplicate indices in batches and ensuring that all nodes are sampled each epoch. However, a much more significant improvement is to represent the sociomatrix $Y$ sparsely.
+        
+    \subsubsection{Sparse Sociomatrix}
+    
+        A sparse matrix stores only non-zero elements, which is quite convenient considering the sparsity of real-life networks. To illustrate, one of the datasets considered has a total of $N=1899$ unique nodes spanning $T=193$ days. The total number of elements in the sociomatrix is thus over half a billion ($N^2T \approx 696\cdot 10^6$), whereas the total number of non-zero elements is barely 34,000. The motivation for using a sparse sociomatrix is that 34,000 elements can easily be stored on the GPU, while reserving space for other computations.
+        
+        The only available sparse representation of a PyTorch tensor is the COO-format. COO is an abbreviation of coordinate list, where each non-zero value is associated with a pair of coordinates. Considering the previously used example sociomatrix in \Cref{eq:BatchIndex}, the following information is stored:
+        \xtab{\xtex{SparseContents}}
+        
+        Hence, creating the submatrix $y$ using \citeauthor{jacobsen2018a}'s batching strategy requires looking up each individual pair of nodes and inserting 1s and 0s depending on the contents of the sparse sociomatrix.
+    
+    \subsubsection{Slicing}
+    
+        This thesis proposes a new batching strategy which allows efficient sampling from a sparse sociomatrix by constraining the batches to slices. 
+        
+        \xeq{BatchSlice}
+        
+% \subsection{Operation Profiling}
+
+%     The operations are profiled on an RTX-2080 GPU running seven times with 1.000-100.000 loops depending on the run-time of the operation, showing timings as \verb|mean ± std|.
+
+%     \subsubsection{Indexing}
+        
+%         \begin{verbatim}
+% %timeit E[:,idx]
+% %timeit E.index_select(1,LongTensor(idx))
+% %timeit FloatTensor(1,len(idx),2)
+%         \end{verbatim}
+%         \begin{verbatim}
+% 642 µs ± 5.82 µs
+% 72.5 µs ± 987 ns
+% 2.3 µs ± 19.4 ns
+%         \end{verbatim}
         
         
-        \begin{verbatim}
-%timeit E[:,idx].normal_() * E_std
-%timeit E.index_select(1,LongTensor(idx)).normal_() * E_std
-%timeit FloatTensor(1,len(idx),2).normal_() * E_std
-%timeit torch.normal(FloatTensor(1,len(idx),2).fill_(0), \
-                        E_std.expand((1,len(idx),2)))
-mean = FloatTensor(1,len(idx),2).fill_(0)
-std = E_std.expand((1,len(idx),2))
-%timeit torch.normal(mean, std)
-        \end{verbatim}
-        \begin{verbatim}
-746 µs ± 11.8 µs
-163 µs ± 2.47 µs
-108 µs ± 1.39 µs
-85.6 µs ± 1.64 µs
-27.7 µs ± 490 ns
-        \end{verbatim}
+%         \begin{verbatim}
+% %timeit E[:,idx].normal_() * E_std
+% %timeit E.index_select(1,LongTensor(idx)).normal_() * E_std
+% %timeit FloatTensor(1,len(idx),2).normal_() * E_std
+% %timeit torch.normal(FloatTensor(1,len(idx),2).fill_(0), \
+%                         E_std.expand((1,len(idx),2)))
+% mean = FloatTensor(1,len(idx),2).fill_(0)
+% std = E_std.expand((1,len(idx),2))
+% %timeit torch.normal(mean, std)
+%         \end{verbatim}
+%         \begin{verbatim}
+% 746 µs ± 11.8 µs
+% 163 µs ± 2.47 µs
+% 108 µs ± 1.39 µs
+% 85.6 µs ± 1.64 µs
+% 27.7 µs ± 490 ns
+%         \end{verbatim}
         
     
-Som jeg forstår på den kode jeg så i forbindelse med vores Skype møde sampler du fra  (prior) fordelingen støjen, i.e.
+% Som jeg forstår på den kode jeg så i forbindelse med vores Skype møde sampler du fra  (prior) fordelingen støjen, i.e.
 
 
-$e_t\sim N(0,diag(\sigma^2_e))$
+% $e_t\sim N(0,diag(\sigma^2_e))$
 
-og lærer hvad $\sigma^2_e$ er som del af din inferens.
-
-
-Dette svarer til i modellen
-
-$p(A,e|\theta,z)= p(A|\theta,z,e)p(e|\sigma^2_e) $
-hvor A er dit netværk, theta dine AR parametre, z de latente positioner og e støj innovationerne, at du forsøger at marginalisere e ved at approksimerer denne marginalisering med et enkelt sample fra $p(e|\sigma^2_e)$ , i.e.
+% og lærer hvad $\sigma^2_e$ er som del af din inferens.
 
 
-$p(A|\theta,z)=\int p(A|\theta,z,e)p(e|\sigma^2_e)  de \approx p(A|\theta,z,e_s)$
+% Dette svarer til i modellen
 
-hvor $e_s\sim p(e|\sigma^2_e)$. 
+% $p(A,e|\theta,z)= p(A|\theta,z,e)p(e|\sigma^2_e) $
+% hvor A er dit netværk, theta dine AR parametre, z de latente positioner og e støj innovationerne, at du forsøger at marginalisere e ved at approksimerer denne marginalisering med et enkelt sample fra $p(e|\sigma^2_e)$ , i.e.
 
 
+% $p(A|\theta,z)=\int p(A|\theta,z,e)p(e|\sigma^2_e)  de \approx p(A|\theta,z,e_s)$
 
-Dette er som jeg ser det helt OK, men en anden mulighed var at forsøge at inferere også E, i.e. minimere:
-
-$-log(p(A,e|\theta,z))=-log( p(A|\theta,z,e)p(e|\sigma^2_e) )=-log( p(A|\theta,z,e))-log(p(e|\sigma^2_e) )$
-
-Hvor det første led er krydsentropien og det andet led den associerede omkostning ved at skulle tilføje støj. Ved ikke om dette potentielt kan være en fordel i forhold til inferensen. Du kunne overveje at undersøge begge muligheder.
+% hvor $e_s\sim p(e|\sigma^2_e)$. 
 
 
 
-Når du prædiktere skal du stadig sample e som du hidtil har gjort fra $p(e|\sigma^2_e)$.
+% Dette er som jeg ser det helt OK, men en anden mulighed var at forsøge at inferere også E, i.e. minimere:
+
+% $-log(p(A,e|\theta,z))=-log( p(A|\theta,z,e)p(e|\sigma^2_e) )=-log( p(A|\theta,z,e))-log(p(e|\sigma^2_e) )$
+
+% Hvor det første led er krydsentropien og det andet led den associerede omkostning ved at skulle tilføje støj. Ved ikke om dette potentielt kan være en fordel i forhold til inferensen. Du kunne overveje at undersøge begge muligheder.
+
+
+
+% Når du prædiktere skal du stadig sample e som du hidtil har gjort fra $p(e|\sigma^2_e)$.

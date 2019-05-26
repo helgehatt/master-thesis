@@ -22,40 +22,57 @@ Before testing on real-life networks, synthetic datasets are generated based on 
         \xfig{\ximg[width=0.7\textwidth]{Data/Static/Initial0}[Latent space positions at time $t=0$]}
         The number of connected nodes depends on the chosen bias, which is used to skew the link probabilities in either direction. \Cref{Data/Static/BiasLow} illustrates the links using a bias of $\beta=-1$ while \Cref{Data/Static/BiasHigh} uses a bias of $\beta=1$, featuring 161 links opposed to 49 with negative bias.
         %The difference is 49 links opposed to 161 using the positive bias, including several links across clusters. 
-        \xdouble{\ximg{Data/Static/BiasLow}[Links using a bias of -1]}{\ximg{Data/Static/BiasHigh}[Links using a bias of 1]}
+        \xfig{\xdirow
+            {\ximg{Data/Static/BiasLow}[Links using a bias of -1]}
+            {\ximg{Data/Static/BiasHigh}[Links using a bias of 1]}
+        }
         Real-life networks are usually quite sparse, such that the negative bias of $\beta=-1$ is used unless otherwise is stated, resulting in the number of links shown in \Cref{Data/Static/Links}. Even though the latent space positions remain constant over time, the positions are only used to find the probabilities of links occurring, such that the actual links at each time step are drawn from a uniform distribution according to the link probabilities.
-        \xdouble{\ximg{Data/Static/Links}[Number of links as a function of time]}{\xanim{Data/Static/Data}[Animation of the static data]}
+        \xfig{\xdirow
+            {\ximg{Data/Static/Links}[Number of links as a function of time]}
+            {\xanim{Data/Static/Data}[Animation of the static data]}
+        }
         \Cref{Data/Static/Data} shows an animation of the synthetic static dataset for all 100 time steps (click on the image in Adobe Reader to play). The image sequence shows that the latent space positions do not change over time, while the links between nodes appear at random with higher frequency for nodes closer in latent space.
     
     \subsection{Dynamic Data}
     
         The dynamic data is based on the same initial positions as the static data, however assumes that the latent positions for subsequent time steps are equal to the previous with diffusion added (cf. eq. \ref{eq:dsnl-model}). This simulates the effect of observations drifting together and apart, as entities become more and less likely to form connections over time. The diffusion is sampled from a normal distribution with zero mean and $\sigma_\epsilon^2\bm{I}$ variance, known as the diffusion rate. Figures \ref{Data/Dynamic/DiffusionLow} and \ref{Data/Dynamic/DiffusionHigh} illustrates how networks evolve over time with respect to diffusion, adding very little diffusion in the first and a lot in the second network.
-        \xdouble{\xanim{Data/Dynamic/DiffusionLow}[Animation of subsequent time steps adding diffusion with $\sigma_\epsilon=0.01\bm{I}$]}{\xanim{Data/Dynamic/DiffusionHigh}[Animation of subsequent time steps adding diffusion with $\sigma_\epsilon=0.25\bm{I}$]}
+        \xfig{\xdirow
+            {\xanim{Data/Dynamic/DiffusionLow}[Animation of subsequent time steps adding diffusion with $\sigma_\epsilon=0.01\bm{I}$]}
+            {\xanim{Data/Dynamic/DiffusionHigh}[Animation of subsequent time steps adding diffusion with $\sigma_\epsilon=0.25\bm{I}$]}
+        }
         The diffusion is not necessarily white noise, such that the direction of the diffusion is modified to simulate the three clusters dividing in half, forming three new clusters.
         The synthetic dynamic dataset is generated using a diffusion rate of $\sigma_\epsilon\bm{I}=0.05$ shown in \Cref{Data/Dynamic/Data}. 
         % making the observations change positions over time, while limiting the drift such that the positions are still possible to predict. 
-        \xdouble{\ximg{Data/Dynamic/Links}[Number of links as a function of time]}{\xanim{Data/Dynamic/Data}[Animation of the dynamic data]}
+        \xfig{\xdirow
+            {\ximg{Data/Dynamic/Links}[Number of links as a function of time]}
+            {\xanim{Data/Dynamic/Data}[Animation of the dynamic data]}
+        }
         As the amount of diffusion added in each step increases, the more uncertainty is revolved around the final positions of the observations, making them harder to accurately predict.
     
     \subsection{Periodic Data}
     
         The autoregressive model is able to simulate periodic behavior by defining additional sets of initial positions and using appropriate values for $\phi$. Note that $\phi$ is a $p\times k$-dimensional matrix, while described as a vector of size $p$ when there is no distinction between any of the $k$ latent dimensions.
         The first set of initial positions is the same as the static and dynamic data, while the second and third sets of positions are defined using two Gaussians with means $(\pm2,0)$ and four Gaussians with means $(\pm2,\pm2)$ respectively and a variance of $0.5^2$, illustrated in Figures \ref{Data/Periodic/Initial1} and \ref{Data/Periodic/Initial2}.
-        \xdouble
-        {\ximg{Data/Periodic/Initial1}[Second set of initial positions]}
-        {\ximg{Data/Periodic/Initial2}[Third set of initial positions]}
+        \xfig{\xdirow
+            {\ximg{Data/Periodic/Initial1}[Second set of initial positions]}
+            {\ximg{Data/Periodic/Initial2}[Third set of initial positions]}
+        }
         Having predefined the initial positions for the first three time steps, a periodic pattern emerges using $\phi=[0, 0, 1]$, such that the latent positions for time step $t$ is equal to those at $t-3$, cf. \Cref{eq:ar-model}.
         Hence, the autoregressive model simulates an AR(3) process, including a small amount of diffusion using $\sigma_\epsilon=0.01$, emphasizing the periodicity of the dataset.
         
         The AR-coefficients, $\phi$, have a significant impact on the predictions of the model, where minor changes to the values is the difference between a stationary and non-stationary process. Depending on the underlying process, stationarity is not always desirable, however using too high or too low $phi$s the predictions can quickly converge to infinity or zero over time. 
         To illustrate these two scenarios, \Cref{Data/Periodic/ARNone} shows the positions at the next time step using $\phi=[0,0,0]$ where the observations are separated according to the diffusion rate, being so low that all nodes are connected. 
-        \xdouble
-        {\ximg{Data/Periodic/ARNone}[Positions at $t_3$ using $\phi=[0,0,0]$, resulting in white noise with $\sigma=0.01$.]}
-        {\ximg{Data/Periodic/ARAll}[Positions at $t_3$ using $\phi=[1,1,1]$]}
+        \xfig{\xdirow
+            {\ximg{Data/Periodic/ARNone}[Positions at $t_3$ using $\phi=[0,0,0]$, resulting in white noise with $\sigma=0.01$.]}
+            {\ximg{Data/Periodic/ARAll}[Positions at $t_3$ using $\phi=[1,1,1]$]}
+        }
         The other scenario is depicted in \Cref{Data/Periodic/ARAll} using $\phi=[1,1,1]$, where the latent positions at the next time step is a sum of all three most recent sets of positions, resulting in too large distances to barely connect a few nodes.
         
         The generated periodic data has abrupt changes to the number of links over time, as can be expected with the large variations between the sets of initial positions. The changes do however follow a distinct pattern, as shown in \Cref{Data/Periodic/Links}, indicating the periodic behavior animated in \Cref{Data/Periodic/Data}.
-        \xdouble{\ximg{Data/Periodic/Links}[Number of links as a function of time]}{\xanim|3|{Data/Periodic/Data}[Animation of the periodic data]}
+        \xfig{\xdirow
+            {\ximg{Data/Periodic/Links}[Number of links as a function of time]}
+            {\xanim|3|{Data/Periodic/Data}[Animation of the periodic data]}
+        }
         
 \section{Synthetic AR(2) Data}
     
@@ -70,7 +87,10 @@ Before testing on real-life networks, synthetic datasets are generated based on 
             Z_t = 2 Z_{t-1} - Z_{t-2} = Z_{t-1} + (Z_{t-1} - Z_{t-2})
         \end{equation}
         At each time step, the initial change of $\pm0.05$ is added, such that the adjustment remains constant over time, and in the same direction. The number of links over time is shown in \Cref{Data/Velocity/Links} with an animation of the velocity dataset in \Cref{Data/Velocity/Data}.
-        \xdouble{\ximg{Data/Velocity/Links}[Number of links as a function of time]}{\xanim{Data/Velocity/Data}[Animation of the velocity data]}
+        \xfig{\xdirow
+            {\ximg{Data/Velocity/Links}[Number of links as a function of time]}
+            {\xanim{Data/Velocity/Data}[Animation of the velocity data]}
+        }
         The number of links increases significantly as the two clusters intertwine, having minimal distance between observations, and decreases as the nodes are separated once again.
         
     \subsection{Acceleration Data}
@@ -79,14 +99,23 @@ Before testing on real-life networks, synthetic datasets are generated based on 
         \xtab{\xtex{DataAccelerationPhi}[Example of how acceleration affects changes over time using different values of $\theta$]}
         
         The change between time steps increases or decreases exponentially, such that continuing in this fashion for 100 time steps will quickly result in changes either too large or too small. Hence, the deceleration data shown in \Cref{Data/Acceleration/DataNegative}, is generated using significantly smaller magnitudes, having an initial change of 0.1 between the first two time steps and a minimal $\theta$ of -0.03.
-        \xdouble{\ximg{Data/Acceleration/LinksNegative}[Number of links as a function of time]}{\xanim{Data/Acceleration/DataNegative}[Animation showing deceleration]}
+        \xfig{\xdirow
+            {\ximg{Data/Acceleration/LinksNegative}[Number of links as a function of time]}
+            {\xanim{Data/Acceleration/DataNegative}[Animation showing deceleration]}
+        }
         The deceleration data is included for illustrative purposes, whereas the dataset used to assess model behavior is shown in \Cref{Data/Acceleration/DataPositive}, using an initial change of only 0.01 and a positive $\theta$ of $0.03$.
-        \xdouble{\ximg{Data/Acceleration/LinksPositive}[Number of links as a function of time]}{\xanim{Data/Acceleration/DataPositive}[Animation of the acceleration data]}
+        \xfig{\xdirow
+            {\ximg{Data/Acceleration/LinksPositive}[Number of links as a function of time]}
+            {\xanim{Data/Acceleration/DataPositive}[Animation of the acceleration data]}
+        }
     
     \subsection{Curvature Data}
     
         Having a notion of acceleration, curvature is generated by applying different changes to each of the $k$ latent dimensions. This is done by combining the results of the acceleration and deceleration data, starting with a larger initial change in the $x$-axis and decelerating, while having a smaller initial change in the $y$-axis and accelerating. Over time, the change across the $y$-axis will catch up with the change in $x$-coordinates, thus shifting the direction of the observations. This phenomena is depicted in \Cref{Data/Curvature/Data}, defining the curvature dataset.
-        \xdouble{\ximg{Data/Curvature/Links}[Number of links as a function of time]}{\xanim{Data/Curvature/Data}[Animation of the curvature data]}
+        \xfig{\xdirow
+            {\ximg{Data/Curvature/Links}[Number of links as a function of time]}
+            {\xanim{Data/Curvature/Data}[Animation of the curvature data]}
+        }
         Notice the similarity in the number of links over time between acceleration (\cref{Data/Acceleration/LinksPositive}) and curvature (\cref{Data/Curvature/Links}). While the dimensionality of $\phi$ can be used to define complex movements over time, an AR(2) process can just as easily capture the curvature data using a one-dimensional $\phi$, as the model is only concerned with the interactions between entities and not with the true underlying circumstances in which they occur.
         
 \section{UC Messaging Data}

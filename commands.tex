@@ -24,6 +24,12 @@
     \end{table}
 }
 
+\NewDocumentCommand{\xeq}{ m }{
+    \begin{equation}\label{eq:#1}
+        \input{equations/#1}
+    \end{equation}
+}
+
 \NewDocumentCommand{\xwrap}{ O{r} m O{0.5\textwidth} }{
     \begin{wrapfigure}{#1}{#3}
         #2
@@ -55,65 +61,48 @@
 
 % MULTIPLES
 
-\NewDocumentCommand{\xdouble}{ O{!htb} m m }{
-    \begin{figure}[#1]
-        \centering
-        \begin{minipage}[t]{.48\textwidth}
-            #2
-        \end{minipage}%
-        \hfill%
-        \begin{minipage}[t]{.48\textwidth}
-            #3
-        \end{minipage}
-    \end{figure}
+\NewDocumentCommand{\xdirow}{ m m }{
+    \begin{minipage}[t]{.475\textwidth}
+        #1
+    \end{minipage}%
+    \hfill%
+    \begin{minipage}[t]{.475\textwidth}
+        #2
+    \end{minipage}
 }
 
-\NewDocumentCommand{\xquad}{ O{!htb} m m m m }{
-    \begin{figure}[#1]
-        \centering
-        \begin{minipage}[t]{.48\textwidth}
-            #2
-        \end{minipage}%
-        \hfill%
-        \begin{minipage}[t]{.48\textwidth}
-            #3
-        \end{minipage}
-        \vskip\baselineskip
-        \begin{minipage}[t]{.48\textwidth}
-            #4
-        \end{minipage}%
-        \hfill%
-        \begin{minipage}[t]{.48\textwidth}
-            #5
-        \end{minipage}
-    \end{figure}
+\NewDocumentCommand{\xtrirow}{ m m m }{
+    \begin{minipage}[t]{.3\textwidth}
+        #1
+    \end{minipage}%
+    \hfill%
+    \begin{minipage}[t]{.3\textwidth}
+        #2
+    \end{minipage}%
+    \hfill%
+    \begin{minipage}[t]{.3\textwidth}
+        #3
+    \end{minipage}
 }
 
-\NewDocumentCommand{\xhex}{ O{!htb} m m m m m m }{
-    \begin{figure}[#1]
-        \centering
-        \begin{minipage}[t]{.48\textwidth}
-            #2
-        \end{minipage}%
-        \hfill%
-        \begin{minipage}[t]{.48\textwidth}
-            #3
-        \end{minipage}
-        \vskip\baselineskip
-        \begin{minipage}[t]{.48\textwidth}
-            #4
-        \end{minipage}%
-        \hfill%
-        \begin{minipage}[t]{.48\textwidth}
-            #5
-        \end{minipage}
-        \vskip\baselineskip
-        \begin{minipage}[t]{.48\textwidth}
-            #6
-        \end{minipage}%
-        \hfill%
-        \begin{minipage}[t]{.48\textwidth}
-            #7
-        \end{minipage}
-    \end{figure}
+\NewDocumentCommand{\xdicol}{ m m }{
+    #1
+    \vskip\baselineskip
+    #2
+}
+
+\NewDocumentCommand{\xtricol}{ m m m }{
+    #1
+    \vskip\baselineskip
+    #2
+    \vskip\baselineskip
+    #3
+}
+
+\NewDocumentCommand{\highlight}{O{red!60} m m}{%
+\draw[line width=1bp, color=#1] (#2.north west)rectangle (#3.south east);
+}
+
+\NewDocumentCommand{\fhighlight}{O{red!60} m m}{%
+\draw[draw=none, fill=#1] (#2.north west)rectangle (#3.south east);
 }

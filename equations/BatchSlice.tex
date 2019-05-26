@@ -1,0 +1,52 @@
+\begin{tikzpicture}[baseline=-\the\dimexpr\fontdimen22\textfont2\relax ]
+
+    \matrix (m)[matrix of math nodes,left delimiter=(,right delimiter=)]
+    {
+        0 & 0 & 1 & 0 & 0 & 0 & 1 & 0 \\
+        0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 \\
+        0 & 0 & 0 & 0 & 0 & 1 & 0 & 1 \\
+        1 & 0 & 1 & 0 & 0 & 0 & 0 & 0 \\
+        0 & 1 & 0 & 0 & 0 & 0 & 1 & 0 \\
+        0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ 
+        0 & 0 & 0 & 0 & 1 & 0 & 0 & 1 \\ 
+        0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 \\ 
+    };
+    
+    \foreach \m [count=\i] in {0,...,7}{
+        \node[node distance=7.5mm, above of=m-1-\i]{\footnotesize\m};
+    }
+    
+    \foreach \m [count=\i] in {0,...,7}{
+        \node[left of=m-\i-1]{\footnotesize\m};
+    }
+
+    \begin{pgfonlayer}{myback}
+    
+        \def\N{8}
+        
+        \highlight{m-1-1}{m-3-\N}
+        \highlight{m-1-6}{m-\N-\N}
+        \fhighlight{m-1-6}{m-3-\N}
+        
+    \end{pgfonlayer}
+    
+\end{tikzpicture}
+= 
+\begin{tikzpicture}[baseline=-\the\dimexpr\fontdimen22\textfont2\relax ]
+
+    \matrix (m)[matrix of math nodes,left delimiter=(,right delimiter=)]
+    {
+        0 & 1 & 0 \\
+        0 & 1 & 0 \\
+        1 & 0 & 1 \\
+    };
+    
+    \foreach \m [count=\i] in {0,1,2}{
+        \node[left of=m-\i-1]{\footnotesize\m};
+    }
+    
+    \foreach \m [count=\i] in {5,6,7}{
+        \node[node distance=7.5mm, above of=m-1-\i]{\footnotesize\m};
+    }
+    
+\end{tikzpicture}

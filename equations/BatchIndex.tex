@@ -1,0 +1,58 @@
+\begin{tikzpicture}[baseline=-\the\dimexpr\fontdimen22\textfont2\relax ]
+
+    \matrix (m)[matrix of math nodes,left delimiter=(,right delimiter=)]
+    {
+        0 & 0 & 1 & 0 & 0 & 0 & 1 & 0 \\
+        0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 \\
+        0 & 0 & 0 & 0 & 0 & 1 & 0 & 1 \\
+        1 & 0 & 1 & 0 & 0 & 0 & 0 & 0 \\
+        0 & 1 & 0 & 0 & 0 & 0 & 1 & 0 \\
+        0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ 
+        0 & 0 & 0 & 0 & 1 & 0 & 0 & 1 \\ 
+        0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 \\ 
+    };
+    
+    \foreach \m [count=\i] in {0,...,7}{
+        \node[node distance=7.5mm, above of=m-1-\i]{\footnotesize\m};
+    }
+    
+    \foreach \m [count=\i] in {0,...,7}{
+        \node[left of=m-\i-1]{\footnotesize\m};
+    }
+
+    \begin{pgfonlayer}{myback}
+    
+        \def\N{8}
+        
+        \foreach \m in {2,5,7}{
+            \highlight{m-1-\m}{m-\N-\m}
+            \highlight{m-\m-1}{m-\m-\N}
+        }
+        
+        \foreach \m in {2,5,7}{
+            \foreach \n in {2,5,7}{
+                \fhighlight{m-\m-\n}{m-\m-\n}
+            }
+        }
+    \end{pgfonlayer}
+    
+\end{tikzpicture}
+= 
+\begin{tikzpicture}[baseline=-\the\dimexpr\fontdimen22\textfont2\relax ]
+
+    \matrix (m)[matrix of math nodes,left delimiter=(,right delimiter=)]
+    {
+        0 & 0 & 1 \\
+        1 & 0 & 1 \\
+        0 & 1 & 0 \\
+    };
+    
+    \foreach \m [count=\i] in {1,4,6}{
+        \node[left of=m-\i-1]{\footnotesize\m};
+    }
+    
+    \foreach \m [count=\i] in {1,4,6}{
+        \node[node distance=7.5mm, above of=m-1-\i]{\footnotesize\m};
+    }
+    
+\end{tikzpicture}

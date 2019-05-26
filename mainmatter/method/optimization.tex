@@ -76,12 +76,12 @@ The latent space positions and model parameters are estimated using maximum like
         \begin{equation}\label{eq:bce-log-domain}
             BCE = -\sum_{i\neq j} \sub(y)\log\left(\frac{\sub(p)}{1-\sub(p)}\right) + \log(1-\sub(p))
         \end{equation}
-        where (full rewriting shown in \Cref{eq:bce-rewrite-first-full})
+        where (full rewriting shown in eq. \ref{eq:bce-rewrite-first-full})
         \begin{equation}\label{eq:bce-rewrite-first}
             \log\left(\frac{\sub(p)}{1-\sub(p)}\right) =
             \log\left(\frac{\sigma(\sub(\eta))}{1-\sigma(\sub(\eta))}\right) = \sub(\eta)
         \end{equation}
-        and (full rewriting shown in \Cref{eq:bce-rewrite-second-full})
+        and (full rewriting shown in eq. \ref{eq:bce-rewrite-second-full})
         \begin{equation}\label{eq:bce-rewrite-second}
             \log(1-\sub(p))=-\log(1+e^{\sub(\eta)})=-\log(e^0+e^{\sub(\eta)})
         \end{equation}

@@ -1,5 +1,15 @@
 \chapter{Results}\label{ch:Results}
 
+The following abbreviations are used for the different models and loss penalties.
+\begin{tabular}{l|l}
+    SM & Static latent space model \\
+    DM & Diffusion model \\
+    AR($p$) & Autoregressive model of order $p$ \\
+    NL & No loss penalty \\
+    GL & Gaussian loss penalty \\
+    GNV & Gaussian loss penalty with no variance parameter
+\end{tabular}
+
 \section{Synthetic Data}
 
 The generated data comprised of 30 nodes over 100 time steps is split into a training set with the first 80 time steps and a test set with the remaining 20. 
@@ -15,51 +25,109 @@ The performance of the models are compared for each dataset, computing the recei
 
     \xfig{\xanim{Results/Static/Train/StaticModel-AR(1)-Undirected-NoLoss}}
     
-    \xhex
-    {\ximg{Results/Static/Proba/StaticModel-AR(1)-Undirected-True}[True]}
-    {\ximg{Results/Static/Proba/StaticModel-AR(1)-Undirected-NoLoss}[S-LSM]}
-    {\xanim{Results/Static/Proba/DiffusionModel-AR(1)-Undirected-NoLoss}[D-LSM]}
-    {\xanim{Results/Static/Proba/AutoregressiveModel-AR(1)-Undirected-NoLoss}[AR(1)]}
-    {\xanim{Results/Static/Proba/AutoregressiveModel-AR(2)-Undirected-NoLoss}[AR(2)]}
-    {\xanim{Results/Static/Proba/AutoregressiveModel-AR(3)-Undirected-NoLoss}[AR(3)]}
+    \xfig{\xtricol
+        {\xdirow
+            {\ximg{Results/Static/Proba/StaticModel-AR(1)-Undirected-True}[True]}
+            {\ximg{Results/Static/Proba/StaticModel-AR(1)-Undirected-NoLoss}[SM | NL]}
+        }{\xdirow
+            {\xanim{Results/Static/Proba/DiffusionModel-AR(1)-Undirected-NoLoss}[DM | NL]}
+            {\xanim{Results/Static/Proba/AutoregressiveModel-AR(1)-Undirected-NoLoss}[AR(1) | NL]}
+        }{\xdirow
+            {\xanim{Results/Static/Proba/AutoregressiveModel-AR(2)-Undirected-NoLoss}[AR(2) | NL]}
+            {\xanim{Results/Static/Proba/AutoregressiveModel-AR(3)-Undirected-NoLoss}[AR(3) | NL]}
+        }
+    }
 
     \xfig{\ximg{Results/Static/AUC-NoLoss}}
 
 \subsection{Dynamic Data}
-
-    \xhex
-    {\xanim{Results/Dynamic/Train/DiffusionModel-AR(1)-Undirected-NoLoss}[NLP]}
-    {\xanim{Results/Dynamic/Space/DiffusionModel-AR(1)-Undirected-NoLoss}[NLP]}
-    {\xanim{Results/Dynamic/Train/DiffusionModel-AR(1)-Undirected-GaussianLoss}[GLP]}
-    {\xanim{Results/Dynamic/Space/DiffusionModel-AR(1)-Undirected-GaussianLoss}[GLP]}
-    {\xanim{Results/Dynamic/Train/DiffusionModel-AR(1)-Undirected-GaussianLossNoVar}[GLP-NV]}
-    {\xanim{Results/Dynamic/Space/DiffusionModel-AR(1)-Undirected-GaussianLossNoVar}[GLP-NV]}
-
-    \xhex
-    {\xanim{Results/Dynamic/Proba/DiffusionModel-AR(1)-Undirected-True}[True]}
-    {\ximg {Results/Dynamic/Proba/StaticModel-AR(1)-Undirected-NoLoss}[S-LSM]}
-    {\xanim{Results/Dynamic/Proba/DiffusionModel-AR(1)-Undirected-GaussianLossNoVar}[D-LSM]}
-    {\xanim{Results/Dynamic/Proba/AutoregressiveModel-AR(1)-Undirected-GaussianLossNoVar}[AR(1)]}
-    {\xanim{Results/Dynamic/Proba/AutoregressiveModel-AR(2)-Undirected-GaussianLossNoVar}[AR(2)]}
-    {\xanim{Results/Dynamic/Proba/AutoregressiveModel-AR(3)-Undirected-GaussianLossNoVar}[AR(3)]}
+    
+    \xfig{\xtricol
+        {\xdirow
+            {\xanim{Results/Dynamic/Train/DiffusionModel-AR(1)-Undirected-NoLoss}[DM | NLP]}
+            {\xanim{Results/Dynamic/Space/DiffusionModel-AR(1)-Undirected-NoLoss}[DM | NLP]}
+        }{\xdirow
+            {\xanim{Results/Dynamic/Train/DiffusionModel-AR(1)-Undirected-GaussianLoss}[DM | GLP]}
+            {\xanim{Results/Dynamic/Space/DiffusionModel-AR(1)-Undirected-GaussianLoss}[DM | GLP]}
+        }{\xdirow
+            {\xanim{Results/Dynamic/Train/DiffusionModel-AR(1)-Undirected-GaussianLossNoVar}[DM | GNV]}
+            {\xanim{Results/Dynamic/Space/DiffusionModel-AR(1)-Undirected-GaussianLossNoVar}[DM | GNV]}
+        }
+    }
+    
+    \xfig{\xtricol
+        {\xdirow
+            {\xanim{Results/Dynamic/Proba/DiffusionModel-AR(1)-Undirected-True}[True]}
+            {\ximg {Results/Dynamic/Proba/StaticModel-AR(1)-Undirected-NoLoss}[SM | NL]}
+        }{\xdirow
+            {\xanim{Results/Dynamic/Proba/DiffusionModel-AR(1)-Undirected-GaussianLossNoVar}[DM | GNV]}
+            {\xanim|6|{Results/Dynamic/Proba/AutoregressiveModel-AR(1)-Undirected-GaussianLossNoVar}[AR(1) | GNV]}
+        }{\xdirow
+            {\xanim|6|{Results/Dynamic/Proba/AutoregressiveModel-AR(2)-Undirected-GaussianLossNoVar}[AR(2) | GNV]}
+            {\xanim|6|{Results/Dynamic/Proba/AutoregressiveModel-AR(3)-Undirected-GaussianLossNoVar}[AR(3) | GNV]}
+        }
+    }
     
     \xfig{\ximg{Results/Dynamic/AUC-GaussianLossNoVar}}
 
 \subsection{Periodic Data}
+    
+    \xfig{\xtricol
+        {\xdirow
+            {\xanim{Results/Periodic/Train/AutoregressiveModel-AR(3)-Undirected-NoLoss}[AR(3) | NLP]}
+            {\xanim{Results/Periodic/Space/AutoregressiveModel-AR(3)-Undirected-NoLoss}[AR(3) | NLP]}
+        }{\xdirow
+            {\xanim{Results/Periodic/Train/AutoregressiveModel-AR(3)-Undirected-GaussianLoss}[AR(3) | GLP]}
+            {\xanim{Results/Periodic/Space/AutoregressiveModel-AR(3)-Undirected-GaussianLoss}[AR(3) | GLP]}
+        }{\xdirow
+            {\xanim{Results/Periodic/Train/AutoregressiveModel-AR(3)-Undirected-GaussianLossNoVar}[AR(3) | GNV]}
+            {\xanim{Results/Periodic/Space/AutoregressiveModel-AR(3)-Undirected-GaussianLossNoVar}[AR(3) | GNV]}
+        }
+    }
 
-%     \subsubsection{Latent Space Model}
     
-%         \xanim{Synthetic-Periodic-Train-StaticModel-Undirected}
+
+    % \begin{figure}[!htb]
+    %     \floatname{animation}{A}
+    %     \xdicol{
+    %         \xtricol
+    %             {\xtrirow
+    %                 {\xanim|6|{Results/Periodic/Space/AutoregressiveModel-AR(1)-Undirected-NoLoss}[AR(1) | NL]}
+    %                 {\xanim|6|{Results/Periodic/Space/AutoregressiveModel-AR(2)-Undirected-NoLoss}[AR(2) | NL]}
+    %                 {\xanim|6|{Results/Periodic/Space/AutoregressiveModel-AR(3)-Undirected-NoLoss}[AR(3) | NL]}
+    %             }{\xtrirow
+    %                 {\xanim|6|{Results/Periodic/Space/AutoregressiveModel-AR(1)-Undirected-GaussianLoss}[AR(1) | GL]}
+    %                 {\xanim|6|{Results/Periodic/Space/AutoregressiveModel-AR(2)-Undirected-GaussianLoss}[AR(2) | GL]}
+    %                 {\xanim|6|{Results/Periodic/Space/AutoregressiveModel-AR(3)-Undirected-GaussianLoss}[AR(3) | GL]}
+    %             }{\xtrirow
+    %                 {\xanim|6|{Results/Periodic/Space/AutoregressiveModel-AR(1)-Undirected-GaussianLossNoVar}[AR(1) | GNV]}
+    %                 {\xanim|6|{Results/Periodic/Space/AutoregressiveModel-AR(2)-Undirected-GaussianLossNoVar}[AR(2) | GNV]}
+    %                 {\xanim|6|{Results/Periodic/Space/AutoregressiveModel-AR(3)-Undirected-GaussianLossNoVar}[AR(3) | GNV]}
+    %             }
+    %         }{\xdicol
+    %             {\xtrirow
+    %                 {\xanim{Results/Periodic/Train/AutoregressiveModel-AR(1)-Undirected-GaussianLoss}[AR(1) | GL]}
+    %                 {\xanim{Results/Periodic/Train/AutoregressiveModel-AR(2)-Undirected-GaussianLoss}[AR(2) | GL]}
+    %                 {\xanim{Results/Periodic/Train/AutoregressiveModel-AR(3)-Undirected-GaussianLoss}[AR(3) | GL]}
+    %             }{\xtrirow
+    %                 {\xanim{Results/Periodic/Train/AutoregressiveModel-AR(1)-Undirected-GaussianLossNoVar}[AR(1) | GNV]}
+    %                 {\xanim{Results/Periodic/Train/AutoregressiveModel-AR(2)-Undirected-GaussianLossNoVar}[AR(2) | GNV]}
+    %                 {\xanim{Results/Periodic/Train/AutoregressiveModel-AR(3)-Undirected-GaussianLossNoVar}[AR(3) | GNV]}
+    %             }
+    %         }
+    % \end{figure}
     
-%     \subsubsection{Diffusion Model}
+    \xfig{\xtricol
+        {\xdirow
+            {\xanim|6|{Results/Periodic/Proba/AutoregressiveModel-AR(3)-Undirected-True}[True]}
+            {\ximg{Results/Periodic/Proba/StaticModel-AR(1)-Undirected-NoLoss}[SM | NL]}
+        }{\xdirow
+            {\xanim|6|{Results/Periodic/Proba/DiffusionModel-AR(1)-Undirected-GaussianLoss}[DM | GL]}
+            {\xanim|6|{Results/Periodic/Proba/AutoregressiveModel-AR(1)-Undirected-GaussianLoss}[AR(1) | GL]}
+        }{\xdirow
+            {\xanim|6|{Results/Periodic/Proba/AutoregressiveModel-AR(2)-Undirected-GaussianLoss}[AR(2) | GL]}
+            {\xanim|6|{Results/Periodic/Proba/AutoregressiveModel-AR(3)-Undirected-GaussianLoss}[AR(3) | GL]}
+        }
+    }
     
-%         \xanim{Synthetic-Periodic-Train-DiffusionModel-Undirected}
-        
-%     \subsubsection{Autoregressive Model}
-    
-%         Prone to get stuck in local minima.
-%         \xanim{Synthetic-Periodic-Train-AutoregressiveModel-Undirected}
-        
-%     \subsubsection{Summary}
-    
-%         \xfig{Synthetic-Periodic-ROC}
+    \xfig{\ximg{Results/Periodic/AUC-GaussianLoss}}
