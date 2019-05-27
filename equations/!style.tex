@@ -3,10 +3,14 @@
 \usepackage{amssymb}
 \usepackage{bm}
 \usepackage{mathtools}
-\usepackage{blkarray}
-% \usepackage{kbordermatrix}
-\usepackage{colortbl}
 
 \numberwithin{equation}{section}
+
+\usepackage{aliascnt}
+\newaliascnt{eqfloat}{equation}
+\newfloat{eqfloat}{h}{loe}
+\floatname{eqfloat}{Equation}
+\crefname{eqfloat}{eq.}{eqs.}
+\Crefname{eqfloat}{Equation}{Equations}
 
 \newcommand{\odds}{\text{odds}}

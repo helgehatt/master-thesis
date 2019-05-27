@@ -1,3 +1,4 @@
+\begin{equation*}
 \begin{tikzpicture}[baseline=-\the\dimexpr\fontdimen22\textfont2\relax ]
 
     \matrix (m)[matrix of math nodes,left delimiter=(,right delimiter=)]
@@ -25,13 +26,13 @@
         \def\N{8}
         
         \foreach \m in {2,5,7}{
-            \highlight{m-1-\m}{m-\N-\m}
-            \highlight{m-\m-1}{m-\m-\N}
+            \xmatline{m-1-\m}{m-\N-\m}
+            \xmatline{m-\m-1}{m-\m-\N}
         }
         
         \foreach \m in {2,5,7}{
             \foreach \n in {2,5,7}{
-                \fhighlight{m-\m-\n}{m-\m-\n}
+                \xmatfill{m-\m-\n}{m-\m-\n}
             }
         }
     \end{pgfonlayer}
@@ -56,3 +57,4 @@
     }
     
 \end{tikzpicture}
+\end{equation*}

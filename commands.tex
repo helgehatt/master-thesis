@@ -25,9 +25,9 @@
 }
 
 \NewDocumentCommand{\xeq}{ m }{
-    \begin{equation}\label{eq:#1}
-        \input{equations/#1}
-    \end{equation}
+    \begin{eqfloat}
+        #1
+    \end{eqfloat}
 }
 
 \NewDocumentCommand{\xwrap}{ O{r} m O{0.5\textwidth} }{
@@ -48,7 +48,8 @@
 \NewDocumentCommand{\xtex}{ O{table} D//{tables} m O{} }{
     \centering
     \input{#2/#3}
-    \captionof{#1}{#4} 
+    % \captionof{#1}{#4}
+    \caption{#4}
     \label{#3}
 }
 
@@ -99,10 +100,10 @@
     #3
 }
 
-\NewDocumentCommand{\highlight}{O{red!60} m m}{%
-\draw[line width=1bp, color=#1] (#2.north west)rectangle (#3.south east);
+\NewDocumentCommand{\xmatline}{D(){0} O{red!60} m m}{%
+    \draw[line width=1bp, color=#2] ($(#3.north west)+(-#1mm,0mm)$) rectangle ($(#4.south east)+(#1mm,0mm)$);
 }
 
-\NewDocumentCommand{\fhighlight}{O{red!60} m m}{%
-\draw[draw=none, fill=#1] (#2.north west)rectangle (#3.south east);
+\NewDocumentCommand{\xmatfill}{D(){0} O{red!60} m m}{%
+    \draw[draw=none, fill=#2] ($(#3.north west)+(-#1mm,0mm)$) rectangle ($(#4.south east)+(#1mm,0mm)$);
 }

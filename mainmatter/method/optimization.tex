@@ -76,12 +76,12 @@ The latent space positions and model parameters are estimated using maximum like
         \begin{equation}\label{eq:bce-log-domain}
             BCE = -\sum_{i\neq j} \sub(y)\log\left(\frac{\sub(p)}{1-\sub(p)}\right) + \log(1-\sub(p))
         \end{equation}
-        where (full rewriting shown in eq. \ref{eq:bce-rewrite-first-full})
+        where (full rewriting shown in \cref{BCEFull1})
         \begin{equation}\label{eq:bce-rewrite-first}
             \log\left(\frac{\sub(p)}{1-\sub(p)}\right) =
             \log\left(\frac{\sigma(\sub(\eta))}{1-\sigma(\sub(\eta))}\right) = \sub(\eta)
         \end{equation}
-        and (full rewriting shown in eq. \ref{eq:bce-rewrite-second-full})
+        and (full rewriting shown in \cref{BCEFull2})
         \begin{equation}\label{eq:bce-rewrite-second}
             \log(1-\sub(p))=-\log(1+e^{\sub(\eta)})=-\log(e^0+e^{\sub(\eta)})
         \end{equation}
@@ -90,27 +90,6 @@ The latent space positions and model parameters are estimated using maximum like
         
         \begin{equation}\label{eq:bce-log-domain-rewrite}
             BCE = -\sum_{i\neq j}\{ \sub(y) \sub(\eta) - LSE(0,\sub(\eta)) \}
-        \end{equation}
-        
-        \begin{equation}\label{eq:bce-rewrite-first-full}
-            \setlength{\jot}{\baselineskip}
-            \begin{split}
-                \log\left(\frac{\sigma(x)}{1-\sigma(x)}\right) &= \log\left(\frac{\frac{e^x}{e^x+1}}{1-\frac{e^x}{e^x+1}}\right) \\ &=
-                \log\left(\frac{e^x}{(e^x+1)\left(1-\frac{e^x}{e^x+1}\right)}\right) \\ &=
-                \log\left(\frac{e^x}{e^x-\frac{e^x}{e^x+1}-\frac{e^{2x}}{e^x+1}+1}\right) \\ &=
-                \log\left(\frac{e^x}{\frac{e^{2x}+e^x-e^x-e^{2x}+e^x+1}{e^x+1}}\right) \\ &=
-                \log\left(\frac{e^x}{\frac{e^x+1}{e^x+1}}\right) = \log(e^x) = x
-            \end{split}
-        \end{equation}
-        
-        \begin{equation}\label{eq:bce-rewrite-second-full}
-            \setlength{\jot}{\baselineskip}
-            \begin{split}
-                \log(1-\sigma(x)) &= \log\left(1-\frac{e^x}{e^x+1}\right)
-                \\ &= \log\left(\frac{e^x+1-e^x}{e^x+1}\right)
-                \\ &= \log\left(\frac{1}{e^x+1}\right)
-                \\ &= \log(1) - \log(e^x+1) \\ &= -\log(1+e^x)
-            \end{split}
         \end{equation}
     
     \subsubsection{Stopping Criteria}

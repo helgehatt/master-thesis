@@ -63,23 +63,18 @@ The models and the MLE framework are implemented in PyTorch, an open-source deep
         The intuition is, that the first set of initial latent positions can be used to learn a second set of positions, being the initial positions for the second block. Continuing in this fashion, what is learned in each block is carried over to the next block, such that the total number of time steps can be increased without affecting the computation time of each individual block. 
         While the computational complexity becomes linear in the number of blocks instead of time steps, the time between each optimization step decreases significantly, thus converging much faster overall.
         
-        In practice however, the information from the previous block is not carried over to the next, but simply discarded as the optimizer immediately starts overfitting to the limited time span. The result is a static representation of the latent positions for each block, since it is much easier to achieve a low loss by moving the block's initial positions than by adjusting the AR-coefficients and actually learning the dynamic aspect.
-        
+        In practice however, the information from the previous block is not carried over to the next, but simply discarded as the optimizer immediately starts overfitting to the limited time span. The result is a static representation of the latent positions at each block, since it is much easier to achieve a low loss by moving the block's initial positions than by adjusting the AR-coefficients and actually learning the temporal aspect.
         
     \subsubsection{Warm Start}
     
-        Even though block optimization is not particularly successful, a similar approach can be used to give the optimizer a warm start, thus drastically reducing the time it takes to converge. Using only a single set of initial positions, the idea is to start by fitting to the first few time steps, and double the number of time steps to optimize until the whole training set is employed. Doing so, a high AUC score is quickly achieved for the first few time steps, and when the number of time steps is extended, the optimizer immediately adjusts the AR-coefficients to ensure a high AUC score for the following time steps as well. As a result, the optimizer is almost fully converged when starting on the full dataset.
+        Even though block optimization is not particularly successful, a similar approach can be used to give the optimizer a warm start, thus drastically reducing the time it takes to converge. Using only a single set of initial positions, the idea is to start by fitting to the first few time steps, and double the number of time steps to optimize until the whole training set is employed. Doing so, a high AUC score is quickly achieved for the first few time steps, and when the number of time steps is extended, the optimizer immediately adjusts the AR-coefficients to ensure a high AUC score for the following time steps as well. As a result, the optimizer is almost fully converged when training on the full dataset.
     
 \subsection{Estimating Innovations}
 
-    In time series analysis, the \emph{innovation} is the difference between the observed value of a variable at time $t$ and the optimal forecast of that value based on information available prior to time $t$. The innovations of a diffusion process or autoregressive process are often referred to as white noise, being a sequence of uncorrelated random variables with zero mean and finite variance. The signal is most often assumed to follow a Gaussian distribution given by
+    In time series analysis, the \emph{innovation} is the difference between the observed value of a variable at time $t$, and the optimal forecast of that value based on information available prior to time $t$. The innovations of a diffusion process or autoregressive process are often referred to as white noise, being a sequence of uncorrelated random variables with zero mean and finite variance. The signal is most often assumed to follow a Gaussian distribution given by
     \begin{equation}
         f(x\vert\mu,\sigma^2) = \frac{1}{\sqrt{2\pi\sigma^2}}e^{-\frac{(x-\mu)^2}{2\sigma^2}}
     \end{equation}
-    % the likelihood function given by
-    % \begin{equation}
-    %     \mathcal{L}(\mu,\sigma)=\left(\frac{1}{\sqrt{2\pi\sigma^2}}\right)^n\cdot \prod_{i=1}^ne^{-\frac{(x_i-\mu)^2}{2\sigma^2}}
-    % \end{equation}
     resulting in the following $n$ sample log-likelihood function
     \begin{equation}
         \ln\mathcal{L}(\mu, \sigma^2\vert x) = -\frac{n}{2}\ln(2\pi) - \frac{n}{2}\ln(\sigma^2) - \frac{1}{2\sigma^2}\sum_{i=1}^n (x_i - \mu)^2
@@ -92,10 +87,6 @@ The models and the MLE framework are implemented in PyTorch, an open-source deep
     \begin{equation}
         f(x\vert\mu,\sigma)=\frac{1}{\sqrt{2}\sigma}e^{-\frac{\sqrt{2}|x-\mu|}{\sigma}}
     \end{equation}
-    % such that the likelihood function for $N$ data samples is
-    % \begin{equation}
-    %     L(\mu,\sigma;x)=\prod_{t=1}^N \frac{1}{\sqrt{2}\sigma}e^{-\frac{\sqrt{2}|x_t-\mu|}{\sigma}}=(\sqrt{2}\sigma)^{-N}e^{\frac{-\sqrt{2}}{\sigma}\sum_{t=1}^N |x_t-\mu|}
-    % \end{equation}
     resulting in the following $n$ sample log-likelihood function
     \begin{equation}
         \ln\mathcal{L}(\mu,\sigma\vert x)=-n\ln(\sqrt{2}\sigma) -\frac{\sqrt{2}}{\sigma}\sum_{t=1}^n |x_i-\mu|
@@ -115,33 +106,44 @@ The models and the MLE framework are implemented in PyTorch, an open-source deep
     
     \subsubsection{The Batching Problem}
     
-        There are two key components in a successful batching strategy, namely making sure all pairs of nodes are compared and that the negative log-likelihood loss of diagonal nodes ($i=j$) is zero. 
+        There are two key components in a successful batching strategy, namely making sure all pairs of nodes are compared and that the negative log-likelihood loss of looping nodes ($i=j$) is zero. 
         Comparing all pairs of nodes is necessary to learn the whole representation of the underlying network, where $\sub(y)$ is not necessarily equal to $\sub(y)(ji)$ for directed networks. 
         An entity is never linked to itself, such that the diagonal of the sociomatrix $Y$ is always empty. As previously stated, the link probability $\sub(p)$ is inversely proportional to the distance between two nodes $i$ and $j$. However, when $i=j$, the distance from the node to itself is zero, which should coincide with a high link probability. To remedy this, the loss should be removed when comparing a node with itself.
         
     \subsubsection{Indexing}
     
-        \citeauthor{jacobsen2018a} devised a batching strategy in \cite{jacobsen2018a}, where a set of $n$ numbers are randomly drawn from a uniform distribution with replacement. These numbers are then used as both row and column indices to extract an $n\times n$ submatrix $y$ from the much larger $N\times N$ sociomatrix $Y$. An example with an $8\times 8$ sociomatrix and the indices $\{1,4,6\}$ is shown in \Cref{eq:BatchIndex}. Each index corresponds to a node with a given latent positions, which are used to compute the link probabilities for all pairs, resulting in an $n\times n$ matrix $\hat{y}$. Finally, the negative log-likelihood loss is calculated based on $y$ and $\hat{y}$. Since the row indices and the column indices are equal, the pairs for which $i=j$ are guaranteed to lie on the main diagonal of the loss matrix. Hence, correct behavior is ensured by simply removing the entries on the main diagonal before summarizing the total loss. 
-    
-        \xeq{BatchIndex}
+        \citeauthor{jacobsen2018a} devised a batching strategy in \cite{jacobsen2018a}, where a set of $n$ numbers are randomly drawn from a uniform distribution with replacement. These numbers are then used as both row and column indices to extract an $n\times n$ submatrix $y$ from the much larger $N\times N$ sociomatrix $Y$. An example with an $8\times 8$ sociomatrix and the indices $\{1,4,6\}$ is shown in \Cref{BatchIndex}. Each index corresponds to a node with a given latent positions, which are used to compute the link probabilities for all pairs, resulting in an $n\times n$ matrix $\hat{y}$. Finally, the negative log-likelihood loss is calculated based on $y$ and $\hat{y}$. Since the row indices and the column indices are equal, the pairs for which $i=j$ are guaranteed to lie on the main diagonal of the loss matrix. Hence, correct behavior is ensured by simply removing the entries on the main diagonal before summarizing the total loss. 
+        \xeq{\xtex/equations/{BatchIndex}}
         
-        This strategy is easy to implement, making sure all combinations of nodes are compared over time by random sampling indices. By using the same set of indices to index the sociomatrix along both dimensions, the placement of the $i=j$ pairs is fixed, thus allowing for quick removal of the desired loss entries.
+        This strategy is easy to implement, making sure all combinations of nodes are compared over time by random sampling indices. By using the same set of indices to index the sociomatrix along both dimensions, the placement of the looping $i=j$ pairs is fixed, thus allowing for quick removal of the desired loss entries.
         An immediate improvement is to sample without replacement, avoiding duplicate indices in batches and ensuring that all nodes are sampled each epoch. However, a much more significant improvement is to represent the sociomatrix $Y$ sparsely.
         
     \subsubsection{Sparse Sociomatrix}
     
         A sparse matrix stores only non-zero elements, which is quite convenient considering the sparsity of real-life networks. To illustrate, one of the datasets considered has a total of $N=1899$ unique nodes spanning $T=193$ days. The total number of elements in the sociomatrix is thus over half a billion ($N^2T \approx 696\cdot 10^6$), whereas the total number of non-zero elements is barely 34,000. The motivation for using a sparse sociomatrix is that 34,000 elements can easily be stored on the GPU, while reserving space for other computations.
         
-        The only available sparse representation of a PyTorch tensor is the COO-format. COO is an abbreviation of coordinate list, where each non-zero value is associated with a pair of coordinates. Considering the previously used example sociomatrix in \Cref{eq:BatchIndex}, the following information is stored:
+        The only available sparse representation of a PyTorch tensor is the COO-format. COO is an abbreviation of coordinate list, where each non-zero value is associated with a pair of coordinates. Considering the previously used example sociomatrix in \Cref{BatchIndex}, the following information is stored:
         \xtab{\xtex{SparseContents}}
         
-        Hence, creating the submatrix $y$ using \citeauthor{jacobsen2018a}'s batching strategy requires looking up each individual pair of nodes and inserting 1s and 0s depending on the contents of the sparse sociomatrix.
+        Hence, creating the submatrix $y$ using \citeauthor{jacobsen2018a}'s batching strategy requires looking up each individual pair of indices and inserting 1s and 0s depending on the contents of the sparse sociomatrix.
     
     \subsubsection{Slicing}
     
-        This thesis proposes a new batching strategy which allows efficient sampling from a sparse sociomatrix by constraining the batches to slices. 
+        This thesis proposes a new batching strategy which allows efficient sampling from a sparse sociomatrix by constraining the batches to slices. The first consideration is whether slices can be used to compare all combinations of nodes, also for directed networks.
+        This is achieved by using different slices for rows and columns, such that a row slice can be compared with any column indices and vice versa. An example is shown in \Cref{BatchSlice} using the same sociomatrix as before, with the slices $\{(0,3), (5,8)\}$ not including the end to adhere to Python semantics.
+        \xeq{\xtex/equations/{BatchSlice}}
         
-        \xeq{BatchSlice}
+        To ensure that all nodes appear equally frequently in the slices, the slices are created for the whole range of nodes and shuffled for each epoch to simulate uniform sampling without replacement.
+        One issue is that the diagonal of looping nodes (where $i=j$) is no longer fixed, and in this particular example, there are no such elements at all. Not comparing looping nodes is beneficial, as they do not contribute to the log-likelihood. However, they cannot be excluded entirely, as a sociomatrix including the pairs $\{(0,1), (1,0)\}$ also include $\{(0,0), (1,1)\}$. Similarly, the log-likelihood loss should also be removed for looping nodes in overlapping slices.
+        While the diagonal of looping nodes is no longer fixed, it can easily be found as the degree of overlap. More specifically, the placement of the diagonal is calculated as the start of the row slice minus the start of the column slice, where 0 is the main diagonal, a negative number is below the main diagonal and positive is above. Hence, this strategy also ensures that the loss is removed when comparing a node to itself.
+        
+        The question that remains, is why exactly slices. Considering the sparse representation of the sociomatrix in \Cref{SparseContents}, the indices can easily be filtered by lower and upper bounds. By conveniently using the row and column slices as bounds on the row and column indices respectively, the result is combined by a logical \texttt{AND} operation. The combined row and column mask is then used to index the original arrays of row and column indices, getting each pair of coordinates for each non-zero value within the slices. Performing these operations on the example sparse sociomatrix with the same slices as before $\{(0,3), (5,8)\}$ is illustrated in \Cref{SparseMask}. The coloring represents the resulting bit masks after filtering, with highlighted areas as 1s and grayed out areas as 0s. The highlighted values are the result from combining row and column masks, indicating non-zero values at indices $\{(0,6),(1,6),(2,5) \text{ and } (2,7)\}$ as expected.
+        \xtab{\xtex{SparseMask}}
+        
+        The found indices are used to construct the smaller dense submatrix $y$, which is subsequently used to compute the negative log-likelihood loss as normal.
+        Instead of constructing a dense matrix, an alternative approach is to construct a sparse matrix, and use the indices as a mask. PyTorch defines an operation \texttt{sparse\_mask} which selects values from a dense matrix based on the indices of a sparse matrix. The result of both approaches are equivalent, however the masking operation does not scale as drastically as the dense matrix multiplication as shown in \Cref{Method/Batch-Slicing-Mask}.
+        \xfig{\ximg[width=0.7\textwidth]{Method/Batch-Slicing-Mask}}
+        However, PyTorch has not yet implemented the operation's derivative, such that it cannot currently be used for model optimization. Regardless, doing so would not result in any immediate performance gain, as the batch sizes used in this project is well below a thousand.
         
 % \subsection{Operation Profiling}
 

@@ -3,10 +3,23 @@
 \usepackage{wrapfig}
 \usepackage[format=plain]{caption}
 \usepackage{subcaption}
-\usepackage{float}
 \usepackage{animate}
 
 \newfloat{animation}{thp}{loa}[chapter]
 \floatname{animation}{Animation}
 \crefname{animation}{animation}{animations}
 \Crefname{animation}{Animation}{Animations}
+
+% \newfloat{eqfloat}{h}{loe}
+% \floatname{eqfloat}{Equation}
+
+% \newcommand*{\ORGeqfloat}{}
+% \let\ORGeqfloat\eqfloat
+% \def\eqfloat{%
+%   \let\ORIGINALcaption\caption
+%   \def\caption{%
+%     % \addtocounter{equation}{-1}%
+%     \ORIGINALcaption
+%   }%
+%   \ORGeqfloat
+% }
