@@ -1,12 +1,12 @@
 \section{PyTorch Implementation}
 
-The models and the MLE framework are implemented in PyTorch, an open-source deep learning platform aiming to provide a seamless path from research prototyping to production deployment.
+The models and the MLE framework are implemented in PyTorch, an open-source deep learning platform aiming to provide a seamless path from research prototyping to production deployment. % PyTorch version
 
 \subsection{Pairwise Distance}
 
     Calculating link probabilities for a subset of nodes requires the computation of the pairwise distance matrix $D$, where $\sub(d)^2=\Vert z_i-z_j\Vert^2$ is the squared euclidean distance between nodes $i$ and $j$. The squared euclidean distance differs from euclidean distance by omitting the square root for faster clustering. The distance matrix is symmetric for an undirected latent space, while a directed latent space has separate representations for incoming and outgoing edges. In the latter case, $D$ is calculated from the latent space positions $Z_{in}$ and $Z_{out}$ such that $\sub(d)\neq\sub(d)(ji)$.
     
-    Considering two arbitrary matrices $A$ and $B$ of size $N\times k$, the direct approach to computing the distance matrix is by adding extra dimensions such that the size of $A$ is $N\times 1\times k$ and $B$ is $1\times N\times k$. The squared differences between all combinations of rows and columns are then computed simultaneously as $(A-B)^2$, resulting in a $N\times N\times k$ matrix. The final step is to sum over the last dimension, giving rise to the $N\times N$ distance matrix. This approach is efficient for very small matrices, however scales poorly both in terms of memory consumption and computational complexity.
+    Considering two arbitrary matrices $A$ and $B$ of size $N\times k$, the direct approach to computing the distance matrix is by adding extra dimensions such that the size of $A$ is $N\times 1\times k$ and $B$ is $1\times N\times k$. The squared differences between all combinations of rows and columns are then computed simultaneously as $(A-B)^2$, resulting in a $N\times N\times k$ matrix. The final step is to sum over the last dimension, giving rise to the $N\times N$ distance matrix. This approach is efficient for very small matrices, however scales poorly both in terms of memory consumption and time complexity.
     
     A less memory intensive approach is to calculate the squared norm of the difference using quadratic expansion, shown in \Cref{eq:pyimpl-dist-quadratic}.
     \begin{equation}\label{eq:pyimpl-dist-quadratic}
@@ -75,34 +75,71 @@ The models and the MLE framework are implemented in PyTorch, an open-source deep
     \begin{equation}
         f(x\vert\mu,\sigma^2) = \frac{1}{\sqrt{2\pi\sigma^2}}e^{-\frac{(x-\mu)^2}{2\sigma^2}}
     \end{equation}
-    resulting in the following $n$ sample log-likelihood function
-    \begin{equation}
-        \ln\mathcal{L}(\mu, \sigma^2\vert x) = -\frac{n}{2}\ln(2\pi) - \frac{n}{2}\ln(\sigma^2) - \frac{1}{2\sigma^2}\sum_{i=1}^n (x_i - \mu)^2
-    \end{equation}
     
-    Considering the sparsity of real-life networks, another fitting assumption is that the changes are less frequent, but have greater impact. This relates to whole groups or communities being connected or separated as a result of events such as introducing 
-    
-
-    The Laplace distribution is given by
+    Considering the sparsity of real-life networks, another fitting assumption is that the changes are less frequent, but have bigger impact. This relates to whole groups or communities being connected or separated as a result of various events. This is modeled by the Laplace distribution, being shaped as two exponential distributions facing each other, given by
     \begin{equation}
         f(x\vert\mu,\sigma)=\frac{1}{\sqrt{2}\sigma}e^{-\frac{\sqrt{2}|x-\mu|}{\sigma}}
     \end{equation}
-    resulting in the following $n$ sample log-likelihood function
-    \begin{equation}
-        \ln\mathcal{L}(\mu,\sigma\vert x)=-n\ln(\sqrt{2}\sigma) -\frac{\sqrt{2}}{\sigma}\sum_{t=1}^n |x_i-\mu|
-    \end{equation}
-    
     
     \subsubsection{Sampling Prior Distribution}
     
-        % One way of handling errors 
-        The simple approach to error handling
+        The simple approach to error handling is by sampling the errors from its prior distribution $\epsilon_t\sim N(0,\sigma_\epsilon^2)$ and learn $\sigma_\epsilon^2$ as a part of the maximum likelihood inference.
+        This corresponds to the model
+        \begin{equation}
+            P(Y,\epsilon|Z,\theta) = P(Y|Z,\theta,\epsilon)P(\epsilon|\sigma_\epsilon^2)
+        \end{equation}
+        with $Y$ as the network, $Z$ the latent positions, $\theta$ the model parameters (e.g. bias and AR-coefficients) and $\epsilon$ the innovations, where $\epsilon$ is marginalized by approximating the marginalization with a single sample $\epsilon_s \sim P(\epsilon|\sigma_\epsilon^2)$, such that
+        \begin{equation}
+            P(Y|Z,\theta) = \int P(Y|Z,\theta,\epsilon) P(\epsilon|\sigma_\epsilon^2) d\epsilon \approx P(Y|Z,\theta,\epsilon_s)
+        \end{equation}
+        Doing so does however have a huge negative impact, as the sampled innovations at each time step are completely different from epoch to epoch. Hence, the cumulative errors introduce a regularizing effect, making the model incapable of learning the temporal aspect. This issue is visualized in \Cref{Method/Diffusion-Over-Time}, where the drawn sample results in a predicted positions $p_1$ entirely different from the underlying innovation leading to the true position at $t_1$. 
+        \xfig{\ximg{Method/Diffusion-Over-Time}[Example of true and predicted diffusion sampling from the prior distribution]}
+        Continuing from $p_1$, predicting $t_2$ is not even possible with the current variance, and as time progresses the difference between predicted and true latent positions will keep increasing.
     
-    \subsubsection{Infer Noise Variable}
+    \subsubsection{Inferring Innovations Directly}
+
+        An alternative approach is to infer the innovations $\epsilon$ directly during optimization, such that the model no longer samples blindly, but adjusts the error to better capture the underlying movement. 
+        Doing so, it is important to penalize the addition of noise to prevent overfitting and incentivize the learning of other model parameters. The innovations for test data predictions are still sampled from $P(\epsilon|\sigma_\epsilon^2)$, such that allowing the innovations to fit perfectly to the training data does not generalize well to test data. Hence, a more fitting solution is to minimize the negative log-likelihood loss associated with $\epsilon$. The $n$ sample log-likelihood function for a Gaussian distribution is given by
+        \begin{equation}\label{error-gaussian-log-loss}
+            \log\mathcal{L}(\mu, \sigma^2\vert x) = -\frac{n}{2}\log2\pi - \frac{n}{2}\log\sigma^2 - \frac{1}{2\sigma^2}\sum_{i=1}^n (x_i - \mu)^2
+        \end{equation}
+        and for a Laplace distribution by
+        \begin{equation}\label{error-laplace-log-loss}
+            \log\mathcal{L}(\mu,\sigma\vert x)=-n\log\sqrt{2}\sigma -\frac{\sqrt{2}}{\sigma}\sum_{t=1}^n |x_i-\mu|
+        \end{equation}
+    
+        Depending on the assumption of the errors' distribution, the log-likelihood functions can be used to reduce the amount of diffusion added and learn $\sigma_\epsilon^2$ as a counterweight to the size of the innovations.
+        
+    \subsubsection{Analytically Optimized Variance}
+        
+        Instead of learning $\sigma_\epsilon^2$ as a part of the model inference, the variance can be chosen to maximize the log-likelihood function as shown in \cite{haerdle2015statistics}. MLE of $\mu$ and $\sigma^2$ for the Gaussian distribution is achieved by taking the partial derivatives with respect to $\mu$ and $\sigma^2$ and setting the resulting equations equal to zero.
+        
+        \begin{equation}\label{error-mu-partial}
+            \frac{\partial\log\mathcal{L}}{\partial\mu} = -\frac{2}{2\sigma^2}\sum_{i=1}^n(x_i-\hat{\mu})\cdot(-1) = 0
+        \end{equation}
+        \begin{equation}\label{error-sigma-partial}
+            \frac{\partial\log\mathcal{L}}{\partial\sigma^2} = -\frac{n}{2}\cdot\frac{1}{\hat{\sigma}^2}+\frac{1}{2}\cdot\frac{1}{\hat{\sigma}^4}\cdot\sum_{i=1}^n(x_i-\mu)^2 = 0
+        \end{equation}
+        
+        \Cref{error-mu-partial} is solved to produce the ML estimator $\hat{\mu}$ of $\mu$ as follows
+        \begin{equation}
+            \sum_{i=1}^n(x_i-\hat{\mu}) = 0 \equiv \hat{\mu}=\frac{1}{n}\sum_{i=1}^n x_i = \bar{x}
+        \end{equation}
+        such that substituting the result in \Cref{error-sigma-partial} allows solving for $\hat{\sigma}^2$
+        \begin{equation}
+            \frac{n}{2\hat{\sigma}^2} = \frac{1}{2\hat{\sigma}^4} = \sum_{i=1}^n (x_i-\bar{x})^2 \equiv \hat{\sigma}^2=\frac{1}{n}\sum_{i=1}^n (x_i-\bar{x})^2
+        \end{equation}
+        
+        Considering that the Gaussian models noise, $\bar{x}$ is assumed to be zero, such that inserting the sample variance into the log-likelihood function results in the following log-likelihood with no variance parameter.
+        \begin{equation}
+            \log\mathcal{L}(x)=-\frac{n}{2}\log 2\pi -\frac{n}{2}\log\sum_{i=1}^n x_i^2-\frac{n}{2}\log n-\frac{n}{2}
+            % \frac{1}{2}\sum_i^n \log\left(\frac{2\pi}{n}\sum_i^n \epsilon_i^2\right) + \frac{N}{2}
+        \end{equation}
+        Maximizing this log-likelihood opposed to the original Gaussian log-likelihood ensures that the innovations are optimized towards an optimal $\sigma_\epsilon^2$.
     
 \subsection{Node Batching}
 
-    Node batching is the procedure of selecting a subset of nodes for which to compute the log-likelihood and update the model. Many real-life networks contain thousands if not millions of nodes, such that processing the entire network on a GPU at once is infeasible. However, even for smaller networks it is desirable to perform batching, such that the log-likelihood is computed faster and the time between model updates is reduced. Optimizing with a batch size of one is referred to as stochastic training, where a single sample is randomly selected and used to update the model. Using a very small part of the dataset introduces noise in system, as the difference from batch to batch is much larger. While too much noise slows down the optimization procedure, noise is beneficial in terms of escaping local minima and saddle points. Hence, the optimal batch size is large enough to result in progressive updates, while small enough to update quickly and benefit from the noise on a plateau. The optimum differs for each dataset and should preferably be cross-validated.
+    Node batching is the procedure of selecting a subset of nodes for which to compute the log-likelihood and update the model. Many real-life networks contain thousands if not millions of nodes, such that processing the entire network on a GPU at once is not feasible. However, even for smaller networks it is desirable to perform batching, such that the log-likelihood is computed faster and the time between model updates is reduced. Optimizing with a batch size of one is referred to as stochastic training, where a single sample is randomly selected and used to update the model. Using a very small part of the dataset introduces noise in system, as the difference from batch to batch is much larger. While too much noise slows down the optimization procedure, noise is beneficial in terms of escaping local minima and saddle points. Hence, an optimal batch size is large enough for progressive updates, while small enough to update quickly and benefit from the noise on a plateau. The optimum differs for each dataset and should preferably be cross-validated.
     
     \subsubsection{The Batching Problem}
     
@@ -143,71 +180,6 @@ The models and the MLE framework are implemented in PyTorch, an open-source deep
         The found indices are used to construct the smaller dense submatrix $y$, which is subsequently used to compute the negative log-likelihood loss as normal.
         Instead of constructing a dense matrix, an alternative approach is to construct a sparse matrix, and use the indices as a mask. PyTorch defines an operation \texttt{sparse\_mask} which selects values from a dense matrix based on the indices of a sparse matrix. The result of both approaches are equivalent, however the masking operation does not scale as drastically as the dense matrix multiplication as shown in \Cref{Method/Batch-Slicing-Mask}.
         \xfig{\ximg[width=0.7\textwidth]{Method/Batch-Slicing-Mask}}
-        However, PyTorch has not yet implemented the operation's derivative, such that it cannot currently be used for model optimization. Regardless, doing so would not result in any immediate performance gain, as the batch sizes used in this project is well below a thousand.
-        
-% \subsection{Operation Profiling}
-
-%     The operations are profiled on an RTX-2080 GPU running seven times with 1.000-100.000 loops depending on the run-time of the operation, showing timings as \verb|mean ± std|.
-
-%     \subsubsection{Indexing}
-        
-%         \begin{verbatim}
-% %timeit E[:,idx]
-% %timeit E.index_select(1,LongTensor(idx))
-% %timeit FloatTensor(1,len(idx),2)
-%         \end{verbatim}
-%         \begin{verbatim}
-% 642 µs ± 5.82 µs
-% 72.5 µs ± 987 ns
-% 2.3 µs ± 19.4 ns
-%         \end{verbatim}
+        However, the operation's derivative is not yet implemented in PyTorch, such that it cannot currently be used for model optimization. Regardless, doing so would not result in any immediate performance gain, as the batch sizes used in this project is well below the time complexity trade-off point.
         
         
-%         \begin{verbatim}
-% %timeit E[:,idx].normal_() * E_std
-% %timeit E.index_select(1,LongTensor(idx)).normal_() * E_std
-% %timeit FloatTensor(1,len(idx),2).normal_() * E_std
-% %timeit torch.normal(FloatTensor(1,len(idx),2).fill_(0), \
-%                         E_std.expand((1,len(idx),2)))
-% mean = FloatTensor(1,len(idx),2).fill_(0)
-% std = E_std.expand((1,len(idx),2))
-% %timeit torch.normal(mean, std)
-%         \end{verbatim}
-%         \begin{verbatim}
-% 746 µs ± 11.8 µs
-% 163 µs ± 2.47 µs
-% 108 µs ± 1.39 µs
-% 85.6 µs ± 1.64 µs
-% 27.7 µs ± 490 ns
-%         \end{verbatim}
-        
-    
-% Som jeg forstår på den kode jeg så i forbindelse med vores Skype møde sampler du fra  (prior) fordelingen støjen, i.e.
-
-
-% $e_t\sim N(0,diag(\sigma^2_e))$
-
-% og lærer hvad $\sigma^2_e$ er som del af din inferens.
-
-
-% Dette svarer til i modellen
-
-% $p(A,e|\theta,z)= p(A|\theta,z,e)p(e|\sigma^2_e) $
-% hvor A er dit netværk, theta dine AR parametre, z de latente positioner og e støj innovationerne, at du forsøger at marginalisere e ved at approksimerer denne marginalisering med et enkelt sample fra $p(e|\sigma^2_e)$ , i.e.
-
-
-% $p(A|\theta,z)=\int p(A|\theta,z,e)p(e|\sigma^2_e)  de \approx p(A|\theta,z,e_s)$
-
-% hvor $e_s\sim p(e|\sigma^2_e)$. 
-
-
-
-% Dette er som jeg ser det helt OK, men en anden mulighed var at forsøge at inferere også E, i.e. minimere:
-
-% $-log(p(A,e|\theta,z))=-log( p(A|\theta,z,e)p(e|\sigma^2_e) )=-log( p(A|\theta,z,e))-log(p(e|\sigma^2_e) )$
-
-% Hvor det første led er krydsentropien og det andet led den associerede omkostning ved at skulle tilføje støj. Ved ikke om dette potentielt kan være en fordel i forhold til inferensen. Du kunne overveje at undersøge begge muligheder.
-
-
-
-% Når du prædiktere skal du stadig sample e som du hidtil har gjort fra $p(e|\sigma^2_e)$.

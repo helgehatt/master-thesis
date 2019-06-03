@@ -14,25 +14,25 @@
 
 \NewDocumentCommand{\xfig}{ O{!htb} m }{
     \begin{figure}[#1]
-        #2
+        #2%
     \end{figure}
 }
 
 \NewDocumentCommand{\xtab}{ O{!htb} m }{
     \begin{table}[#1]
-        #2
+        #2%
     \end{table}
 }
 
 \NewDocumentCommand{\xeq}{ m }{
     \begin{eqfloat}
-        #1
+        #1%
     \end{eqfloat}
 }
 
 \NewDocumentCommand{\xwrap}{ O{r} m O{0.5\textwidth} }{
     \begin{wrapfigure}{#1}{#3}
-        #2
+        #2%
     \end{wrapfigure}
 }
 
@@ -62,14 +62,15 @@
 
 % MULTIPLES
 
-\NewDocumentCommand{\xdirow}{ m m }{
-    \begin{minipage}[t]{.475\textwidth}
-        #1
+\NewDocumentCommand{\xdirow}{ O{0.475} m m }{
+    \pgfmathparse{0.95 - #1}
+    \begin{minipage}[t]{#1\textwidth}
+        #2
     \end{minipage}%
     \hfill%
-    \begin{minipage}[t]{.475\textwidth}
-        #2
-    \end{minipage}
+    \begin{minipage}[t]{\pgfmathresult\textwidth}
+        #3
+    \end{minipage}%
 }
 
 \NewDocumentCommand{\xtrirow}{ m m m }{
@@ -83,7 +84,7 @@
     \hfill%
     \begin{minipage}[t]{.3\textwidth}
         #3
-    \end{minipage}
+    \end{minipage}%
 }
 
 \NewDocumentCommand{\xdicol}{ m m }{
@@ -97,7 +98,7 @@
     \vskip\baselineskip
     #2
     \vskip\baselineskip
-    #3
+    #3%
 }
 
 \NewDocumentCommand{\xmatline}{D(){0} O{red!60} m m}{%

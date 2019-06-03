@@ -25,7 +25,7 @@ Network analysis is becoming increasingly important in many fields, including in
 
 \section{Dynamic Models}
 
-    Dynamic networks have complex underlying structures, where entities and relationships appear and disappear over time. To be able to analyze a specific state of a network, a snapshot is created and a static model is developed to capture the inherent structures.
+    Temporal networks have complex underlying structures, where entities and relationships appear and disappear over time. To be able to analyze a specific state of a network, a snapshot is created and a static model is developed to capture the inherent structures.
     Doing so does however leave out all the temporal information, such as how the structures evolve over time.
     
     Instead of analyzing a single snapshot of a network, the thesis is concerned with dynamic models capable of capturing the temporal aspects of a network. This is achieved using an \emph{autoregressive} (AR) model, performing a simple linear regression of previous network states to find a correlation between past and present. More complex models can also be considered, however due to the additional time dimension, complex models quickly become infeasible to apply to large networks.

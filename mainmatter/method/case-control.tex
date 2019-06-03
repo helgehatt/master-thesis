@@ -14,7 +14,7 @@ where
 \begin{equation}
     \setlength{\jot}{0.5\baselineskip}
     \begin{split}
-        \ell_i &\equiv \sum_{i\neq j}\{\sub(\eta)\sub(y)-\log(1+e^{\sub(\eta)})\} = \sub(\ell)(i,1) + \sub(\ell)(i,0)\\
+        \ell_i &\equiv \sum_{i\neq j}\{\sub(y)\sub(\eta)-\log(1+e^{\sub(\eta)})\} = \sub(\ell)(i,1) + \sub(\ell)(i,0)\\
         &= \sum_{i\neq j, \sub(Y)=1} \{\sub(\eta)-\log(1+e^{\sub(\eta)}) \} + \sum_{i\neq j, \sub(Y)=0} \{-\log(1+e^{\sub(\eta)}) \} \\
         % &= \sub(\ell)(i,1) + \sub(\ell)(i,0)
     \end{split}
@@ -44,7 +44,7 @@ where $\sub(N)(i,h)$ is the total number of nodes $j$ with $\sub(D)=h$ and $\sub
 The only remaining task is to determine $\sub(n)(i,h)$ for each value of $h$. 
 This is done by picking a global control-to-case rate $r$ and setting the total control size of each node $\sub(n)(i,h)=r\bar{d}\equiv n_0$, where $\bar{d}$ is the mean degree of the entire network. Having a fixed value of $\sub(n)(i,0)=\sum_{h=1}^M\sub(n)(i,h)$, the number of samples selected in each stratum $\sub(n)(i,h)$ is set to be proportional to the $h$th stratum's contribution to the change in log-likelihood when sampling latent positions.
 
-\citeauthor{raftery2012fast} does so by conducting a pilot MCMC run, where the change in log-likelihood is calculated at each iteration and the values of $\sub(n)(i,h)$ are updated accordingly. Hence, the stratified case-control log-likelihood is computed by summing over $O(n_0)$ terms, which does not grow with the network size $N$. Typically $n_0$ is small compared to $N$, thus resulting in a computational cost reduction from $O(N^2)$ to $O(N)$.
+\citeauthor{raftery2012fast} does so by conducting a pilot MCMC run, where the change in log-likelihood is calculated at each iteration and the values of $\sub(n)(i,h)$ are updated accordingly. Hence, the stratified case-control log-likelihood is computed by summing over $O(n_0)$ terms, which does not grow with the network size $N$. Typically $n_0$ is small compared to $N$, thus resulting in a time complexity reduction from $O(N^2)$ to $O(N)$.
 
 % \begin{equation}\label{eq:case-likelihhod-change}
 %     \def\z{(z_i^{(t)})}

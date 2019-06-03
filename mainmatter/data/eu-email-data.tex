@@ -1,0 +1,13 @@
+\section{EU Email Data}
+
+The EU email network was generated using email data from a large European research institution, containing anonymized information of all incoming and outgoing email between the members. The dataset comprises 986 nodes and 332,334 temporal edges, spanning a total of 803 days. The network is directed, where each edge $(u,v,ts)$ corresponds to person $u$ sending an email to person $v$ at time $ts$. Sending the same email to several people results in separate edges for each recipient. The timestamps $ts$ are in seconds, starting from zero, such that the network's sociomatrix $Y$ is created by aggregating seconds into days. Doing so results in the number of links over time depicted in \Cref{Data/EUEmail/Links}.
+
+\xwrap{\ximg{Data/EUEmail/Links}}
+The last third of the data is incomplete, however 500 time steps are more than enough to perform a temporal analysis. 
+The dataset exhibits a large amount of periodic behavior, which most likely relates to weekdays and weekends, having a lot of activity over five days followed by two days pause. The periods of little or no activity occur with about a one year gap, while a longer period with slowly declining and inclining activity is in between. This change in activity is certainly not coincidental, and probably relates to Christmas and summer vacations.
+
+To limit the amount of time spent on model optimization, the timespan is constrained to 200 time steps, giving rise to the following two segments.
+\xfig{\xdirow
+    {\ximg{Data/EUEmail/Links0-200}}
+    {\ximg{Data/EUEmail/Links200-400}}
+}
