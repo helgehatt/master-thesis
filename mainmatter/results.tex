@@ -1,8 +1,12 @@
 \chapter{Results}\label{ch:Results}
 
-This chapter presents the results of applying the methodology in \Cref{ch:Method} to the datasets described in \Cref{ch:Data}. The synthetic data is considered first, including comparisons of the static latent space model, the diffusion model and autoregressive models of various order. The models are compared in terms of their final AUC scores, as well as the learned latent representation of the underlying network.
+This chapter presents the results of applying the methodology in \Cref{ch:Method} to the datasets described in \Cref{ch:Data}. The synthetic data is considered first, including comparisons of the static latent space model, the diffusion model and autoregressive models of various order. The models are compared in terms of their final AUC scores, as well as the learned latent representation of the underlying network. 
 
-The following abbreviations are used for the different models and loss penalties.
+The two real-life networks considered are directed and aggregated to a daily basis, having an expected seasonality of seven, corresponding to a week. Hence, the datasets are modeled using an AR(7) model, as well as the static latent space model, diffusion model and other orders of autoregression for comparison. The EU email dataset exhibits distinct periodic patterns, making room for long-term prediction. Meanwhile, the UC messaging dataset is quite irregular, such that the effect of diffusion penalties can be more thoroughly analyzed.
+
+The performance of the models are compared for each dataset, computing the receiver operating characteristics (ROC) for each model by combining all targets and predictions in the test set. 
+
+The following abbreviations are used for the different models and diffusion penalties.
 
 \xtab{\xdirow[0.6]
     {\xdicol
@@ -18,18 +22,18 @@ The following abbreviations are used for the different models and loss penalties
 
 \section{Synthetic Data}
 
-The synthetic data is comprised of 30 nodes over 100 time steps is split into a training set of 80 time steps and a test set with the remaining 20. The datasets are undirected and two-dimensional, such that directed models or models of higher dimensions have not been considered for the synthetic data.
+The synthetic data is comprised of 30 nodes over 100 time steps, and is split into a training set of 80 time steps and a test set with the remaining 20. Knowing that the datasets are undirected and two-dimensional, directed models or models of higher dimensions have not been considered. Preferably, the trained model should be able to accurately capture the underlying true model given correct type and order.
 
-% The convergence of the models is depicted for each dataset, showing the average loss per batch, the average training and test AUC scores as well as the model's current AUC scores for each individual time step. 
-% Given the small number of entities in the synthetic datasets, each batch includes all nodes, where each epoch computes the loss of each batch 80 times, once for each time step in the training data. 
+Given the small number of entities in the synthetic datasets, each batch includes all nodes, where each epoch computes the loss of each batch 80 times, once for each time step in the training data. Validation occurs every 10 epochs, computing the AUC scores for each individual time step as well as average training and test AUC.
+The optimization procedure uses an early stopping criteria, where the evaluation metric is the equally weighted sum of average training and test AUC. Termination occurs when the metric has not increased by 0.01 over three validations (30 epochs). In case of the autoregressive models, the training does not stop, by continues to the next optimization block as described in REF.
 
 % The models are trained for a minimum of 200 epochs, using an early stopping criteria to decide when the training has converged. The requirement is an increase in test AUC of 0.001 over 30 epochs, terminating the optimization procedure if this criteria is not met. 
 
 % When the training stops for the first time, the number of time steps to include in a single step of the optimizer increases from 1 to 10, continuing training with accumulated gradients to further improve performance. Since the change in diffusion rate and AR coefficients has an impact on all time steps, optimizing for a single time step can result in a negative impact overall. Hence, accumulating the gradients makes the training more stable, however it also makes the optimizer more prone to end in local minima, and including more than 10 time steps has not proved to benefit performance.
 
-The performance of the models are compared for each dataset, computing the receiver operating characteristics (ROC) on all links for the 20 time steps in the test set.
-
 \subsection{Static Data}
+
+    \Cref{Results/Static/Train/StaticModel-AR(1)-Undirected-NoLoss} depicts the convergence of the static latent space model, showing the average loss per batch, the average training and test AUC scores as well as the model's current AUC scores for each individual time step. The convergence is shown for selected models, especially when comparing autoregressive models of different order or using different cost functions for penalizing diffusion.
 
     \xfig{\xanim{Results/Static/Train/StaticModel-AR(1)-Undirected-NoLoss}}
     
