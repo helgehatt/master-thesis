@@ -84,7 +84,7 @@ Few additions are required to capture the temporal aspect with respect to diffus
     The link probability $\sub(p)^\t$ at time $t$ is calculated as before, however with the latent space at time $t$ modeled as the previous latent space at time $t-1$ with added diffusion, shown in \Cref{eq:dsnl-latent-space}. The diffusion is assumed to follow a Gaussian with zero mean and $\bm{\sigma}_\epsilon^2$ variance. The variance, also known as the diffusion rate, is a $k$-dimensional vector with separate variances for each of the latent dimension.
     
     \begin{equation}\label{eq:dsnl-latent-space}
-        \Z_t = \Z_{t-1} + \bm{\epsilon}_t \qquad\qquad \bm{\epsilon} \sim N(0,\bm{\sigma}_\epsilon^2)
+        \Z_t = \Z_{t-1} + \bm{\epsilon}_t \qquad\qquad \bm{\epsilon} \sim N(\bm{0},\bm{\sigma}_\epsilon^2)
     \end{equation}
     
     The diffusion rate determines how far observations can drift in a single time step, such that a fairly low diffusion rate results in the observations staying more or less in place, while a high diffusion rate makes the observations drift apart, resulting in radical changes to the relationships. With the addition of the diffusion rate, the number of parameters to estimate is increased by $k$, to $N\cdot k + k + 1$. There are different ways of learning the diffusion rate, which is discussed in \Cref{sec:pyimpl-innovations} on implementation details, where some of the methods increases the number of model parameters significantly.
@@ -99,7 +99,7 @@ Few additions are required to capture the temporal aspect with respect to diffus
     \citeauthor{zangenberg2018a} formalizes an autoregressive latent space model in \cite{zangenberg2018a} using the same measure of link probability $\sub(p)^\t$, but considers the change in latent positions $\Z$ to be defined by the AR process in \Cref{eq:ar-model}. Here, $c$ is a constant, $p$ indicates the order of the AR process, $\bm{\phi}$ is the $p\times k$ matrix of AR coefficients weighing the impact of the previous sets of latent positions, and $\bm{\epsilon}_t$ the $k$-dimensional error vector at time $t$ as before. \citeauthor{zangenberg2018a} used $\bm{\phi}$ as a $p$-dimensional vector for simplicity.
     
     \begin{equation}\label{eq:ar-model}
-        \Z_t = c+\sum_{i=1}^p \bm{\phi}_i \Z_{t-i} + \bm{\epsilon}_t \qquad\qquad \bm{\epsilon} \sim N(0,\bm{\sigma}_\epsilon^2)
+        \Z_t = c+\sum_{i=1}^p \bm{\phi}_i \Z_{t-i} + \bm{\epsilon}_t \qquad\qquad \bm{\epsilon} \sim N(\bm{0},\bm{\sigma}_\epsilon^2)
     \end{equation}
     
     A first-order autoregressive process, denoted AR(1) as $p=1$, is a generalization of the previously described diffusion process, using only the most recent value in its prediction. Hence, the AR model is capable of capturing diffusion, while extending to periodic behavior as well for higher-order processes ($p>1$). 

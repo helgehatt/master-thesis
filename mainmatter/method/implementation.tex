@@ -4,17 +4,17 @@ The models and the MLE framework are implemented in PyTorch, an open-source deep
 
 \subsection{Pairwise Distance}
 
-    Calculating link probabilities for a subset of nodes requires the computation of the pairwise distance matrix $D$, where $\sub(d)^2=\Vert z_i-z_j\Vert^2$ is the squared euclidean distance between nodes $i$ and $j$. The squared euclidean distance differs from euclidean distance by omitting the square root for faster clustering. The distance matrix is symmetric for an undirected latent space, while a directed latent space has separate representations for incoming and outgoing edges. In the latter case, $D$ is calculated from the latent space positions $Z_{in}$ and $Z_{out}$ such that $\sub(d)\neq\sub(d)(ji)$.
+    Calculating link probabilities for a subset of nodes requires the computation of the pairwise distance matrix $\D$, where $(\sub(d))^2=\Vert \z_i-\z_j\Vert^2$ is the squared euclidean distance between nodes $i$ and $j$. The squared euclidean distance differs from euclidean distance by omitting the square root for faster clustering. The distance matrix is symmetric for an undirected latent space, while a directed latent space has separate representations for incoming and outgoing edges. In the latter case, $\D$ is calculated from the latent space positions $\Z_{in}$ and $\Z_{out}$ such that $\sub(d)\neq\sub(d)(ji)$.
     
-    Considering two arbitrary matrices $A$ and $B$ of size $N\times k$, the direct approach to computing the distance matrix is by adding extra dimensions such that the size of $A$ is $N\times 1\times k$ and $B$ is $1\times N\times k$. The squared differences between all combinations of rows and columns are then computed simultaneously as $(A-B)^2$, resulting in a $N\times N\times k$ matrix. The final step is to sum over the last dimension, giving rise to the $N\times N$ distance matrix. This approach is efficient for very small matrices, however scales poorly both in terms of memory consumption and time complexity.
+    Considering two arbitrary matrices $\A$ and $\B$ of size $N\times k$, the direct approach to computing the distance matrix is by adding extra dimensions such that the size of $\A$ is $N\times 1\times k$ and $\B$ is $1\times N\times k$. The squared differences between all combinations of rows and columns are then computed simultaneously as $(\A-\B)^2$, resulting in a $N\times N\times k$ matrix. The final step is to sum over the last dimension, giving rise to the $N\times N$ distance matrix. This approach is efficient for very small matrices, however scales poorly both in terms of memory consumption and time complexity.
     
     A less memory intensive approach is to calculate the squared norm of the difference using quadratic expansion, shown in \Cref{eq:pyimpl-dist-quadratic}.
     \begin{equation}\label{eq:pyimpl-dist-quadratic}
-        \sub(d)^2=\Vert z_i-z_j\Vert^2\equiv\Vert z_i\Vert^2 + \Vert z_j\Vert^2 - 2(z_i\cdot z_j)
+        (\sub(d))^2=\Vert \z_i-\z_j\Vert^2\equiv\Vert \z_i\Vert^2 + \Vert \z_j\Vert^2 - 2(\z_i\cdot \z_j)
     \end{equation}
-    The squared norm of a matrix $A$ is computed by squaring all $N\times k$ entries and summing over the last dimension, resulting in a vector of size $N$. Viewing $\Vert A\Vert^2$ as a column vector and $\Vert B\Vert^2$ as a row vector, the full $N\times N$ distance matrix is computed as $\Vert A\Vert^2 + \Vert B\Vert^2 - 2AB^T$. Doing so, the memory consumption is $O(N^2)$ for the final distance matrix (assuming $k\ll N$), down from $O(N^2k)$ for the intermediary results of the direct approach.
+    The squared norm of a matrix $\A$ is computed by squaring all $N\times k$ entries and summing over the last dimension, resulting in a vector of size $N$. Viewing $\Vert \A\Vert^2$ as a column vector and $\Vert \B\Vert^2$ as a row vector, the full $N\times N$ distance matrix is computed as $\Vert \A\Vert^2 + \Vert \B\Vert^2 - 2\A\B^T$. Doing so, the memory consumption is $O(N^2)$ for the final distance matrix (assuming $k\ll N$), down from $O(N^2k)$ for the intermediary results of the direct approach.
     
-    To illustrate the difference in computational complexity between the two methods, \Cref{Method/Pairwise-Distance-N} shows the time it takes to compute the calculations (in µs) as a function of $N$ and as a function of $k$ in \Cref{Method/Pairwise-Distance-k}. The timings are the mean of 7 runs with 100-1000 loops each, carried out on an RTX-2080 GPU. Both the direct approach and the approach utilizing quadratic expansion scale exponentially with $N$, however with a much lower rate in terms of the second. Additionally, the first method scales linearly with $k$, while the second remains constant. Hence, empirical tests show that using quadratic expansion is a much more efficient way of computing the pairwise distances as the number of nodes in a batch and the dimensionality of the latent space increases.
+    To illustrate the difference in computational complexity between the two methods, \Cref{Method/Pairwise-Distance-N} shows the time it takes to compute the calculations (in µs) as a function of $N$ and as a function of $k$ in \Cref{Method/Pairwise-Distance-k}. The timings are the mean of 7 runs with 100-1000 loops each, carried out on an RTX-2080 GPU. Both the direct approach and the approach utilizing quadratic expansion scale exponentially with $N$, however the latter with a much lower rate. Additionally, the first method scales linearly with $k$, while the second remains constant. Hence, empirical tests show that using quadratic expansion is a much more efficient way of computing the pairwise distances as the number of nodes in a batch and the dimensionality of the latent space increases. These findings contradict \citeauthor{jacobsen2018a}'s argument in \cite{jacobsen2018a}, stating that the direct approach is computationally fastest, ``because it allows full GPU parallelism over the entire process of computing the pairwise distance matrix''.
     \xfig{\xdirow
         {\ximg{Method/Pairwise-Distance-N}}
         {\ximg{Method/Pairwise-Distance-k}}
@@ -33,26 +33,26 @@ The models and the MLE framework are implemented in PyTorch, an open-source deep
     
     \subsubsection{Storing Intermediate Positions}
         
-        The most obvious solution is to simply recompute everything for each batch and for each time step. Doing so is however quite redundant considering the autoregressive model has to compute the latent positions for all time steps $0\leq t<T$ before computing the positions at time $T$. Hence, it is tempting to store the computed latent space positions as we iterate through the time steps sequentially. Doing so speeds up the computation significantly, however the parameters are no longer optimized properly. By utilizing these intermediary latent positions, the resulting positions are no longer directly related to the optimizable initial positions, thus making the computation graph incomplete.
+        The most obvious solution is to simply recompute everything for each batch and for each time step. Doing so is however quite redundant considering the autoregressive model has to compute the latent positions for all time steps $0\leq t'<t$ before computing the positions at time $t$. Hence, it is tempting to store the computed latent space positions as we iterate through the time steps sequentially. Doing so speeds up the computation significantly, however the parameters are no longer optimized properly. By utilizing these intermediary latent positions, the resulting positions are no longer directly related to the optimizable initial positions, thus making the computation graph incomplete.
     
     \subsubsection{Pre-computing Latent Spaces}
         
         An alternative is to compute all latent positions for all time steps beforehand, and simply pass the correct latent space representation to the appropriate step of the optimization procedure, thus keeping the computation graph intact. This is possible by specifying that the computation graph should be retained between backward passes. 
-        As a result, the computation graph is still quite large for higher-order autoregressive models, but more importantly, doing so makes the optimizer calculate subsequent costs using positions computed prior to updating the parameters. Making small changes to the AR coefficients ($\phi$) in the autoregressive model has a huge impact on the latent space positions at later time steps, such that the pre-computed latent positions at time $t$ are entirely different from the actual latent positions at time $t$. Hence, there is no obvious way to avoid recomputing the latent positions after each optimization step.
+        As a result, the computation graph is still quite large for higher-order autoregressive models, but more importantly, doing so makes the optimizer calculate subsequent costs using positions computed prior to updating the parameters. Making small changes to the AR coefficients ($\bmphi$) in the autoregressive model has a huge impact on the latent space positions at later time steps, such that the pre-computed latent positions at time $t$ are entirely different from the actual latent positions at time $t$. Hence, there is no obvious way to avoid recomputing the latent positions after each optimization step.
         
     \subsubsection{Direct Computation}
     
         Fortunately, the most time-consuming part of optimizing is not the computation of the positions, but the traversal of the computation graph when calculating the gradients in the backward pass. As a result, the most efficient method of computation is by directly relating the latent positions at time $t$ to the adjustable initial positions. 
-        This is trivial in terms of the static latent space model, where $Z_t=Z_0$, however the diffusion model models the latent positions at time $t$ based on the positions at time $t-1$, namely $Z_t=Z_{t-1}+\epsilon_t$.
+        This is trivial in terms of the static latent space model, where $\Z_t=\Z_0$, however the diffusion model models the latent positions at time $t$ based on the positions at time $t-1$, namely $\Z_t=\Z_{t-1}+\bmepsilon_t$.
         
-        This corresponds to simply adding diffusion $\epsilon_t$ at each time step $t$, such that an equivalent representation is to model the latent positions as $Z_t=Z_0+\sum_{i=1}^t\epsilon_i$. Doing so, the computation graph comprises a constant number of operations opposed to growing linearly with $t$.
-        For the general AR($p$) process on the other hand, where $Z_t=\sum_{i=1}^p \phi_1 Z_{t-i} + \epsilon_t$, there is no obvious way of computing $Z_t$ directly with respect to the initial positions $Z_{0\dots p-1}$. One alternative is to compute the polynomial of $Z_t$, however the number of terms grows exponentially with $t$ for $p>1$. To illustrate, the polynomial for the first three autoregressions of an AR(3) process is shown in \Cref{eq:pyimpl-ar-polynomial}.
+        This corresponds to simply adding diffusion $\bmepsilon_t$ at each time step $t$, such that an equivalent representation is to model the latent positions as $\Z_t=\Z_0+\sum_{i=1}^t\bmepsilon_i$. Doing so, the computation graph comprises a constant number of operations opposed to growing linearly with $t$.
+        For the general AR($p$) process on the other hand, where $\Z_t=\sum_{i=1}^p \bmphi_1 \Z_{t-i} + \bmepsilon_t$, there is no obvious way of computing $\Z_t$ directly with respect to the initial positions $\Z_{0\dots p-1}$. One alternative is to compute the polynomial of $\Z_t$, however the number of terms grows exponentially with $t$ for $p>1$. To illustrate, the polynomial for the first three autoregressions of an AR(3) process is shown in \Cref{eq:pyimpl-ar-polynomial}.
         \begin{equation}\label{eq:pyimpl-ar-polynomial}
         \begin{split}
-            Z_3 &= \phi_1Z_2 + \phi_2Z_1 + \phi_3Z_0 + \epsilon_3 \\
-            Z_4 &= \phi_1^2Z_2 + \phi_1\phi_2Z_1 + \phi_1\phi_3Z_0 + \phi_1\epsilon_3 + \phi_2Z_2 + \phi_3Z_1 + \epsilon_4 \\
-            Z_5 &= \phi_1^3Z_2 + \phi_1^2\phi_2Z_1 + \phi_1^2\phi_3Z_0 + \phi_1^2\epsilon_3 + 2\phi_1\phi_2Z_2 \\
-                &+ \phi_1\phi_3Z_1 + \phi_2^2Z_1 + \phi_2\phi_3Z_0 + \phi_1\epsilon_4 + \phi_2\epsilon_3 + \phi_3Z_2 + \epsilon_5
+            \Z_3 &= \bmphi_1\Z_2 + \bmphi_2\Z_1 + \bmphi_3\Z_0 + \bmepsilon_3 \\
+            \Z_4 &= \bmphi_1^2\Z_2 + \bmphi_1\bmphi_2\Z_1 + \bmphi_1\bmphi_3\Z_0 + \bmphi_1\bmepsilon_3 + \bmphi_2\Z_2 + \bmphi_3\Z_1 + \bmepsilon_4 \\
+            \Z_5 &= \bmphi_1^3\Z_2 + \bmphi_1^2\bmphi_2\Z_1 + \bmphi_1^2\bmphi_3\Z_0 + \bmphi_1^2\bmepsilon_3 + 2\bmphi_1\bmphi_2\Z_2 \\
+                &+ \bmphi_1\bmphi_3\Z_1 + \bmphi_2^2\Z_1 + \bmphi_2\bmphi_3\Z_0 + \bmphi_1\bmepsilon_4 + \bmphi_2\bmepsilon_3 + \bmphi_3\Z_2 + \bmepsilon_5
         \end{split}
         \end{equation}
         Hence, the autoregressions are computed iteratively, with the size of the computation graph growing linearly with $t$.
@@ -73,69 +73,68 @@ The models and the MLE framework are implemented in PyTorch, an open-source deep
 
     In time series analysis, the \emph{innovation} is the difference between the observed value of a variable at time $t$, and the optimal forecast of that value based on information available prior to time $t$. The innovations of a diffusion process or autoregressive process are often referred to as white noise, being a sequence of uncorrelated random variables with zero mean and finite variance. The signal is most often assumed to follow a Gaussian distribution given by
     \begin{equation}
-        f(x\vert\mu,\sigma^2) = \frac{1}{\sqrt{2\pi\sigma^2}}e^{-\frac{(x-\mu)^2}{2\sigma^2}}
+        f(\x\vert\mu,\sigma^2) = \frac{1}{\sqrt{2\pi\sigma^2}}e^{-\frac{(\x-\mu)^2}{2\sigma^2}}
     \end{equation}
     
     Considering the sparsity of real-life networks, another fitting assumption is that the changes are less frequent, but have bigger impact. This relates to whole groups or communities being connected or separated as a result of various events. This is modeled by the Laplace distribution, being shaped as two exponential distributions facing each other, given by
     \begin{equation}
-        f(x\vert\mu,\sigma)=\frac{1}{\sqrt{2}\sigma}e^{-\frac{\sqrt{2}|x-\mu|}{\sigma}}
+        f(\x\vert\mu,\sigma)=\frac{1}{\sqrt{2}\sigma}e^{-\frac{\sqrt{2}|\x-\mu|}{\sigma}}
     \end{equation}
     
     \subsubsection{Sampling Prior Distribution}
     
-        The simple approach to error handling is by sampling the errors from its prior distribution $\bm{\epsilon}_t \sim N(0,\bm{\sigma}_\epsilon^2)$ and learn $\bm{\sigma}_\epsilon^2$ as a part of the maximum likelihood inference.
+        The simple approach to error handling is by sampling the errors from its prior distribution $\bmepsilon_t \sim N(\bm{0},\bmsigma_\epsilon^2)$ and learn $\bmsigma_\epsilon^2$ as a part of the maximum likelihood inference.
         This corresponds to the model
         \begin{equation}
-            P(\Y,\bm{\epsilon}|\Z,\theta) = P(\Y|\Z,\bm{\theta},\bm{\epsilon})P(\bm{\epsilon}|\bm{\sigma}_\epsilon^2)
+            P(\Y_t,\bmepsilon|\Z_t,\theta) = P(\Y_t|\Z_t,\bmtheta,\bmepsilon)P(\bmepsilon|\bmsigma_\epsilon^2)
         \end{equation}
-        with $\Y$ as the network, $\Z$ the latent positions, $\bm{\theta}$ the model parameters (e.g. bias and AR-coefficients) and $\bm{\epsilon}$ the innovations, where $\bm{\epsilon}$ is marginalized by approximating the marginalization with a single sample $\bm{\epsilon}_s \sim P(\epsilon|\sigma_\epsilon^2)$, such that
+        with $\Y$ as the network, $\Z$ the latent positions, $\bmtheta$ the model parameters (e.g. bias and AR-coefficients) and $\bmepsilon$ the innovations, where $\bmepsilon$ is marginalized by approximating the marginalization with a single sample $\bmepsilon_s \sim P(\bmepsilon|\bmsigma_\epsilon^2)$, such that
         \begin{equation}
-            P(\Y|\Z,\bm{\theta}) = \int P(\Y|\Z,\bm{\theta},\bm{\epsilon}) P(\bm{\epsilon}|\bm{\sigma}_\epsilon^2) d\bm{\epsilon} \approx P(\Y|\Z,\bm{\theta},\bm{\epsilon}_s)
+            P(\Y_t|\Z_t,\bmtheta) = \int P(\Y_t|\Z_t,\bmtheta,\bmepsilon) P(\bmepsilon|\bmsigma_\epsilon^2) d\bmepsilon \approx P(\Y_t|\Z_t,\bmtheta,\bmepsilon_s)
         \end{equation}
-        The benefit of this simple approach, is that the number of model parameters is kept to a minimum, estimating only the $k$-dimensional vector of variances $\bm{\sigma}_\epsilon^2$. However, doing so has a huge negative impact, as the sampled innovations $\epsilon_s$ are completely different from epoch to epoch. Hence, the cumulative errors introduce a regularizing effect, making the model incapable of learning the temporal aspect. This issue is visualized in \Cref{Method/Diffusion-Over-Time}, where the drawn sample results in a predicted positions $p_1$ entirely different from the underlying innovation leading to the true position at $t_1$. 
+        The benefit of this simple approach, is that the number of model parameters is kept to a minimum, estimating only the $k$-dimensional vector of variances $\bmsigma_\epsilon^2$. However, doing so has a huge negative impact, as the sampled innovations $\bmepsilon_s$ are completely different from epoch to epoch. Hence, the cumulative errors introduce a regularizing effect, making the model incapable of learning the temporal aspect. This issue is visualized in \Cref{Method/Diffusion-Over-Time}, where the drawn sample results in a predicted positions $p_1$ entirely different from the underlying innovation leading to the true position at $t_1$. 
         \xfig{\ximg{Method/Diffusion-Over-Time}[Example of true and predicted diffusion sampling from the prior distribution]}
         Continuing from $p_1$, predicting $t_2$ is not even possible with the current variance, and as time progresses the difference between predicted and true latent positions will keep increasing.
     
     \subsubsection{Inferring Innovations Directly}
 
-        An alternative approach is to infer the innovations $\bm{\epsilon}$ directly during optimization, such that the model no longer samples blindly, but adjusts the error to better capture the underlying movement. 
-        Doing so, it is important to penalize the addition of noise to prevent overfitting and incentivize the learning of other model parameters. The innovations for test data predictions are still sampled from $P(\epsilon|\sigma_\epsilon^2)$, such that allowing the innovations to fit perfectly to the training data does not generalize well to test data. Hence, a more fitting solution is to minimize the negative log-likelihood loss associated with $\epsilon$. The $n$ sample log-likelihood function for a Gaussian distribution is given by
+        An alternative approach is to infer the innovations $\bmepsilon$ directly during optimization, such that the model no longer samples blindly, but adjusts the error to better capture the underlying movement. 
+        Doing so, it is important to penalize the addition of noise to prevent overfitting and incentivize the learning of other model parameters. The innovations for test data predictions are still sampled from $P(\bmepsilon|\bmsigma_\epsilon^2)$, such that allowing the innovations to fit perfectly to the training data does not generalize well to test data. Hence, a more fitting solution is to minimize the negative log-likelihood loss associated with $\bmepsilon$. The $n$ sample log-likelihood function for a Gaussian distribution is given by
         \begin{equation}\label{error-gaussian-log-loss}
-            \log\mathcal{L}(\mu, \sigma^2\vert x) = -\frac{n}{2}\log2\pi - \frac{n}{2}\log\sigma^2 - \frac{1}{2\sigma^2}\sum_{i=1}^n (x_i - \mu)^2
+            \log\mathcal{L}(\mu, \sigma^2\vert \x) = -\frac{n}{2}\log2\pi - \frac{n}{2}\log\sigma^2 - \frac{1}{2\sigma^2}\sum_{i=1}^n (x_i - \mu)^2
         \end{equation}
         and for a Laplace distribution by
         \begin{equation}\label{error-laplace-log-loss}
-            \log\mathcal{L}(\mu,\sigma\vert x)=-n\log\sqrt{2}\sigma -\frac{\sqrt{2}}{\sigma}\sum_{t=1}^n |x_i-\mu|
+            \log\mathcal{L}(\mu,\sigma\vert \x) = -n\log\sqrt{2}\sigma -\frac{\sqrt{2}} {\sigma} \sum_{t=1}^n |x_i-\mu|
         \end{equation}
     
-        Depending on the assumption of the errors' distribution, the log-likelihood functions can be used to reduce the amount of diffusion added and learn $\bm{\sigma}_\epsilon^2$ as a counterweight to the size of the innovations. The disadvantage of this approach, is that the numbers of parameters to estimate increases by $N\cdot d\cdot k$ for each time step of the optimization procedure.
+        Depending on the assumption of the errors' distribution, the log-likelihood functions can be used to reduce the amount of diffusion added and learn $\bmsigma_\epsilon^2$ as a counterweight to the size of the innovations. The disadvantage of this approach, is that the number of parameters to estimate increases by $N\cdot d\cdot k$ for each time step of the optimization procedure.
         
     \subsubsection{Analytically Optimized Variance}
         
-        Instead of learning $\bm{\sigma}_\epsilon^2$ as a part of the model inference, the variance can be chosen to maximize the log-likelihood function as shown in \cite{haerdle2015statistics}. MLE of $\mu$ and $\sigma^2$ for the Gaussian distribution is achieved by taking the partial derivatives with respect to $\mu$ and $\sigma^2$ and setting the resulting equations equal to zero.
-        
-        \begin{equation}\label{error-mu-partial}
-            \frac{\partial\log\mathcal{L}}{\partial\mu} = -\frac{2}{2\sigma^2}\sum_{i=1}^n(x_i-\hat{\mu})\cdot(-1) = 0
-        \end{equation}
+        Instead of learning $\bmsigma_\epsilon^2$ as a part of the model inference, the variance can be chosen to maximize the log-likelihood function as shown in \cite{haerdle2015statistics}. The MLE of $\sigma^2$ for the Gaussian distribution is found by taking the partial derivative with respect to $\sigma^2$ and setting the resulting equation equal to zero. Considering that the Gaussian models noise, $\mu$ is assumed to be zero, resulting in
+        % \begin{equation}\label{error-mu-partial}
+        %     \frac{\partial\log\mathcal{L}}{\partial\mu} = -\frac{2}{2\sigma^2}\sum_{i=1}^n(x_i-\hat{\mu})\cdot(-1) = 0
+        % \end{equation}
         \begin{equation}\label{error-sigma-partial}
-            \frac{\partial\log\mathcal{L}}{\partial\sigma^2} = -\frac{n}{2}\cdot\frac{1}{\hat{\sigma}^2}+\frac{1}{2}\cdot\frac{1}{\hat{\sigma}^4}\cdot\sum_{i=1}^n(x_i-\mu)^2 = 0
+            \frac{\partial\log\mathcal{L}}{\partial\sigma^2} = -\frac{n}{2} \cdot \frac{1}{\hat{\sigma}^2} + \frac{1}{2} \cdot \frac{1}{\hat{\sigma}^4} \cdot \sum_{i=1}^n x_i^2 = 0
+        \end{equation}
+        % \Cref{error-mu-partial} is solved to produce the ML estimator $\hat{\mu}$ of $\mu$ as follows
+        % \begin{equation}
+        %     \sum_{i=1}^n(x_i-\hat{\mu}) = 0 \equiv \hat{\mu}=\frac{1}{n}\sum_{i=1}^n x_i = \bar{x}
+        % \end{equation}
+        % such that substituting the result in \Cref{error-sigma-partial} allows solving for $\hat{\sigma}^2$
+        which is solved for the sample variance $\hat{\sigma}^2$
+        \begin{equation}
+            \frac{n}{2\hat{\sigma}^2} = \frac{1}{2\hat{\sigma}^4} \sum_{i=1}^n x_i^2 \equiv \hat{\sigma}^2 = \frac{1}{n} \sum_{i=1}^n x_i^2
         \end{equation}
         
-        \Cref{error-mu-partial} is solved to produce the ML estimator $\hat{\mu}$ of $\mu$ as follows
+        Inserting the sample variance into the log-likelihood function results in the following log-likelihood, removing the variance as a model parameter.
         \begin{equation}
-            \sum_{i=1}^n(x_i-\hat{\mu}) = 0 \equiv \hat{\mu}=\frac{1}{n}\sum_{i=1}^n x_i = \bar{x}
-        \end{equation}
-        such that substituting the result in \Cref{error-sigma-partial} allows solving for $\hat{\sigma}^2$
-        \begin{equation}
-            \frac{n}{2\hat{\sigma}^2} = \frac{1}{2\hat{\sigma}^4} = \sum_{i=1}^n (x_i-\bar{x})^2 \equiv \hat{\sigma}^2=\frac{1}{n}\sum_{i=1}^n (x_i-\bar{x})^2
-        \end{equation}
-        
-        Considering that the Gaussian models noise, $\bar{x}$ is assumed to be zero, such that inserting the sample variance into the log-likelihood function results in the following log-likelihood with no variance parameter.
-        \begin{equation}
-            \log\mathcal{L}(x)=-\frac{n}{2}\log 2\pi -\frac{n}{2}\log\sum_{i=1}^n x_i^2-\frac{n}{2}\log n-\frac{n}{2}
+            \log\mathcal{L}(\x)=-\frac{n}{2}\log 2\pi -\frac{n}{2}\log\sum_{i=1}^n x_i^2-\frac{n}{2}\log n-\frac{n}{2}
             % \frac{1}{2}\sum_i^n \log\left(\frac{2\pi}{n}\sum_i^n \epsilon_i^2\right) + \frac{N}{2}
         \end{equation}
-        Maximizing this log-likelihood opposed to the original Gaussian log-likelihood ensures that the innovations are optimized towards an optimal $\sigma_\epsilon^2$.
+        Maximizing this log-likelihood opposed to the original Gaussian log-likelihood ensures that the innovations are optimized towards an optimal $\bmsigma_\epsilon^2$.
     
 \subsection{Node Batching}
 
@@ -145,7 +144,7 @@ The models and the MLE framework are implemented in PyTorch, an open-source deep
     
         There are two key components in a successful batching strategy, namely making sure all pairs of nodes are compared and that the negative log-likelihood loss of looping nodes ($i=j$) is zero. 
         Comparing all pairs of nodes is necessary to learn the whole representation of the underlying network, where $\sub(y)$ is not necessarily equal to $\sub(y)(ji)$ for directed networks. 
-        An entity is never linked to itself, such that the diagonal of the sociomatrix $Y$ is always empty. As previously stated, the link probability $\sub(p)$ is inversely proportional to the distance between two nodes $i$ and $j$. However, when $i=j$, the distance from the node to itself is zero, which should coincide with a high link probability. To remedy this, the loss should be removed when comparing a node with itself.
+        An entity is never linked to itself, such that the diagonal of the sociomatrix $Y_t$ is always empty. As previously stated, the link probability $\sub(p)$ is inversely proportional to the distance between two nodes $i$ and $j$. However, when $i=j$, the distance from the node to itself is zero, which should coincide with a high link probability. To remedy this, the loss should be removed when comparing a node with itself.
         
     \subsubsection{Indexing}
     
