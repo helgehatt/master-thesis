@@ -69,7 +69,7 @@ The models and the MLE framework are implemented in PyTorch, an open-source deep
     
         Even though block optimization is not particularly successful, a similar approach can be used to give the optimizer a warm start, thus drastically reducing the time it takes to converge. Using only a single set of initial positions, the idea is to start by fitting to the first few time steps, and double the number of time steps to optimize until the whole training set is employed. Doing so, a high AUC score is quickly achieved for the first few time steps, and when the number of time steps is extended, the optimizer immediately adjusts the AR-coefficients to ensure a high AUC score for the following time steps as well. As a result, the optimizer is almost fully converged when training on the full dataset.
     
-\subsection{Estimating Innovations}
+\subsection{Estimating Innovations}\label{sec:pyimpl-innovations}
 
     In time series analysis, the \emph{innovation} is the difference between the observed value of a variable at time $t$, and the optimal forecast of that value based on information available prior to time $t$. The innovations of a diffusion process or autoregressive process are often referred to as white noise, being a sequence of uncorrelated random variables with zero mean and finite variance. The signal is most often assumed to follow a Gaussian distribution given by
     \begin{equation}
@@ -83,22 +83,22 @@ The models and the MLE framework are implemented in PyTorch, an open-source deep
     
     \subsubsection{Sampling Prior Distribution}
     
-        The simple approach to error handling is by sampling the errors from its prior distribution $\epsilon_t\sim N(0,\sigma_\epsilon^2)$ and learn $\sigma_\epsilon^2$ as a part of the maximum likelihood inference.
+        The simple approach to error handling is by sampling the errors from its prior distribution $\bm{\epsilon}_t \sim N(0,\bm{\sigma}_\epsilon^2)$ and learn $\bm{\sigma}_\epsilon^2$ as a part of the maximum likelihood inference.
         This corresponds to the model
         \begin{equation}
-            P(Y,\epsilon|Z,\theta) = P(Y|Z,\theta,\epsilon)P(\epsilon|\sigma_\epsilon^2)
+            P(\Y,\bm{\epsilon}|\Z,\theta) = P(\Y|\Z,\bm{\theta},\bm{\epsilon})P(\bm{\epsilon}|\bm{\sigma}_\epsilon^2)
         \end{equation}
-        with $Y$ as the network, $Z$ the latent positions, $\theta$ the model parameters (e.g. bias and AR-coefficients) and $\epsilon$ the innovations, where $\epsilon$ is marginalized by approximating the marginalization with a single sample $\epsilon_s \sim P(\epsilon|\sigma_\epsilon^2)$, such that
+        with $\Y$ as the network, $\Z$ the latent positions, $\bm{\theta}$ the model parameters (e.g. bias and AR-coefficients) and $\bm{\epsilon}$ the innovations, where $\bm{\epsilon}$ is marginalized by approximating the marginalization with a single sample $\bm{\epsilon}_s \sim P(\epsilon|\sigma_\epsilon^2)$, such that
         \begin{equation}
-            P(Y|Z,\theta) = \int P(Y|Z,\theta,\epsilon) P(\epsilon|\sigma_\epsilon^2) d\epsilon \approx P(Y|Z,\theta,\epsilon_s)
+            P(\Y|\Z,\bm{\theta}) = \int P(\Y|\Z,\bm{\theta},\bm{\epsilon}) P(\bm{\epsilon}|\bm{\sigma}_\epsilon^2) d\bm{\epsilon} \approx P(\Y|\Z,\bm{\theta},\bm{\epsilon}_s)
         \end{equation}
-        Doing so does however have a huge negative impact, as the sampled innovations at each time step are completely different from epoch to epoch. Hence, the cumulative errors introduce a regularizing effect, making the model incapable of learning the temporal aspect. This issue is visualized in \Cref{Method/Diffusion-Over-Time}, where the drawn sample results in a predicted positions $p_1$ entirely different from the underlying innovation leading to the true position at $t_1$. 
+        The benefit of this simple approach, is that the number of model parameters is kept to a minimum, estimating only the $k$-dimensional vector of variances $\bm{\sigma}_\epsilon^2$. However, doing so has a huge negative impact, as the sampled innovations $\epsilon_s$ are completely different from epoch to epoch. Hence, the cumulative errors introduce a regularizing effect, making the model incapable of learning the temporal aspect. This issue is visualized in \Cref{Method/Diffusion-Over-Time}, where the drawn sample results in a predicted positions $p_1$ entirely different from the underlying innovation leading to the true position at $t_1$. 
         \xfig{\ximg{Method/Diffusion-Over-Time}[Example of true and predicted diffusion sampling from the prior distribution]}
         Continuing from $p_1$, predicting $t_2$ is not even possible with the current variance, and as time progresses the difference between predicted and true latent positions will keep increasing.
     
     \subsubsection{Inferring Innovations Directly}
 
-        An alternative approach is to infer the innovations $\epsilon$ directly during optimization, such that the model no longer samples blindly, but adjusts the error to better capture the underlying movement. 
+        An alternative approach is to infer the innovations $\bm{\epsilon}$ directly during optimization, such that the model no longer samples blindly, but adjusts the error to better capture the underlying movement. 
         Doing so, it is important to penalize the addition of noise to prevent overfitting and incentivize the learning of other model parameters. The innovations for test data predictions are still sampled from $P(\epsilon|\sigma_\epsilon^2)$, such that allowing the innovations to fit perfectly to the training data does not generalize well to test data. Hence, a more fitting solution is to minimize the negative log-likelihood loss associated with $\epsilon$. The $n$ sample log-likelihood function for a Gaussian distribution is given by
         \begin{equation}\label{error-gaussian-log-loss}
             \log\mathcal{L}(\mu, \sigma^2\vert x) = -\frac{n}{2}\log2\pi - \frac{n}{2}\log\sigma^2 - \frac{1}{2\sigma^2}\sum_{i=1}^n (x_i - \mu)^2
@@ -108,11 +108,11 @@ The models and the MLE framework are implemented in PyTorch, an open-source deep
             \log\mathcal{L}(\mu,\sigma\vert x)=-n\log\sqrt{2}\sigma -\frac{\sqrt{2}}{\sigma}\sum_{t=1}^n |x_i-\mu|
         \end{equation}
     
-        Depending on the assumption of the errors' distribution, the log-likelihood functions can be used to reduce the amount of diffusion added and learn $\sigma_\epsilon^2$ as a counterweight to the size of the innovations.
+        Depending on the assumption of the errors' distribution, the log-likelihood functions can be used to reduce the amount of diffusion added and learn $\bm{\sigma}_\epsilon^2$ as a counterweight to the size of the innovations. The disadvantage of this approach, is that the numbers of parameters to estimate increases by $N\cdot d\cdot k$ for each time step of the optimization procedure.
         
     \subsubsection{Analytically Optimized Variance}
         
-        Instead of learning $\sigma_\epsilon^2$ as a part of the model inference, the variance can be chosen to maximize the log-likelihood function as shown in \cite{haerdle2015statistics}. MLE of $\mu$ and $\sigma^2$ for the Gaussian distribution is achieved by taking the partial derivatives with respect to $\mu$ and $\sigma^2$ and setting the resulting equations equal to zero.
+        Instead of learning $\bm{\sigma}_\epsilon^2$ as a part of the model inference, the variance can be chosen to maximize the log-likelihood function as shown in \cite{haerdle2015statistics}. MLE of $\mu$ and $\sigma^2$ for the Gaussian distribution is achieved by taking the partial derivatives with respect to $\mu$ and $\sigma^2$ and setting the resulting equations equal to zero.
         
         \begin{equation}\label{error-mu-partial}
             \frac{\partial\log\mathcal{L}}{\partial\mu} = -\frac{2}{2\sigma^2}\sum_{i=1}^n(x_i-\hat{\mu})\cdot(-1) = 0
@@ -179,7 +179,8 @@ The models and the MLE framework are implemented in PyTorch, an open-source deep
         
         The found indices are used to construct the smaller dense submatrix $y$, which is subsequently used to compute the negative log-likelihood loss as normal.
         Instead of constructing a dense matrix, an alternative approach is to construct a sparse matrix, and use the indices as a mask. PyTorch defines an operation \texttt{sparse\_mask} which selects values from a dense matrix based on the indices of a sparse matrix. The result of both approaches are equivalent, however the masking operation does not scale as drastically as the dense matrix multiplication as shown in \Cref{Method/Batch-Slicing-Mask}.
-        \xfig{\ximg[width=0.7\textwidth]{Method/Batch-Slicing-Mask}}
+        
+        \xwrap{\ximg[width=0.5\textwidth]{Method/Batch-Slicing-Mask}}
         However, the operation's derivative is not yet implemented in PyTorch, such that it cannot currently be used for model optimization. Regardless, doing so would not result in any immediate performance gain, as the batch sizes used in this project is well below the time complexity trade-off point.
         
         

@@ -1,4 +1,4 @@
-\section{Model Optimization}
+\section{Model Optimization}\label{sec:model-opt}
 
 The latent space positions and model parameters are estimated using maximum likelihood estimation (MLE). The inference for the latent space model introduced by \citeauthor*{hoff2002latent} and for the case-control approximate likelihood by \citeauthor*{raftery2012fast} is based on Markov chain Monte Carlo (MCMC) algorithms, while the dynamic model developed by \citeauthor{sarkar2005dynamic} uses KD-trees as an adaptation of multidimensional scaling. Here, we consider an alternative approach presented by \citeauthor{jacobsen2018a} for static latent space models, adapting the method to account for the temporal aspect. The main advantage is that this approach facilitates the use of GPU computability, allowing for analysis of much larger networks.
 
@@ -38,7 +38,7 @@ The latent space positions and model parameters are estimated using maximum like
         \Delta C \approx -\eta \nabla C \cdot \nabla C = -\eta \Vert\nabla C\Vert^2
     \end{equation}
     
-    This guarantees that $\Delta C \leq 0$ as $\Vert\nabla C\Vert^2 \geq 0$. Hence, $C$ will always decrease, taking steps toward its minimum. 
+    This guarantees that $\Delta C \leq 0$, granted that $\eta$ is sufficiently small, as $\Vert\nabla C\Vert^2 \geq 0$. Hence, $C$ will strive towards a minimum, taking steps in the direction of the steepest descent.
     
     \subsubsection{Learning Rate}
     
@@ -51,7 +51,39 @@ The latent space positions and model parameters are estimated using maximum like
         Note that the landscape defined by the cost function $C$ is usually a lot more rigid, having several minima, maxima, saddle points and plateaus. Hence, finding the global minimum is still a non-trivial task, where several adaptations of the gradient descent have been developed with various extensions to overcome vanishing gradients and local minima issues. 
         \citeauthor{ruder2017overview} provides an overview of gradient descent optimization algorithms in \cite{ruder2017overview}.
         
-        In particular, Adam (Adaptive Moment Estimation) is a state-of-the-art optimizer, including several key additions. As the name suggests, the algorithm computes adaptive learning rates for each parameter. Furthermore, the method stores an exponentially decaying average of past squared gradients, as well as a decaying average of past gradients, similar to momentum.
+        In particular, Adam (Adaptive Moment Estimation) is a state-of-the-art optimizer, including several key additions. The optimizer is thoroughly introduced by \citeauthor{kingma2017adam} in \cite{kingma2017adam}, describing Adam as the result of combining the advantages of AdaGrad and RMSProp. Considering model parameters $W$, cost function $L$ and where $\nabla$ denotes the gradient, AdaGrad's update rule is formalized as follows
+        \begin{equation}
+            W_t = W_{t-1} - \eta \frac{\nabla L_t(W_{t-1})}{\sqrt{\sum_{t'=1}^t\nabla L_{t'}(W_{t'-1})^2}}
+        \end{equation}
+        adapting the learning rate per parameter, such that highly varying parameters are suppressed while enhancing those that are rarely varying. The disadvantage of this optimizer is that recent and old gradients are weighted equally. This is solved with RMSProp, using an exponential moving average of gradients controlled by $\gamma \in [0,1)$, such that the update rule becomes
+        \begin{align}
+            R_t &= \gamma R_{t-1}+(1-\gamma)\nabla L_t(W_{t-1})^2 \\[.5\baselineskip]
+            W_t &= W_{t-1} - \eta \frac{\nabla L_t(W_{t-1})^2}{\sqrt{R_t}}
+        \end{align}
+        emphasizing recent gradients with smaller $\gamma$. The goal of Adam is then to maintain exponential moving averages of the gradient $M$ and its square $R$, updating proportional to $M / \sqrt{R}$. The following algorithm shows exactly how Adam updates its model parameters
+        
+        {\centering
+        \begin{minipage}{.6\textwidth}
+            \begin{algorithm}[H]
+            \caption{Adam}
+            \begin{algorithmic}
+                \STATE $M_0 = 0, R_0 = 0$
+                \FOR{$t=1, ..., T$}
+                    \STATE $M_t = \beta_1 M_{t-1} + (1-\beta_1) \nabla L_t(W_{t-1})$
+                    \STATE $R_t = \beta_2 R_{t-1} + (1-\beta_2) \nabla L_t(W_{t-1})^2$
+                    \STATE $\hat{M}_t = M_t / (1-(\beta_1)^t)$
+                    \STATE $\hat{R}_t = R_t / (1-(\beta_2)^t)$
+                    \STATE $W_t = W_{t-1} - \eta \frac{\hat{M}} {\sqrt{\hat{R}+\varepsilon}}$
+                \ENDFOR
+                \RETURN $W_t$
+            \end{algorithmic}
+            \end{algorithm}
+        \end{minipage}
+        \par}
+        
+        
+        
+        As the name suggests, the algorithm computes adaptive learning rates for each parameter. Furthermore, the method stores an exponentially decaying average of past squared gradients, as well as a decaying average of past gradients, similar to momentum.
         
         Momentum is an analogy from physics, where a ball going downhill accelerates and rolls past flat minima until it is stopped by friction. By using the same concept in gradient descent, the optimizer is less prone to end up in local minima, while the global minimum is presumably too steep for the ball to escape from.
 

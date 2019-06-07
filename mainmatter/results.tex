@@ -1,23 +1,23 @@
 \chapter{Results}\label{ch:Results}
 
-This chapter presents the results of applying the methodology in \Cref{ch:Method} to the datasets described in \Cref{ch:Data}. The synthetic data is considered first, including comparisons of the static latent space model, the diffusion model and autoregressive models of various order. The models are compared in terms of their final AUC scores, as well as the learned latent representation of the underlying network. 
+This chapter presents the results of applying the methodology in \Cref{ch:Method} to the datasets described in \Cref{ch:Data}. The synthetic data is examined first, including comparisons of the static latent space model, the diffusion model and autoregressive models of various order. The models are compared in terms of their final AUC scores, as well as the learned latent representation of the underlying network. 
 
-The two real-life networks considered are directed and aggregated to a daily basis, having an expected seasonality of seven, corresponding to a week. Hence, the datasets are modeled using an AR(7) model, as well as the static latent space model, diffusion model and other orders of autoregression for comparison. The EU email dataset exhibits distinct periodic patterns, making room for long-term prediction. Meanwhile, the UC messaging dataset is quite irregular, such that the effect of diffusion penalties can be more thoroughly analyzed.
+The two real-life networks considered are directed and aggregated to a daily basis, having an expected seasonality of seven, corresponding to a week. Hence, the datasets are modeled using an additional autoregressive model of order 7. The EU email dataset exhibits distinct periodic patterns, which should be relatively easy to predict. Meanwhile, the UC messaging dataset is quite irregular, such that high AUC scores cannot be expected. Regardless, the unusual behavior can be used to more thoroughly analyze the effect of diffusion penalties.
 
-The performance of the models are compared for each dataset, computing the receiver operating characteristics (ROC) for each model by combining all targets and predictions in the test set. 
-
-The following abbreviations are used for the different models and diffusion penalties.
-
+The following abbreviations are used for the different models and diffusion penalties:
 \xtab{\xdirow[0.6]
     {\xdicol
         {\xtex{AbbrvModels}}
-        {}
+        {
+            There is a large number of different models to consider due to the number of ways to combine model types, parameters and diffusion penalties. First of all, there are three different models, where the autoregressive model can have an arbitrary order. Each of these models can either be directed or undirected, and with an arbitrary dimensionality. 
+        }
     }{\xdicol
         {\xtex{AbbrvParams}}
         {\xtex{AbbrvPenalties}}
     }
 }
 
+Furthermore, there are four different approaches to penalizing diffusion, which quickly gives rise to 100+ model variants with only three orders of $p$ and three values for $k$. Hence, testing all combinations is not feasible, and the models used are consciously selected for each dataset.
 
 
 \section{Synthetic Data}
@@ -35,69 +35,70 @@ The optimization procedure uses an early stopping criteria, where the evaluation
 
     \Cref{Results/Static/Train/StaticModel-AR(1)-Undirected-NoLoss} depicts the convergence of the static latent space model, showing the average loss per batch, the average training and test AUC scores as well as the model's current AUC scores for each individual time step. The convergence is shown for selected models, especially when comparing autoregressive models of different order or using different cost functions for penalizing diffusion.
 
-    \xfig{\xanim{Results/Static/Train/StaticModel-AR(1)-Undirected-NoLoss}}
+    \xfig[H]{\xanim{Results/Static/Train/StaticModel-AR(1)-Undirected-NoLoss}}
     
-    \xfig{\xtricol
-        {\xdirow
-            {\ximg{Results/Static/Proba/StaticModel-AR(1)-Undirected-True}[True]}
-            {\ximg{Results/Static/Proba/StaticModel-AR(1)-Undirected-NoLoss}[LSM | NL]}
-        }{\xdirow
-            {\xanim{Results/Static/Proba/DiffusionModel-AR(1)-Undirected-NoLoss}[DFM | NL]}
-            {\xanim{Results/Static/Proba/AutoregressiveModel-AR(1)-Undirected-NoLoss}[AR(1) | NL]}
-        }{\xdirow
-            {\xanim{Results/Static/Proba/AutoregressiveModel-AR(2)-Undirected-NoLoss}[AR(2) | NL]}
-            {\xanim{Results/Static/Proba/AutoregressiveModel-AR(3)-Undirected-NoLoss}[AR(3) | NL]}
+    
+    % \xvfill{
+        \xfig[H]{\xtricol
+            {\xdirow
+                {\ximg{Results/Static/Proba/StaticModel-AR(1)-Undirected-True}[True]}
+                {\ximg{Results/Static/Proba/StaticModel-AR(1)-Undirected-NoLoss}[LSM | U | K(2) | NL]}
+            }{\xdirow
+                {\xanim{Results/Static/Proba/DiffusionModel-AR(1)-Undirected-NoLoss}[DFM | U | K(2) | NL]}
+                {\xanim{Results/Static/Proba/AutoregressiveModel-AR(1)-Undirected-NoLoss}[AR(1) | U | K(2) | NL]}
+            }{\xdirow
+                {\xanim{Results/Static/Proba/AutoregressiveModel-AR(2)-Undirected-NoLoss}[AR(2) | U | K(2) | NL]}
+                {\xanim{Results/Static/Proba/AutoregressiveModel-AR(3)-Undirected-NoLoss}[AR(3) | U | K(2) | NL]}
+            }
         }
-    }
+    % }
 
-    \xfig{\ximg[width=0.8\textwidth]{Results/Static/AUC-NoLoss}}
+    \xfig[H]{\ximg[width=0.8\textwidth]{Results/Static/AUC-Undirected-NL}[Test | U | K(2) | NL]}
 
 \subsection{Dynamic Data}
     
-    \xfig{\xtricol
+    \xfig[H]{\xtricol
         {\xdirow
-            {\xanim{Results/Dynamic/Train/DiffusionModel-AR(1)-Undirected-NoLoss}[DFM | NL]}
-            {\xanim{Results/Dynamic/Space/DiffusionModel-AR(1)-Undirected-NoLoss}[DFM | NL]}
+            {\xanim{Results/Dynamic/Train/DiffusionModel-AR(1)-Undirected-NoLoss}[DFM | U | K(2) | NL]}
+            {\xanim{Results/Dynamic/Space/DiffusionModel-AR(1)-Undirected-NoLoss}[DFM | U | K(2) | NL]}
         }{\xdirow
-            {\xanim{Results/Dynamic/Train/DiffusionModel-AR(1)-Undirected-GaussianLoss}[DFM | GL]}
-            {\xanim{Results/Dynamic/Space/DiffusionModel-AR(1)-Undirected-GaussianLoss}[DFM | GL]}
+            {\xanim{Results/Dynamic/Train/DiffusionModel-AR(1)-Undirected-GaussianLoss}[DFM | U | K(2) | GL]}
+            {\xanim{Results/Dynamic/Space/DiffusionModel-AR(1)-Undirected-GaussianLoss}[DFM | U | K(2) | GL]}
         }{\xdirow
-            {\xanim{Results/Dynamic/Train/DiffusionModel-AR(1)-Undirected-GaussianLossNoVar}[DFM | GNV]}
-            {\xanim{Results/Dynamic/Space/DiffusionModel-AR(1)-Undirected-GaussianLossNoVar}[DFM | GNV]}
+            {\xanim{Results/Dynamic/Train/DiffusionModel-AR(1)-Undirected-GaussianLossNoVar}[DFM | U | K(2) | GNV]}
+            {\xanim{Results/Dynamic/Space/DiffusionModel-AR(1)-Undirected-GaussianLossNoVar}[DFM | U | K(2) | GNV]}
         }
     }
     
-    \xfig{\xtricol
+    \xfig[H]{\xtricol
         {\xdirow
             {\xanim{Results/Dynamic/Proba/DiffusionModel-AR(1)-Undirected-True}[True]}
-            {\ximg {Results/Dynamic/Proba/StaticModel-AR(1)-Undirected-NoLoss}[LSM | NL]}
+            {\ximg {Results/Dynamic/Proba/StaticModel-AR(1)-Undirected-NoLoss}[LSM | U | K(2) | NL]}
         }{\xdirow
-            {\xanim{Results/Dynamic/Proba/DiffusionModel-AR(1)-Undirected-GaussianLossNoVar}[DFM | GNV]}
-            {\xanim|6|{Results/Dynamic/Proba/AutoregressiveModel-AR(1)-Undirected-GaussianLossNoVar}[AR(1) | GNV]}
+            {\xanim{Results/Dynamic/Proba/DiffusionModel-AR(1)-Undirected-GaussianLossNoVar}[DFM | U | K(2) | GNV]}
+            {\xanim|6|{Results/Dynamic/Proba/AutoregressiveModel-AR(1)-Undirected-GaussianLossNoVar}[AR(1) | U | K(2) | GNV]}
         }{\xdirow
-            {\xanim|6|{Results/Dynamic/Proba/AutoregressiveModel-AR(2)-Undirected-GaussianLossNoVar}[AR(2) | GNV]}
-            {\xanim|6|{Results/Dynamic/Proba/AutoregressiveModel-AR(3)-Undirected-GaussianLossNoVar}[AR(3) | GNV]}
+            {\xanim|6|{Results/Dynamic/Proba/AutoregressiveModel-AR(2)-Undirected-GaussianLossNoVar}[AR(2) | U | K(2) | GNV]}
+            {\xanim|6|{Results/Dynamic/Proba/AutoregressiveModel-AR(3)-Undirected-GaussianLossNoVar}[AR(3) | U | K(2) | GNV]}
         }
     }
     
-    \xfig{\ximg[width=0.8\textwidth]{Results/Dynamic/AUC-GaussianLossNoVar}}
+    \xfig[H]{\ximg[width=0.8\textwidth]{Results/Dynamic/AUC-Undirected-GNV}[Test | U | K(2) | GNV]}
 
 \subsection{Periodic Data}
     
-    \xfig{\xtricol
+    \xfig[H]{\xtricol
         {\xdirow
-            {\xanim{Results/Periodic/Train/AutoregressiveModel-AR(3)-Undirected-NoLoss}[AR(3) | NL]}
-            {\xanim{Results/Periodic/Space/AutoregressiveModel-AR(3)-Undirected-NoLoss}[AR(3) | NL]}
+            {\xanim{Results/Periodic/Train/AutoregressiveModel-AR(3)-Undirected-NoLoss}[AR(3) | U | K(2) | NL]}
+            {\xanim|3|{Results/Periodic/Space/AutoregressiveModel-AR(3)-Undirected-NoLoss}[AR(3) | U | K(2) | NL]}
         }{\xdirow
-            {\xanim{Results/Periodic/Train/AutoregressiveModel-AR(3)-Undirected-GaussianLoss}[AR(3) | GL]}
-            {\xanim{Results/Periodic/Space/AutoregressiveModel-AR(3)-Undirected-GaussianLoss}[AR(3) | GL]}
+            {\xanim{Results/Periodic/Train/AutoregressiveModel-AR(3)-Undirected-GaussianLoss}[AR(3) | U | K(2) | GL]}
+            {\xanim|3|{Results/Periodic/Space/AutoregressiveModel-AR(3)-Undirected-GaussianLoss}[AR(3) | U | K(2) | GL]}
         }{\xdirow
-            {\xanim{Results/Periodic/Train/AutoregressiveModel-AR(3)-Undirected-GaussianLossNoVar}[AR(3) | GNV]}
-            {\xanim{Results/Periodic/Space/AutoregressiveModel-AR(3)-Undirected-GaussianLossNoVar}[AR(3) | GNV]}
+            {\xanim{Results/Periodic/Train/AutoregressiveModel-AR(3)-Undirected-GaussianLossNoVar}[AR(3) | U | K(2) | GNV]}
+            {\xanim|3|{Results/Periodic/Space/AutoregressiveModel-AR(3)-Undirected-GaussianLossNoVar}[AR(3) | U | K(2) | GNV]}
         }
     }
-
-    
 
     % \begin{figure}[!htb]
     %     \floatname{animation}{A}
@@ -129,17 +130,157 @@ The optimization procedure uses an early stopping criteria, where the evaluation
     %         }
     % \end{figure}
     
-    \xfig{\xtricol
+    \xfig[H]{\xtricol
         {\xdirow
             {\xanim|6|{Results/Periodic/Proba/AutoregressiveModel-AR(3)-Undirected-True}[True]}
-            {\ximg{Results/Periodic/Proba/StaticModel-AR(1)-Undirected-NoLoss}[LSM | NL]}
+            {\ximg{Results/Periodic/Proba/StaticModel-AR(1)-Undirected-NoLoss}[LSM | U | K(2) | NL]}
         }{\xdirow
-            {\xanim|6|{Results/Periodic/Proba/DiffusionModel-AR(1)-Undirected-GaussianLoss}[DFM | GL]}
-            {\xanim|6|{Results/Periodic/Proba/AutoregressiveModel-AR(1)-Undirected-GaussianLoss}[AR(1) | GL]}
+            {\xanim|6|{Results/Periodic/Proba/DiffusionModel-AR(1)-Undirected-GaussianLoss}[DFM | U | K(2) | GL]}
+            {\xanim|6|{Results/Periodic/Proba/AutoregressiveModel-AR(1)-Undirected-GaussianLoss}[AR(1) | U | K(2) | GL]}
         }{\xdirow
-            {\xanim|6|{Results/Periodic/Proba/AutoregressiveModel-AR(2)-Undirected-GaussianLoss}[AR(2) | GL]}
-            {\xanim|6|{Results/Periodic/Proba/AutoregressiveModel-AR(3)-Undirected-GaussianLoss}[AR(3) | GL]}
+            {\xanim|6|{Results/Periodic/Proba/AutoregressiveModel-AR(2)-Undirected-GaussianLoss}[AR(2) | U | K(2) | GL]}
+            {\xanim|3|{Results/Periodic/Proba/AutoregressiveModel-AR(3)-Undirected-GaussianLoss}[AR(3) | U | K(2) | GL]}
         }
     }
     
-    \xfig{\ximg[width=0.8\textwidth]{Results/Periodic/AUC-GaussianLoss}}
+    \xfig[H]{\ximg[width=0.8\textwidth]{Results/Periodic/AUC-Undirected-GL}[Test | U | K(2) | GL]}
+    
+\section{EU Email Data}
+
+    The email dataset is divided into two segments, spanning the first 200 time steps and the subsequent 200 time steps.
+    
+    The edges (links) between nodes are depicted only for link probabilities higher than 1\% in terms of two-dimensional latent positions and 2.5\% for three dimensions to reduce clutter in the animations. As before, a higher link probability results in a darker edge, being able to get a sense of distances between nodes in three-dimensional plots as well.
+
+    \subsection{Undirected}
+    
+        \xfig[H]{\xdicol
+            {\xdirow
+                {\ximg{Results/EUEmail0-200/Proba/StaticModel-AR(1)-Undirected-K(2)-NL}[LSM | U | K(2) | NL]}
+                {\ximg{Results/EUEmail0-200/Proba/StaticModel-AR(1)-Undirected-K(3)-NL}[LSM | U | K(3) | NL]}
+            }{\xdirow
+                {\xanim|9|{Results/EUEmail0-200/Proba/DiffusionModel-AR(1)-Undirected-K(2)-GL-1}[DFM | U | K(2) | GL]}
+                {\xanim|9|{Results/EUEmail0-200/Proba/DiffusionModel-AR(1)-Undirected-K(3)-GL-1}[DFM | U | K(3) | GL]}
+            }
+        }
+    
+        \xfig[H]{\xtricol
+            {\xdirow
+                {\xanim|9|{Results/EUEmail0-200/Proba/AutoregressiveModel-AR(1)-Undirected-K(2)-GL-1}[AR(1) | U | K(2) | GL]}
+                {\xanim|9|{Results/EUEmail0-200/Proba/AutoregressiveModel-AR(1)-Undirected-K(3)-GL-1}[AR(1) | U | K(3) | GL]}
+            }{\xdirow
+                {\xanim|9|{Results/EUEmail0-200/Proba/AutoregressiveModel-AR(3)-Undirected-K(2)-GL-1}[AR(3) | U | K(2) | GL]}
+                {\xanim|9|{Results/EUEmail0-200/Proba/AutoregressiveModel-AR(3)-Undirected-K(3)-GL-1}[AR(3) | U | K(3) | GL]}
+            }{\xdirow
+                {\xanim|9|{Results/EUEmail0-200/Proba/AutoregressiveModel-AR(7)-Undirected-K(2)-GL-1}[AR(7) | U | K(2) | GL]}
+                {\xanim|9|{Results/EUEmail0-200/Proba/AutoregressiveModel-AR(7)-Undirected-K(3)-GL-1}[AR(7) | U | K(3) | GL]}
+            }
+        }
+    
+    \subsection{Directed}
+    
+        \xfig[H]{\xdicol
+            {\xdirow
+                {\ximg{Results/EUEmail0-200/Proba/StaticModel-AR(1)-Directed-K(2)-NL}[LSM | D | K(2) | NL]}
+                {\ximg{Results/EUEmail0-200/Proba/StaticModel-AR(1)-Directed-K(3)-NL}[LSM | D | K(3) | NL]}
+            }{\xdirow
+                {\xanim|6|{Results/EUEmail0-200/Proba/DiffusionModel-AR(1)-Directed-K(2)-GL-1}[DFM | D | K(2) | GL]}
+                {\xanim|6|{Results/EUEmail0-200/Proba/DiffusionModel-AR(1)-Directed-K(3)-GL-1}[DFM | D | K(3) | GL]}
+            }
+        }
+    
+        \xfig[H]{\xtricol
+            {\xdirow
+                {\xanim|6|{Results/EUEmail0-200/Proba/AutoregressiveModel-AR(1)-Directed-K(2)-GL-1}[AR(1) | D | K(2) | GL]}
+                {\xanim|6|{Results/EUEmail0-200/Proba/AutoregressiveModel-AR(1)-Directed-K(3)-GL-1}[AR(1) | D | K(3) | GL]}
+            }{\xdirow
+                {\xanim|6|{Results/EUEmail0-200/Proba/AutoregressiveModel-AR(3)-Directed-K(2)-GL-1}[AR(3) | D | K(2) | GL]}
+                {\xanim|6|{Results/EUEmail0-200/Proba/AutoregressiveModel-AR(3)-Directed-K(3)-GL-1}[AR(3) | D | K(3) | GL]}
+            }{\xdirow
+                {\xanim|6|{Results/EUEmail0-200/Proba/AutoregressiveModel-AR(7)-Directed-K(2)-GL-1}[AR(7) | D | K(2) | GL]}
+                {\xanim|6|{Results/EUEmail0-200/Proba/AutoregressiveModel-AR(7)-Directed-K(3)-GL-1}[AR(7) | D | K(3) | GL]}
+            }
+        }
+    
+    \subsection{Comparison}
+        
+        \xfig[H]{\xtricol
+            {\xdirow
+                {\ximg{Results/EUEmail0-200/AUC-Undirected-K(2)-GL}[Test | U | K(2) | GL]}
+                {\ximg{Results/EUEmail0-200/AUC-Directed-K(2)-GL}[Test | D | K(2) | GL]}
+            }{\xdirow
+                {\ximg{Results/EUEmail0-200/AUC-Undirected-K(3)-GL}[Test | U | K(3) | GL]}
+                {\ximg{Results/EUEmail0-200/AUC-Directed-K(3)-GL}[Test | D | K(3) | GL]}
+            }{\xdirow
+                {\ximg{Results/EUEmail0-200/AUC-Undirected-K(10)-GL}[Test | U | K(10) | GL]}
+                {\ximg{Results/EUEmail0-200/AUC-Directed-K(10)-GL}[Test | D | K(10) | GL]}
+            }
+        }
+        
+        \xfig[H]{\xtricol
+            {\xdirow
+                {\ximg{Results/EUEmail0-200/AUC-Directed-K(2)-LL}[Test | D | K(2) | LL]}
+                {\ximg{Results/EUEmail0-200/AUC-Directed-K(2)-GNV}[Test | D | K(2) | GNV]}
+            }{\xdirow
+                {\ximg{Results/EUEmail0-200/AUC-Directed-K(3)-LL}[Test | D | K(3) | LL]}
+                {\ximg{Results/EUEmail0-200/AUC-Directed-K(3)-GNV}[Test | D | K(3) | GNV]}
+            }{\xdirow
+                {\ximg{Results/EUEmail0-200/AUC-Directed-K(10)-LL}[Test | D | K(10) | LL]}
+                {\ximg{Results/EUEmail0-200/AUC-Directed-K(10)-GNV}[Test | D | K(10) | GNV]}
+            }
+        }
+    
+    % \subsection{EU Email 200-400}
+    
+    %     \xfig[H]{\xdicol
+    %         {\xdirow
+    %             {\ximg{Results/EUEmail200-400/Proba/StaticModel-AR(1)-Directed-K(2)-NL}[LSM | K(2) | NL]}
+    %             {\ximg{Results/EUEmail200-400/Proba/StaticModel-AR(1)-Directed-K(3)-NL}[LSM | K(3) | NL]}
+    %         }{\xdirow
+    %             {\xanim|6|{Results/EUEmail200-400/Proba/DiffusionModel-AR(1)-Directed-K(2)-GL-1}[DFM | K(2) | GL]}
+    %             {\xanim|6|{Results/EUEmail200-400/Proba/DiffusionModel-AR(1)-Directed-K(3)-GL-1}[DFM | K(3) | GL]}
+    %         }
+    %     }
+    
+    %     \xfig[H]{\xtricol
+    %         {\xdirow
+    %             {\xanim|6|{Results/EUEmail200-400/Proba/AutoregressiveModel-AR(1)-Directed-K(2)-GL-1}[AR(1) | K(2) | GL]}
+    %             {\xanim|6|{Results/EUEmail200-400/Proba/AutoregressiveModel-AR(1)-Directed-K(3)-GL-1}[AR(1) | K(3) | GL]}
+    %         }{\xdirow
+    %             {\xanim|6|{Results/EUEmail200-400/Proba/AutoregressiveModel-AR(3)-Directed-K(2)-GL-1}[AR(3) | K(2) | GL]}
+    %             {\xanim|6|{Results/EUEmail200-400/Proba/AutoregressiveModel-AR(3)-Directed-K(3)-GL-1}[AR(3) | K(3) | GL]}
+    %         }{\xdirow
+    %             {\xanim|6|{Results/EUEmail200-400/Proba/AutoregressiveModel-AR(7)-Directed-K(2)-GL-1}[AR(7) | K(2) | GL]}
+    %             {\xanim|6|{Results/EUEmail200-400/Proba/AutoregressiveModel-AR(7)-Directed-K(3)-GL-1}[AR(7) | K(3) | GL]}
+    %         }
+    %     }
+        
+    %     \xfig[H]{\xtricol
+    %         {\ximg[width=0.6\textwidth]{Results/EUEmail200-400/AUC-Directed-K(2)-GL}[K(2) | GL | Test]}
+    %         {\ximg[width=0.6\textwidth]{Results/EUEmail200-400/AUC-Directed-K(3)-GL}[K(3) | GL | Test]}
+    %         {\ximg[width=0.6\textwidth]{Results/EUEmail200-400/AUC-Directed-K(10)-GL}[K(10) | GL | Test]}
+    %     }
+    
+\section{UC Messaging Data}
+
+\xfig[H]{
+    \xdicol{
+        % \xdicol
+        % {\xdirow
+            % {\ximg{Results/UCMessaging/AUC-Directed-K(10)-NL-Train}[K(10) | NL | Train]}
+            % {\ximg{Results/UCMessaging/AUC-Directed-K(10)-NL}[K(10) | NL | Test]}
+        % }{
+        \xdirow
+            {\ximg{Results/UCMessaging/AUC-Directed-K(10)-GL-Train}[K(10) | GL | Train]}
+            {\ximg{Results/UCMessaging/AUC-Directed-K(10)-GL}[K(10) | GL | Test]}
+        % }%
+    }{%
+        \xdicol
+        {\xdirow
+            {\ximg{Results/UCMessaging/AUC-Directed-K(10)-LL-Train}[K(10) | LL | Train]}
+            {\ximg{Results/UCMessaging/AUC-Directed-K(10)-LL}[K(10) | LL | Test]}
+        }{\xdirow
+            {\ximg{Results/UCMessaging/AUC-Directed-K(10)-GNV-Train}[K(10) | GNV | Train]}
+            {\ximg{Results/UCMessaging/AUC-Directed-K(10)-GNV}[K(10) | GNV | Test]}
+        }%
+    }%
+}%
