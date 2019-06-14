@@ -14,29 +14,29 @@
 
 \NewDocumentCommand{\xfig}{ O{!htb} m }{
     \begin{figure}[#1]
-        #2%
+        #2
     \end{figure}
 }
 
 \NewDocumentCommand{\xtab}{ O{!htb} m }{
     \begin{table}[#1]
-        #2%
+        #2
     \end{table}
 }
 
-\NewDocumentCommand{\xeq}{ m }{
-    \begin{eqfloat}
-        #1%
+\NewDocumentCommand{\xeq}{ O{!htb} m }{
+    \begin{eqfloat}[#1]
+        #2
     \end{eqfloat}
 }
 
-\NewDocumentCommand{\xwrap}{ O{r} m O{0.5\textwidth} }{
-    \begin{wrapfigure}{#1}{#3}
+\NewDocumentCommand{\xwrap}{ O{figure} O{r} m O{0.5\textwidth} }{
+    \begin{wrapfloat}{#1}{#2}{#4}
         \renewcommand{\figurename}{Fig}
         \vspace{-\baselineskip}
-        #2%
-        \vspace{-\baselineskip}
-    \end{wrapfigure}
+        #3
+        % \vspace{-\baselineskip}
+    \end{wrapfloat}
 }
 
 \NewDocumentCommand{\xvfill}{ m }{
@@ -68,46 +68,35 @@
 
 % MULTIPLES
 
-\NewDocumentCommand{\xdirow}{ O{0.475} m m }{
+\NewDocumentCommand{\xdouble}{ O{0.475} m m }{
     \renewcommand{\figurename}{Fig}
     \floatname{animation}{Anim}
-    \pgfmathparse{0.95 - #1}
     \begin{minipage}[t]{#1\textwidth}
-        #2%
-    \end{minipage}%
-    \hfill%
-    \begin{minipage}[t]{\pgfmathresult\textwidth}
-        #3%
-    \end{minipage}%
-}
-
-\NewDocumentCommand{\xtrirow}{ m m m }{
-    \begin{minipage}[t]{.3\textwidth}
-        #1
-    \end{minipage}
-    \hfill
-    \begin{minipage}[t]{.3\textwidth}
         #2
     \end{minipage}
     \hfill
-    \begin{minipage}[t]{.3\textwidth}
+    \pgfmathparse{0.95 - #1}
+    \begin{minipage}[t]{\pgfmathresult\textwidth}
         #3
     \end{minipage}
 }
 
-\NewDocumentCommand{\xdicol}{ m m }{
-    #1%
-    \vskip\baselineskip%
-    #2%
+\NewDocumentCommand{\xtriple}{ O{0.3} O{0.3} m m m }{
+    \begin{minipage}[t]{#1\textwidth}
+        #1
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{#2\textwidth}
+        #2
+    \end{minipage}
+    \hfill
+    \pgfmathparse{0.9 - #1 - #2}
+    \begin{minipage}[t]{\pgfmathresult\textwidth}
+        #3
+    \end{minipage}
 }
 
-\NewDocumentCommand{\xtricol}{ m m m }{
-    #1
-    \vskip\baselineskip
-    #2
-    \vskip\baselineskip
-    #3%
-}
+% DRAWING
 
 \NewDocumentCommand{\xmatline}{D(){0} O{red!60} m m}{%
     \draw[line width=1bp, color=#2] ($(#3.north west)+(-#1mm,0mm)$) rectangle ($(#4.south east)+(#1mm,0mm)$);

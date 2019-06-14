@@ -40,13 +40,13 @@ The latent space positions and model parameters are estimated using maximum like
     
     This guarantees that $\Delta C \leq 0$, granted that $\eta$ is sufficiently small, as $\Vert\nabla C\Vert^2 \geq 0$. Hence, $C$ will strive towards a minimum, taking steps in the direction of the steepest descent.
     
-    \subsubsection{Learning Rate}
+    \subsection{Learning Rate}
     
         The learning rate $\eta$ controls how big steps the optimizer takes down the slope, where a too large step may result in moving past the minimum. On the contrary, a too small step size makes $\Delta C$ so tiny that the optimization algorithm barely makes progress. There are several techniques to facilitate the convergence of optimizers, including separate learning rates for different parameters and adaptive learning rates.
         
         Using an adaptive learning rate can be highly beneficial, starting with a large step size to quickly approach a solution, and then slowly decay to fine tune the parameters. Other uses involve schedules, adjusting $\eta$ when reaching a specific evaluation score, or when the optimizer has reached a plateau.
     
-    \subsubsection{Optimizers}
+    \subsection{Optimizers}
     
         Note that the landscape defined by the cost function $C$ is usually a lot more rigid, having several minima, maxima, saddle points and plateaus. Hence, finding the global minimum is still a non-trivial task, where several adaptations of the gradient descent have been developed with various extensions to overcome vanishing gradients and local minima issues. 
         \citeauthor{ruder2017overview} provides an overview of gradient descent optimization algorithms in \cite{ruder2017overview}.
@@ -61,12 +61,10 @@ The latent space positions and model parameters are estimated using maximum like
             W_t &= W_{t-1} - \eta \frac{\nabla L_t(W_{t-1})^2}{\sqrt{R_t}}
         \end{align}
         emphasizing recent gradients with smaller $\gamma$. The goal of Adam is then to maintain exponential moving averages of the gradient $M$ and its square $R$, updating proportional to $M / \sqrt{R}$. The following algorithm shows exactly how Adam updates its model parameters
-        
-        {\centering
+        {\par\vspace{-\baselineskip}\centering
         \begin{minipage}{.6\textwidth}
             \begin{algorithm}[H]
             \caption{Adam}
-            \label{alg:mopt-adam}
             \begin{algorithmic}[1]
                 \STATE $M_0 = \bm{0}, R_0 = \bm{0}$
                 \FOR{$t=1, ..., T$}
@@ -74,7 +72,7 @@ The latent space positions and model parameters are estimated using maximum like
                     \STATE $R_t = \beta_2 R_{t-1} + (1-\beta_2) \nabla L_t(W_{t-1})^2$
                     \STATE $\hat{M}_t = M_t / (1-(\beta_1)^t)$
                     \STATE $\hat{R}_t = R_t / (1-(\beta_2)^t)$
-                    \STATE $W_t = W_{t-1} - \eta \hat{M} / \sqrt{\hat{R}+\varepsilon}$
+                    \STATE $W_t = W_{t-1} - \eta \hat{M} \Big/ \sqrt{\hat{R}+\varepsilon}$
                 \ENDFOR
                 \RETURN $W_t$
             \end{algorithmic}
@@ -95,7 +93,7 @@ The latent space positions and model parameters are estimated using maximum like
         
         Momentum is an analogy from physics, where a ball going downhill accelerates and rolls past flat minima until it is stopped by friction. By using the same concept in gradient descent, the optimizer is less prone to end up in local minima, while the global minimum is presumably too steep for the ball to escape from.
 
-    \subsubsection{Cost Functions}
+    \subsection{Cost Functions}
     
         There are several popular cost functions (also referred to as objective functions or loss functions), and which function to use often depends on the problem the optimizer is attempting to solve. 
         In terms of a linear regression problem, the goal involve finding a linear mapping between input and output, such that the cost (or loss) should be minimum for the line of best fit. Hence, an appropriate cost function penalizes the difference between the target output $\bm{y}$ and the predicted output $\bm{\hat{y}}$ given by the line. 
@@ -112,16 +110,16 @@ The latent space positions and model parameters are estimated using maximum like
         \end{equation}
         The first term $\sub(y)\log(\sub(p))$ penalizes a low probability $\sub(p)$ when the target $\sub(y)$ is 1, while the second term penalizes a high probability when the target is 0. As a result, the cost function facilitates class separation when minimized by an optimizer.
         
-        Considering that $\sub(p)=\sigma(\sub(\eta))$, where $\sigma$ is the sigmoid function (cf. eq. \ref{eq:lsm-link-sigmoid}), the binary cross-entropy can be rewritten in the log-domain to omit the sigmoid function entirely, and for numerical stability. The log-domain cross-entropy function is defined as follows
+        Considering that $\sub(p)=\sigma(\sub(\eta))$, where $\sigma$ is the sigmoid function (cf. eq. \ref{eq:lsm-proba}), the binary cross-entropy can be rewritten in the log-domain to omit the sigmoid function entirely, and for numerical stability. The log-domain cross-entropy function is defined as follows
         \begin{equation}\label{eq:bce-log-domain}
             BCE = -\sum_{i\neq j} \sub(y)\log\left(\frac{\sub(p)}{1-\sub(p)}\right) + \log(1-\sub(p))
         \end{equation}
-        where (full rewriting shown in \cref{BCEFull1})
+        where %(full rewriting shown in \cref{BCEFull1})
         \begin{equation}\label{eq:bce-rewrite-first}
             \log\left(\frac{\sub(p)}{1-\sub(p)}\right) =
             \log\left(\frac{\sigma(\sub(\eta))}{1-\sigma(\sub(\eta))}\right) = \sub(\eta)
         \end{equation}
-        and (full rewriting shown in \cref{BCEFull2})
+        and %(full rewriting shown in \cref{BCEFull2})
         \begin{equation}\label{eq:bce-rewrite-second}
             \log(1-\sub(p))=-\log(1+e^{\sub(\eta)})=-\log(e^0+e^{\sub(\eta)})
         \end{equation}
@@ -132,7 +130,7 @@ The latent space positions and model parameters are estimated using maximum like
             BCE = -\sum_{i\neq j}\{ \sub(y) \sub(\eta) - LSE(0,\sub(\eta)) \}
         \end{equation}
     
-    \subsubsection{Stopping Criteria}
+    \subsection{Stopping Criteria}
     
         The last topic worthy of mentioning is stopping criteria, deciding when to stop the optimization procedure. This is most often used to prevent overfitting, which is when the optimizer makes increasingly accurate predictions for the training samples, at the cost of inaccurate test predictions. However, stopping criteria can be used for more than just stopping, deciding when to alter the learning rate as opposed to a plateau, or when to make other alterations to the optimization algorithm. 
         

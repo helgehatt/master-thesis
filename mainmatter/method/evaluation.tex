@@ -1,4 +1,4 @@
-\section{Model Evaluation}
+\section{Model Evaluation}\label{sec:meval}
 
 The models are evaluated in terms of temporal link prediction, where link data for time steps $t\in [0,T_{split})$ is used to predict the links for $t\in [T_{split},T)$. The first task is to split the dataset into a training and a test set by setting $T_{split}$, where $0 < T_{split} < T$, using roughly the first 80\% of the data for training, and the remainder for model evaluation. Hence, the goal of the model is to predict $T-T_{split}$ time steps ahead. A dataset with $N$ entities consists of an $T\times N\times N$ temporal sociomatrix $\tY$, where $\sub(y)^\t$ is 1 if entities $i$ and $j$ are linked at time $t$, and 0 otherwise. As a result, the task boils down to a binary classification problem, predicting which entities are linked at which time steps.
 

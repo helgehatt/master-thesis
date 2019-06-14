@@ -5,51 +5,49 @@ Few additions are required to capture the temporal aspect with respect to diffus
 
 \subsection{Latent Space Model}
 
-    The latent space approach to social network analysis is introduced by \citeauthor{hoff2002latent} \cite{hoff2002latent}, using a model similar to Multidimensional Scaling in which entities are associated with locations in a $k$-dimensional space and where links are more likely if the entities are close in latent space. 
+    The latent space approach to social network analysis is introduced by \citeauthor{hoff2002latent} \cite{hoff2002latent}, using a model similar to multidimensional scaling in which entities are associated with locations in a $k$-dimensional space and where links are more likely if the entities are close in latent space. 
     % Given two entities $i$ and $j$, linkage is denoted by $\link$ and absence of a link by $\link*$, while $p(\link)$ or just $\sub(p)$ denotes the probability of observing the link. 
     The probability of observing a link between entities $i$ and $j$ is denoted as $\sub(p)$, where euclidean distance is used to measure the similarity between entities, denoted as $\sub(d)$. Note that any distance metric satisfying the triangle inequality can be used.
-    The undirected latent space model is inherently reciprocal, where a small $\sub(d)$ follows from a small $\sub(d)(ji)$. This is not necessarily the case for the directed model, which is discussed in \Cref{sec:mdev-directed}.
+    The undirected latent space model is inherently reciprocal, where a small $\sub(d)$ follows from a small $\sub(d)(ji)$. This is not the case for the directed model, which is elaborated in \Cref{sec:mdev-directed}.
     %from $\link$, making the link $\link(j)(i)$ more probable. 
     Similarly, small $\sub(d)$ and $\sub(d)(jk)$ results in small $\sub(d)(ik)$, making the model inherently transitive as well.
     
-    The method proposed in \cite{hoff2002latent} uses a conditional independence approach, assuming that the presence or absence of a link between two observations is independent of all other links in the network. Given the $N\times k$-dimensional matrix of latent space positions $\Z$, the covariate information $\X$ and parameters $\bm{\theta}$ the model is formalized in \Cref{eq:lsm-link-proba}, where $\Y$ is the $N\times N$ binary sociomatrix with $\sub(y)=1$ if $i$ and $j$ are linked and $\sub(y)=0$ otherwise. Note that the following does not include $i=j$, being an entity's relationship to itself.
+    The method proposed in \cite{hoff2002latent} uses a conditional independence approach, assuming that the presence or absence of a link between two observations is independent of all other links in the network. Given the $N\times k$-dimensional matrix of latent space positions $\Z$, the covariate information $\X$ and parameters $\bm{\theta}$ the model is formalized in \Cref{eq:lsm-model}, where $\Y$ is the $N\times N$ binary sociomatrix with $\sub(y)=1$ if $i$ and $j$ are linked and $\sub(y)=0$ otherwise. Note that the following does not include $i=j$, being an entity's relationship to itself.
     
-    \begin{equation}\label{eq:lsm-link-proba}
+    \begin{equation}\label{eq:lsm-model}
         P(\Y|\Z,\X,\bm{\theta}) = \prod_{i\neq j} P(\sub(y)|\z_i,\z_j,\sub(x),\bm{\theta})
     \end{equation}
     
     Covariate information includes pair-specific characteristics such as an indicator of whether two actors $i$ and $j$ are of the same sex. This was used by \citeauthor*{hoff2002latent} when analyzing strong friendship ties between boys and girls in a sixth-grade classroom. Providing such information can help increase model accuracy without adding much more complexity. However, the goal is to devise generalized models applicable to any type of network, such that covariate information will not be included in this thesis. 
     
-    Deciding whether links are present or absent can be considered a binary classification task, making the logistic regression model suitable to compute the odds of a link $\sub(\eta)$ using the latent space positions $\Z$ and a single parameter $\beta$ for the bias (intercept), as in \Cref{eq:lsm-link-odds}.
-    
-    \begin{equation}\label{eq:lsm-link-odds}
+    Deciding whether links are present or absent can be considered a binary classification task, making the logistic regression model suitable to compute the odds of a link $\sub(\eta)$ using the latent space positions $\Z$ and a single parameter $\beta$ for the bias (intercept), as shown in \Cref{eq:lsm-odds}.
+    \begin{equation}\label{eq:lsm-odds}
         \begin{split}
-            \sub(\eta) &= \log \odds(\sub(y)=1|\z_i,\z_j,\beta) \\
-                       &= \beta - |\z_i-\z_j|
+            \sub(\eta) &= \log \odds(\sub(y)=1|\z_i,\z_j,\beta) \\[0.5\baselineskip]
+                       &= \beta - \Vert\z_i-\z_j\Vert
         \end{split}
     \end{equation}
     
-    To transform the odds to a probability measure, the sigmoid function is applied to $\eta$ in \Cref{eq:lsm-link-sigmoid}, restricting the output to the interval $[0,1]$.
-    
-    \begin{equation}\label{eq:lsm-link-sigmoid}
-        \sub(p) = \sigma(\sub(\eta)) = \frac{1}{1 + e^{-(\beta - |z_i-z_j|)}}
+    To transform the odds to a probability measure, the sigmoid function is applied to $\eta$ in \Cref{eq:lsm-proba}, restricting the output to the interval $[0,1]$.
+    \begin{equation}\label{eq:lsm-proba}
+        \sub(p) = \sigma(\sub(\eta)) = \frac{1}{1 + e^{-(\beta - \Vert\z_i-\z_j\Vert)}}
     \end{equation}
     
     The link probabilities $\sub(p)$ is thus inverse proportional to the distance between the observations in the latent space, with a bias term to skew the probabilities in either direction.
-    Having a conditional independence model, the log-likelihood is simply defined in \Cref{eq:lsm-log-likelihood}, which is used to estimate the model parameters using maximum likelihood techniques, or equivalently, by minimizing the negative log-likelihood function. Here, $\bm{\eta}$ is the $N\times N$ matrix of odds. The origin of this log-likelihood function and how exactly it is used to perform maximum likelihood estimation is explained later in \Cref{sec:model-opt} on model optimization.
+    Having a conditional independence model, the log-likelihood is simply defined in \Cref{eq:lsm-likelihood}, which is used to estimate the model parameters using maximum likelihood techniques, or equivalently, by minimizing the negative log-likelihood function. Here, $\bm{\eta}$ is the $N\times N$ matrix of odds. The origin of this log-likelihood function and how exactly it is used to perform maximum likelihood estimation is explained later in \Cref{sec:model-opt} on model optimization.
     
-    \begin{equation}\label{eq:lsm-log-likelihood}
+    \begin{equation}\label{eq:lsm-likelihood}
         \log P(\Y|\bm{\eta}) = \sum_{i\neq j}\{ \sub(\eta)\sub(y) - \log(1+e^{\sub(\eta)}) \}
     \end{equation}
     
-    Note that the distances between a set of points in Euclidean space are invariant under rotation, reflection, and translation. Hence, there is an infinite number of latent space positions giving the same log-likelihood. The number of parameters to estimate depends on the number of entities $N$ in the network as well as the chosen dimensionality $k$ of the latent space, resulting in $N \cdot k + 1$ parameters. The $N\cdot k$ parameters corresponds to the latent space representation $\Z$, while the $+1$ is due to the bias $\beta$ which is kept as a single scalar. \citeauthor{jacobsen2018a} \cite{jacobsen2018a} experimented with specific biases for each row and column of the sociomatrix, corresponding to two vectors of dimensions $N\times 1$ and $1\times N$, though the results showed a single scalar to generalize better, allowing less wiggle room in the estimation of latent positions.
+    Note that the distances between a set of points in Euclidean space are invariant under rotation, reflection, and translation. Hence, there is an infinite number of latent space positions giving the same log-likelihood. The number of parameters to estimate depends on the number of entities $N$ in the network as well as the chosen dimensionality $k$ of the latent space, resulting in $N \cdot k + 1$ parameters. The $N\cdot k$ parameters corresponds to the latent space representation $\Z$, while the $+1$ is from the bias $\beta$ which is kept as a single scalar. \citeauthor{jacobsen2018a} \cite{jacobsen2018a} experimented with specific biases for each row and column of the sociomatrix, corresponding to two vectors of dimensions $N\times 1$ and $1\times N$, though the results showed a single scalar to generalize better, allowing less wiggle room in the estimation of latent positions.
     
 \subsection{Diffusion Model}
     
-    A dynamic latent space model for social network analysis is presented by \citeauthor{sarkar2005dynamic} in \cite{sarkar2005dynamic} using a standard Markov assumption, i.e. that the latent locations at time $t+1$ are conditionally independent of all previous locations given the latent locations at time $t$. The solution is comprised of two parts, an observation model and a transition model.  Adding the time dimension with a total of $T$ time steps, $\tY$ and $\tZ$ are now tensors of sizes $T\times N\times N$ and $T\times N\times k$ respectively. Hence, the probability of observing a link between $i$ and $j$ at time $t$ is denoted as $\sub(p)^\t$. Similarly, $\sub(d)^\t = |\z_i^\t-\z_j^\t|$ is the Euclidean distance between observations $i$ and $j$ in the latent space at a given time $t$.%, however the $(t)$ superscripts are omitted unless explicitly necessary.
+    A dynamic latent space model for social network analysis is presented by \citeauthor{sarkar2005dynamic} in \cite{sarkar2005dynamic} using a standard Markov assumption, i.e. that the latent locations at time $t+1$ are conditionally independent of all previous locations given the latent locations at time $t$. The solution is comprised of two parts, an observation model and a transition model. Adding the time dimension with a total of $T$ time steps, $\tY$ and $\tZ$ are now tensors of sizes $T\times N\times N$ and $T\times N\times k$ respectively. Hence, the probability of observing a link between $i$ and $j$ at time $t$ is denoted as $\sub(p)^\t$. Similarly, $\sub(d)^\t = \Vert\z_i^\t-\z_j^\t\Vert$ is the Euclidean distance between observations $i$ and $j$ in the latent space at a given time $t$.%, however the $(t)$ superscripts are omitted unless explicitly necessary.
     
     \citeauthor*{sarkar2005dynamic} formulates the observation model for the graph as
-    \begin{equation}\label{eq:dsnl-obsmodel}
+    \begin{equation}\label{eq:dsnl-observation}
         P(\Y_t|\Z_t) = \prod_{i\sim j} \sub(p)^\t \prod_{i\not\sim j} \left(1-\sub(p)^\t\right)
     \end{equation}
     where $i\sim j$ and $i\not\sim j$ denote the existence and absence of a link, respectively.
@@ -64,30 +62,36 @@ Few additions are required to capture the temporal aspect with respect to diffus
             \ 0 & \text{otherwise}
         \end{cases}
     \end{equation}
-    resulting in the link probability shown in \Cref{eq:dsnl-link-proba}, adding a small amount of diffusion if $K(\sub(d)^\t)=0$.
+    resulting in the link probability shown in \Cref{eq:dsnl-proba}, adding a small amount of diffusion if $K(\sub(d)^\t)=0$.
     
-    \begin{equation}\label{eq:dsnl-link-proba}
+    \begin{equation}\label{eq:dsnl-proba}
         \sub(p)^\t=\frac{1}{1 + e^{-\left(\sub(r)-\sub(d)^\t\right)}} K(\sub(d)^\t) + \epsilon\left(1-K(\sub(d)^\t)\right)
     \end{equation}
     
     The second part, namely the transition model, penalizes large displacements from the previous time step by having each coordinate of each latent position independently subjected to a Gaussian perturbation with zero mean and $\sigma^2$ variance. This results in the following Gaussian model
     \begin{equation}\label{eq:dsnl-transition}
-        \log P(\Z_t|\Z_{t-1}) = -\sum_{i=1}^n \left|\z_i^{(t)}-\z_i^{(t-1)}\right|^2 / \sigma^2 + const
+        \log P(\Z_t|\Z_{t-1}) = -\sum_{i=1}^n \left\Vert\z_i^{(t)}-\z_i^{(t-1)}\right\Vert^2 / \sigma^2 + const
     \end{equation}
-    where the goal is to optimize log-likelihood of the graphs $\Y_{0..t}$ conditioned on the latent positions $\Z_{0..t}$.
+    % where the goal is to optimize the log-likelihood of the graphs $\Y_{0..t}$ conditioned on the latent positions $\Z_{0..t}$, estimating 
+    such that the latent positions are estimated using
+    \begin{equation}
+        P(\Z_t|\Y_t,\Z_{t-1})\propto P(\Y_t|\Z_t)P(\Z_t|\Z_{t-1})
+    \end{equation}
+    \citeauthor*{sarkar2005dynamic} does so by developing a two-stage learning algorithm, starting with generalized multidimensional scaling to find initial latent positions followed by applying nonlinear conjugate gradient optimization.
     
     \citeauthor{zangenberg2018a} uses these elements in \cite{zangenberg2018a} to extend the static latent space model to a simple dynamic diffusion model, applying a standard Markov assumption.
     % for the temporal aspect, a simple diffusion model is formalized in \Cref{eq:dsnl-model} by applying a standard Markov assumption, where $\bm{\sigma}_\epsilon$ is the $k$-dimensional vector of variances for each latent dimension. 
     % \begin{equation}\label{eq:dsnl-model}
     %     P(\Y_t|\Z_t,\beta,\bm{\sigma}_\epsilon) = \prod_t P(\Z_t|\Z_{t-1}) P(\Y_t,\Z_t|\beta,\bm{\sigma}_\epsilon)
     % \end{equation}
-    The link probability $\sub(p)^\t$ at time $t$ is calculated as before, however with the latent space at time $t$ modeled as the previous latent space at time $t-1$ with added diffusion, shown in \Cref{eq:dsnl-latent-space}. The diffusion is assumed to follow a Gaussian with zero mean and $\bm{\sigma}_\epsilon^2$ variance. The variance, also known as the diffusion rate, is a $k$-dimensional vector with separate variances for each of the latent dimension.
+    The link probability $\sub(p)^\t$ at time $t$ is calculated as before (eq. \ref{eq:lsm-proba}), however with the latent space at time $t$ modeled as the previous latent space at time $t-1$ with added diffusion, shown in \Cref{eq:dsnl-space}. The diffusion is assumed to follow a Gaussian with zero mean and $\bm{\sigma}_\epsilon^2$ variance. The variance, also known as the diffusion rate, is a $k$-dimensional vector with separate variances for each of the latent dimension.
     
-    \begin{equation}\label{eq:dsnl-latent-space}
+    \begin{equation}\label{eq:dsnl-space}
         \Z_t = \Z_{t-1} + \bm{\epsilon}_t \qquad\qquad \bm{\epsilon} \sim N(\bm{0},\bm{\sigma}_\epsilon^2)
     \end{equation}
     
-    The diffusion rate determines how far observations can drift in a single time step, such that a fairly low diffusion rate results in the observations staying more or less in place, while a high diffusion rate makes the observations drift apart, resulting in radical changes to the relationships. With the addition of the diffusion rate, the number of parameters to estimate is increased by $k$, to $N\cdot k + k + 1$. There are different ways of learning the diffusion rate, which is discussed in \Cref{sec:pyimpl-innovations} on implementation details, where some of the methods increases the number of model parameters significantly.
+    The diffusion rate determines how far observations can drift in a single time step, such that a fairly low diffusion rate results in the observations staying more or less in place, while a high diffusion rate makes the observations drift apart, resulting in radical changes to the relationships. With the addition of the diffusion rate, the number of parameters to estimate is increased by $k$, to $N\cdot k + k + 1$. Note that even though $\tZ$ is of size $T\times N\times k$, only the initial latent positions at $t=0$ are model parameters, computing the remaining $(T-1)\cdot N\cdot k$ positions. 
+    There are different ways of learning the diffusion rate, which is discussed in \Cref{sec:pyimpl-innovations} on implementation details, where some of the methods increases the number of model parameters significantly.
     
     %Note that as $t\rightarrow\infty$, we have $E[Z_t]=Z_0$ regardless of the magnitude of the diffusion rate as $E[\epsilon_t]=0$.
     
@@ -108,7 +112,7 @@ Few additions are required to capture the temporal aspect with respect to diffus
     Seasonality and periodicity are terms often used in time series analysis, which are thoroughly introduced in the book \cite{brockwell2016introduction} by \citeauthor{brockwell2016introduction} on time series and forecasting.
     As a brief example, monthly data has a seasonal interval of twelve as there are twelve months in a year, while daily data has a seasonal interval of seven corresponding to a week.
     
-    Increasing the order of the autoregressive model does however also increase model complexity, where an AR(3) process requires three sets of initial latent space positions to produce predictions for time steps $t\geq3$. Hence, the number of parameters to estimate has increased by a three-fold, in addition to extra AR coefficients. For the general AR($p$) model, the number of parameters is $p\cdot N\cdot k + p\cdot k + k + 1$, requiring an additional set of $N\times k$ latent space positions and $k$ coefficients for each order of $p$.
+    Increasing the order of the autoregressive model does however also increase model complexity, where an AR(3) process requires three sets of initial latent space positions to produce predictions for time steps $t\geq3$. Hence, the number of parameters to estimate has increased by a three-fold, in addition to extra AR coefficients. For the general AR($p$) model, the number of parameters is $p\cdot N\cdot k + p\cdot k + k + 1$, requiring an additional set of $N\cdot k$ latent space positions and $k$ coefficients for each order of $p$.
     Using all AR coefficients is however not necessary and the basis for predictions can be limited to a fixed set of previous values, also called lags. Considering daily data, an AR(7) process is required to capture the expected weekly seasonality. The fifth and sixth lags, corresponding to the values at $t-5$ and $t-6$, are often irrelevant when predicting the value at time $t$. Therefore, a sufficient limitation is to simply model the lags at 1, 2 and 7, thus greatly reducing the total amount of model parameters.
     
     An important concept of time series models such as the AR model, is stationarity, where a stationary process remains stable as time progresses. For an AR(1) model, the condition $-1<\phi<1$ is necessary for the process to be stationary. This is proven by \citeauthor{alonso2012autoregressive} in \cite{alonso2012autoregressive} by assuming that the process begins with an arbitrary fixed value $Z_0=x$, and writing up subsequent values by successive substitution, shown in \Cref{eq:ar-substitution}.
@@ -140,8 +144,90 @@ Few additions are required to capture the temporal aspect with respect to diffus
     
 \subsection{Alternative Models}
 
+    Dynamic network models with latent variables are reviewed by \citeauthor{kim2018review} in \cite{kim2018review}. This includes both latent space models as well as stochastic blockmodels, introducing them in a chronological order, starting with the static latent space model by \citeauthor*{hoff2002latent} \cite{hoff2002latent} from 2002. Latent space models are divided into two lines of research, namely the latent position model \cite{handcock2015clustering} based on Euclidean distance space, and the latent factor model \cite{hoff2009bilinear} based on projection.
     
+    \subsubsection{Latent Projection Model}
+    
+        This thesis considers only latent positions models, placing entities in an unobserved Euclidean space and using the distance between them as a measure of link probability. Latent projection models on the other hand, assumes that $i$ and $j$ are more likely linked if $\z_i$ and $\z_j$ are in the same direction, i.e.
+        \begin{equation}
+            \begin{split}
+                \sub(\eta) &= \log \odds(\sub(y)=1|\z_i,\z_j,\beta) \\[0.5\baselineskip]
+                &= \beta + \frac{\z_i^T\z_j}{\Vert\z_j\Vert}
+            \end{split}
+        \end{equation}
+        where $\z_i^T\z_j$ is positive if $\z_i$ and $\z_j$ are in the same direction, and negative for opposite directions. Furthermore, the denominator $\Vert\z_j\Vert$ allows asymmetric link probabilities $\sub(\eta)\neq\sub(\eta)(ji)$ for directed sender-receiver networks.
+        
+    \subsubsection{Latent Position Cluster Model}
+    
+        \citeauthor*{handcock2015clustering} devises a latent position cluster model in \cite{handcock2015clustering} by combining latent space models with the model-based clustering method from \cite{banfield1993gaussian}. This is done by drawing each latent positions $\z_i$ from a finite mixture of multivariate Gaussians from $G$ groups as follows
+        \begin{equation}
+            \z_i\sim\sum_{g=1}^G\lambda_g N(\bmmu_g,\bmsigma_g^2\bm{I})
+        \end{equation}
+        where $\lambda_g$ is the probability of belonging to group $g$.
+        
+    \subsubsection{Bilinear Mixed-Effects Model}
+    
+        Another model developed by \citeauthor{hoff2009bilinear} in \cite{hoff2009bilinear} is the generalized bilinear mixed-effects (GBME) model. The model uses traditional regression on dyads ($i,j$ pairs), but with additive and multiplicative random effects in the error terms, i.e.
+        \begin{equation}
+            \sub(\epsilon) = a_i + b_j + \z_i^T\z_j + \sub(\gamma)
+        \end{equation}
+        where
+        \begin{equation}
+            \begin{split}
+                (a_i,b_j)^T &\sim N(\bm{0},\bmSigma_{ab}) \\
+                \z_i &\sim N(\bm{0},\bmsigma_z^2\bm{I}) \\
+                (\sub(\gamma),\sub(\gamma)(ji))^T &\sim N(\bm{0}, \bmSigma_\gamma)
+            \end{split}
+        \end{equation}
+        and
+        \begin{equation}
+            \bmSigma_{ab} = 
+                \begin{pmatrix}
+                    \sigma_a^2 & \sigma_{ab} \\
+                    \sigma_{ab} & \sigma_b^2 \\
+                \end{pmatrix},
+            \hspace{1cm}
+            \bmSigma_\gamma = \sigma_\gamma^2
+                \begin{pmatrix}
+                    1 & \rho \\
+                    \rho & 1 \\
+                \end{pmatrix}
+        \end{equation}
+        
+        The goal is to explain second-order dependence in dyadic data by including a sender effect $a_i$, a receiver effect $b_i$ and a dyad effect $\sub(\gamma)$ for the unique pair. The variances $\sigma_a^2$ and $\sigma_b^2$ describe the dependence of entities having a common sender and receiver respectively, with the correlation between sender-receiver effects as $\sigma_{ab}$. Furthermore, reciprocity and within-actor correlation are measured by the variance $\sigma_\gamma^2$ and the correlation parameter $\rho$. Last but not least, the bilinear effect in the $\z_i^T\z_j$ term captures third-order dependence in dyadic data, including transitivity, balance and clusterability.
+        
+    \subsubsection{Dynamic Gravity Model}
+    
+        The previously mentioned GBME model is combined with gravity models from social sciences in \citeauthor{ward2007commerce} \cite{ward2007commerce} and \citeauthor{ward2007peace} \cite{ward2007peace}. The resulting models were applied to temporal networks by separately fitting the static model to each individual time step. \citeauthor{ward2013gravity} later improved the model in \cite{ward2013gravity} by including the fit from the previous time step as follows
+        \begin{equation}
+            \log\left(\sub(y)^\t\right) = \beta_{uv} \left(\hat{\u}_i^{(t-1)}\right)^T \hat{\v}_j^{(t-1)} + a_i^\t + b_j^\t + \left(\u_i^\t\right)^T \v_j^\t + \sub(\epsilon)
+        \end{equation}
+        separating sending activity $\u$ from receiving activity $\v$, and where the first term is used to estimate the effect of the positions at time $t-1$ on the links at time $t$.
+        
+    \subsection{Dynamic Bilinear Effects Model}
+    
+        Other dynamic extensions include Gaussian processes, where \citeauthor{durante2014bayesian} \cite{durante2014bayesian,durante2014nonparametric} propose a model extending the bilinear component in GBME to temporal networks. This is achieved by assuming the mean parameters and latent factors are evolving in time as Gaussian processes, namely that
+        \begin{equation}
+            \sub(\eta)^\t = \mu^\t + \left(\z_i^\t\right)^T \z_j^\t
+        \end{equation}
+        where $\eta$ is the linked mean parameter of a generalized linear model and $\mu^\t$ is the mean process.
+        
+        These are only a few of the models reviewed in \cite{kim2018review}, including a more thorough introduction to the various approaches.
+    
+    % In \cite{hoff2009homophily}, \citeauthor{hoff2009homophily} shows some of the advantages of latent factor models, being able to capture homophily and stochastic equivalence. Homophily is a pattern in which similar nodes are more likely attached to each other than dissimilar ones, whereas stochastic equivalence considers that nodes can be grouped by their relationship patterns.
+
 
 \subsection{Directed Models}\label{sec:mdev-directed}
 
+    The latent position model in \Cref{eq:lsm-model} with the link probability defined in \Cref{eq:lsm-proba} does not directly allow asymmetric link probabilities (i.e. $\sub(\eta)\neq\sub(\eta)(ji)$) as the latent projection model does.
+    This is overcome by introducing an additional set of latent positions, having separate positions for incoming and outgoing links. Simply put, each node is represented as a sender and a receiver, where links may only occur between sender-receiver pairs.
     
+    Doing so, $\tZ$ is extended to a tensor of size $d\times N\times k$, where $d$ is the directionality corresponding to one for undirected models and two for directed models. As a result, the link probability depends on the following odds in the directed scenario
+    \begin{equation}
+        \begin{split}
+            \sub(\eta)&=\log \odds\left(\sub(y)=1| \z_i^{(out)},\z_j^{(in)},\beta \right) \\[0.5\baselineskip]
+            &= \beta - \left\Vert \z_i^{(out)} - \z_j^{(in)} \right\Vert
+        \end{split}
+    \end{equation}
+    where $out$ and $in$ refers to the first and second set of latent positions, respectively.
+    This representation generalizes to the dynamic models as well, maintaining separate positions for senders and receivers at each time step.

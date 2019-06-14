@@ -65,7 +65,7 @@ Network analysis is becoming increasingly important in many fields, including in
 
     The goal of \citeauthor{zangenberg2018a}'s thesis was to examine whether additional information can be captured by a dynamic model opposed to a static model when analyzing temporal networks. This was achieved by developing three different models; a static latent space model using no temporal information, a diffusion model where the links at time $T+1$ depend only on the previous time step $T$, assuming the future is conditionally independent of the past given the present (Markov property), and lastly an autoregressive latent space model where the assumption of conditional independence is replaced with several autoregressive lags to capture periodic structure.
     
-    The models are implemented in Stan, a probabilistic programming language where Bayesian inference is used to perform temporal link prediction. Doing so, results showed that the autoregressive model was able to identify periodic changes over time, however with a limited network size of 30 entities over 23 time steps. The models were also tested on a real communication network comprised of 40 entities over 22 time steps, providing a reasonable fit for the first two models while the autoregressive model proved too computationally expensive. 
+    The models were implemented in Stan, a probabilistic programming language where Bayesian inference was used to perform temporal link prediction. Doing so, results showed that the autoregressive model was able to identify periodic changes over time, however with a limited network size of 30 entities over 23 time steps. The models were also tested on a real communication network comprised of 40 entities over 22 time steps, providing a reasonable fit for the first two models while the autoregressive model proved too computationally expensive. 
     
     \citeauthor{jacobsen2018a}'s work focused on non-temporal networks, comparing variations of the static latent space model proposed in \cite{hoff2002latent} to capture the inherent structures of large-scale networks. 
     Similarity between entities in the latent space was determined by Euclidean distance, allowing for easy interpretation and visualization.
@@ -93,7 +93,7 @@ Network analysis is becoming increasingly important in many fields, including in
         \end{tabular}
     \end{center}
     
-    Furthermore, the $t$th slices of a tensor $\tZ$ is denoted $\bm{Z}_t$. The $i$th entry of a vector $\bm{a}$ is denoted $a_i$, the $i$th row of a matrix $\bm{A}$ is denoted $\bm{a}_i$ and element $(i,j)$ of a matrix $\bm{A}$ is denoted $\sub(a)$. Note that the same rules for scalars, vectors, etc. applies to indexed types, being able to distinguish between the scalar $a_i$ of a vector $\bm{a}$ and the vector $\bm{a}_i$ of a matrix $\bm{A}$. Greek letters are considered lowercase unless otherwise is stated, such that $\beta$ is a scalar and $\bm{\theta}$ a vector.
+    Furthermore, the $t$th slices of a tensor $\tZ$ is denoted $\bm{Z}_t$. The $i$th entry of a vector $\bm{a}$ is denoted $a_i$, the $i$th row of a matrix $\bm{A}$ is denoted $\bm{a}_i$ and element $(i,j)$ of a matrix $\bm{A}$ is denoted $\sub(a)$. Note that the same rules for scalars, vectors, etc. applies to indexed types, being able to distinguish between the scalar $a_i$ of a vector $\bm{a}$ and the vector $\bm{a}_i$ of a matrix $\bm{A}$. Greek letters are considered lowercase unless otherwise stated, such that $\beta$ is a scalar and $\bm{\theta}$ a vector.
     
 \section{Thesis Outline}
 

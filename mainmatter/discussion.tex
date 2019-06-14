@@ -1,39 +1,95 @@
 \chapter{Discussion}\label{ch:Discussion}
 
-\section{Model Convergence}
+\section{Summary}
 
-One of the most challenging tasks is getting the models to converge properly, which entails a high convergence limit, stable progress and as quickly as possible.
+    The results of the previous chapter are summarized and discussed,
 
-Modeling each subsequent time step as its own set of positions versus relating each subsequent time step directly to the initial positions.
+    \subsection{Synthetic Data}
+    
+        The synthetic datasets show how the latent models are capable of learning the underlying network structure. 
+        
+        \subsubsection{Static Data}
+        
+            The static data 
+        
+        \subsubsection{Dynamic Data}
+        
+        \subsubsection{Periodic Data}
+        
+    \subsection{Synthetic AR(2) Data}
+    
+        Several experiments with synthetic AR(2) datasets were conducted, as the second order autoregressive process in theory is capable of modeling velocity, acceleration and curvature.
+    
+    \subsection{EU Email Data}
+    
+        Not knowing the underlying network structure, it is difficult to distinguish between a good and bad latent representation.
+    
+    \subsection{UC Messaging Data}
+    
+        Remove inactive nodes
+    
+\section{Model Variations}
 
-Local minima, especially in terms of the autoregressive model, where small modifications to the AR coefficients have a huge impact.
+    \subsection{Static vs Dynamic}
+
+    \subsection{Undirected vs Directed}
+    
+        Undirected models have a very distinct latent space representation, with observations scattered around a dense core. This gives reason to believe that the models rank the network's actors according to their activity, with the most active actors centered at the origin. 
+        Directed models show similar behavior, a
+    
+    \subsection{\texorpdfstring{$k$}{k}-Dimensional}
+    
+    \subsection{Diffusion Penalty}
+    
+\section{Extensions}
+    
+    \subsection{Hyperparameter Tuning}
+    
+    \subsection{Parallelization}
+
+    \subsection{Direct AR Computation}
+    
+    \subsection{GPU Validation}
+    
+        % https://github.com/h2oai/h2o4gpu
+
+    \subsection{Next Steps}
+    
+        % Math Overflow temporal network
+        % Aggregate to monthly data
+        
+    \subsection{Procrustean Transformation}
+    
+        % Invariant under rotation, translation, reflection and scaling
+
+% \section{Model Convergence}
+
+% One of the most challenging tasks is getting the models to converge properly, which entails a high convergence limit, stable progress and as quickly as possible.
+
+% Modeling each subsequent time step as its own set of positions versus relating each subsequent time step directly to the initial positions.
+
+% Local minima, especially in terms of the autoregressive model, where small modifications to the AR coefficients have a huge impact.
 
 
-Training on the first few time steps before training on the rest.
+% Training on the first few time steps before training on the rest.
 
 
-Tried accumulating gradients, however the issue was with the computation graph
+% Tried accumulating gradients, however the issue was with the computation graph
 
-One of the biggest issues, including the initial positions in the computation graph
+% One of the biggest issues, including the initial positions in the computation graph
 
-\section{GPU Implementation}
+% \section{Parallelization}
 
-    Validation?
+%     A natural extension is to parallelize the GPU implementation.
+    
+%     %ensemble
 
-\section{Parallelization}
+% \section{Hyperparameters}
 
-    A natural extension is to parallelize the GPU implementation.
+% The model converges much faster training on smaller batches at the time. Doing so, the optimizer tunes a limited number of parameters at each iteration, instead of making changes to all parameters, possibly making several mistakes.
 
-\section{Hyperparameters}
-
-The model converges much faster training on smaller batches at the time. Doing so, the optimizer tunes a limited number of parameters at each iteration, instead of making changes to all parameters, possibly making several mistakes.
-
-The learning rate has a huge impact on the time it takes the model to converge, benefiting from an adaptive learning rate schedule to quickly get close to the convergence limit before reducing the step size.
+% The learning rate has a huge impact on the time it takes the model to converge, benefiting from an adaptive learning rate schedule to quickly get close to the convergence limit before reducing the step size.
 
 
 
-Training on the last half of the training data yields much faster convergence
-
-\section{Alternative Models}
-
-UCMessaging - AR performs worse than DFM because of shock.
+% Training on the last half of the training data yields much faster convergence

@@ -1,3 +1,16 @@
 \chapter{Summary}
 
-The goal of the thesis is to ...
+The goal of the thesis is to perform multi-step temporal link prediction on large complex networks using latent space modeling, examining whether additional information is captured by dynamic models opposed to static models.
+Latent space modeling facilitates the visualization of network structure, placing all actors in a $k$-dimensional latent space in accordance with actor relationships. Hence, the thesis features an excessive amount of figures and animations for illustrative purposes. Adobe Reader is recommended for viewing the embedded animations.
+
+The thesis combines \citeauthor{zangenberg2018a}'s work on dynamic latent space models \cite{zangenberg2018a} with \citeauthor{jacobsen2018a}'s GPU-based modeling framework for static latent space models \cite{jacobsen2018a}. \citeauthor{zangenberg2018a} compares a static latent space model with a simple diffusion model and a more advanced autoregressive model, concluding that dynamic models are favorable in terms of temporal link prediction. However, the models were only tested on very small networks over a limited time span. \citeauthor{jacobsen2018a} on the other hand, was able to fit static latent space models to networks with thousands of actors, such that a combination of the two ideas will hopefully give rise to the analysis of large temporal networks.
+
+Experiments on synthetic data verifies \citeauthor{zangenberg2018a}'s results, showing that the autoregressive model outperforms static and diffusion models for datasets with periodic patterns.
+The implemented GPU-based modeling framework for dynamic models is successfully applied to two large real-life networks concerning email and social messaging data, with a thousand and two thousand actors, respectively.
+With a limited time span of two hundred days, all models perform equally well, showing no immediate benefit of using an advanced dynamic model opposed to a static model. The conclusion is that more networks must be analyzed, preferably over a long time span.
+
+% The thesis considers the same models as in \cite{zangenberg2018a}, including the original latent space model by \cite{hoff2002latent}, a simple diffusion model and autoregressive models of varying order. 
+% Why autoregressive
+% The models are optimized using maximum likelihood estimation 
+
+% The results

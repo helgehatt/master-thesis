@@ -10,23 +10,23 @@ The models and the MLE framework are implemented in PyTorch, an open-source deep
     
     A less memory intensive approach is to calculate the squared norm of the difference using quadratic expansion, shown in \Cref{eq:pyimpl-dist-quadratic}.
     \begin{equation}\label{eq:pyimpl-dist-quadratic}
-        (\sub(d))^2=\Vert \z_i-\z_j\Vert^2\equiv\Vert \z_i\Vert^2 + \Vert \z_j\Vert^2 - 2(\z_i\cdot \z_j)
+        (\sub(d))^2=\Vert\z_i-\z_j\Vert^2\equiv\Vert \z_i\Vert^2 + \Vert\z_j\Vert^2 - 2(\z_i\cdot\z_j)
     \end{equation}
-    The squared norm of a matrix $\A$ is computed by squaring all $N\times k$ entries and summing over the last dimension, resulting in a vector of size $N$. Viewing $\Vert \A\Vert^2$ as a column vector and $\Vert \B\Vert^2$ as a row vector, the full $N\times N$ distance matrix is computed as $\Vert \A\Vert^2 + \Vert \B\Vert^2 - 2\A\B^T$. Doing so, the memory consumption is $O(N^2)$ for the final distance matrix (assuming $k\ll N$), down from $O(N^2k)$ for the intermediary results of the direct approach.
+    The squared norm of a matrix $\A$ is computed by squaring all $N\times k$ entries and summing over the last dimension, resulting in a vector of size $N$. Viewing $\Vert\A\Vert^2$ as a column vector and $\Vert\B\Vert^2$ as a row vector, the full $N\times N$ distance matrix is computed as $\Vert\A\Vert^2 + \Vert \B\Vert^2 - 2\A\B^T$. Doing so, the memory consumption is $O(N^2)$ for the final distance matrix (assuming $k\ll N$), down from $O(N^2k)$ for the intermediary results of the direct approach.
     
     To illustrate the difference in computational complexity between the two methods, \Cref{Method/Pairwise-Distance-N} shows the time it takes to compute the calculations (in µs) as a function of $N$ and as a function of $k$ in \Cref{Method/Pairwise-Distance-k}. The timings are the mean of 7 runs with 100-1000 loops each, carried out on an RTX-2080 GPU. Both the direct approach and the approach utilizing quadratic expansion scale exponentially with $N$, however the latter with a much lower rate. Additionally, the first method scales linearly with $k$, while the second remains constant. Hence, empirical tests show that using quadratic expansion is a much more efficient way of computing the pairwise distances as the number of nodes in a batch and the dimensionality of the latent space increases. These findings contradict \citeauthor{jacobsen2018a}'s argument in \cite{jacobsen2018a}, stating that the direct approach is computationally fastest, ``because it allows full GPU parallelism over the entire process of computing the pairwise distance matrix''.
-    \xfig{\xdirow
+    \xfig{\xdouble
         {\ximg{Method/Pairwise-Distance-N}}
         {\ximg{Method/Pairwise-Distance-k}}
     }
     
-\subsection{Latent Space Positions}
+\subsection{Latent Space Positions}\label{sec:pyimpl-positions}
 
     One of the most time-consuming tasks is the computation of the latent space positions, particularly in terms of the autoregressive process where the latent positions at time $t$ depend on all $t-1$ previous latent spaces.
     There are two key challenges to keep in mind, namely keeping the PyTorch computation graph intact as well as keeping the optimization procedure well-behaved. 
     %This entails that each step of the optimizer contributes to a decrease in the overall loss, and that the gradients will eventually converge to zero.
     
-    Starting with a subset of nodes ($batch$) at a particular time $t$, the predictions $\sub(p)\text{ for } i,j \in batch$ are computed, assigning high and low probabilities depending on the bias $\beta$, the latent positions $Z$ and other model parameters. These predictions are compared to the true results, indicating which nodes are actually linked, resulting in a $loss$ which is inversely proportional to the correctness of the model. Every single step, from the batch is drawn to the loss is computed, is recorded in PyTorch's computation graph, telling exactly which operations were performed to get from batch to result. 
+    Starting with a subset of nodes ($batch$) at a particular time $t$, the predictions $\sub(p)\text{ for } i,j \in batch$ are computed, assigning high and low probabilities depending on the bias $\beta$, the latent positions $\Z_t$ and other model parameters. These predictions are compared to the true results, indicating which nodes are actually linked, resulting in a $loss$ which is inversely proportional to the correctness of the model. Every single step, from the batch is drawn to the loss is computed, is recorded in PyTorch's computation graph, telling exactly which operations were performed to get from batch to result. 
     
     Now, to ensure better predictions at the next iteration, PyTorch propagates backward through the recorded graph, computing the gradients with respect to the latent positions and the other parameters. Doing so, the optimizer knows which parameters to increase and decrease, including which direction to move the latent positions.
     The caveat is, that if the chain of operations is broken, the optimizer will have no way of computing the gradients with respect to the adjustable parameters. 
@@ -124,7 +124,7 @@ The models and the MLE framework are implemented in PyTorch, an open-source deep
         %     \sum_{i=1}^n(x_i-\hat{\mu}) = 0 \equiv \hat{\mu}=\frac{1}{n}\sum_{i=1}^n x_i = \bar{x}
         % \end{equation}
         % such that substituting the result in \Cref{error-sigma-partial} allows solving for $\hat{\sigma}^2$
-        which is solved for the sample variance $\hat{\sigma}^2$
+        which is solved for the sample variance $\hat{\sigma}^2$ as follows
         \begin{equation}
             \frac{n}{2\hat{\sigma}^2} = \frac{1}{2\hat{\sigma}^4} \sum_{i=1}^n x_i^2 \equiv \hat{\sigma}^2 = \frac{1}{n} \sum_{i=1}^n x_i^2
         \end{equation}
@@ -144,24 +144,25 @@ The models and the MLE framework are implemented in PyTorch, an open-source deep
     
         There are two key components in a successful batching strategy, namely making sure all pairs of nodes are compared and that the negative log-likelihood loss of looping nodes ($i=j$) is zero. 
         Comparing all pairs of nodes is necessary to learn the whole representation of the underlying network, where $\sub(y)$ is not necessarily equal to $\sub(y)(ji)$ for directed networks. 
-        An entity is never linked to itself, such that the diagonal of the sociomatrix $Y_t$ is always empty. As previously stated, the link probability $\sub(p)$ is inversely proportional to the distance between two nodes $i$ and $j$. However, when $i=j$, the distance from the node to itself is zero, which should coincide with a high link probability. To remedy this, the loss should be removed when comparing a node with itself.
+        An entity is never linked to itself, such that the diagonal of the sociomatrix $\Y$ is always empty. As previously stated, the link probability $\sub(p)$ is inversely proportional to the distance between two nodes $i$ and $j$. However, when $i=j$, the distance from the node to itself is zero, which should coincide with a high link probability. To remedy this, the loss should be removed when comparing a node with itself.
         
     \subsubsection{Indexing}
     
-        \citeauthor{jacobsen2018a} devised a batching strategy in \cite{jacobsen2018a}, where a set of $n$ numbers are randomly drawn from a uniform distribution with replacement. These numbers are then used as both row and column indices to extract an $n\times n$ submatrix $y$ from the much larger $N\times N$ sociomatrix $Y$. An example with an $8\times 8$ sociomatrix and the indices $\{1,4,6\}$ is shown in \Cref{BatchIndex}. Each index corresponds to a node with a given latent positions, which are used to compute the link probabilities for all pairs, resulting in an $n\times n$ matrix $\hat{y}$. Finally, the negative log-likelihood loss is calculated based on $y$ and $\hat{y}$. Since the row indices and the column indices are equal, the pairs for which $i=j$ are guaranteed to lie on the main diagonal of the loss matrix. Hence, correct behavior is ensured by simply removing the entries on the main diagonal before summarizing the total loss. 
+        \citeauthor{jacobsen2018a} devised a batching strategy in \cite{jacobsen2018a}, where a set of $n$ numbers are randomly drawn from a uniform distribution with replacement. These numbers are then used as both row and column indices to extract an $n\times n$ submatrix $\Y_{sub}$ from the much larger $N\times N$ sociomatrix $\Y$. Note that \citeauthor{jacobsen2018a} only considered static networks, such that $\Y$ does not include the additional time dimension.
+        An example with an $8\times 8$ sociomatrix and the indices $\{1,4,6\}$ is shown in \Cref{BatchIndex}. Each index corresponds to a node with a given latent positions, which are used to compute the link probabilities for all pairs, resulting in an $n\times n$ matrix $\P_{sub}$. Finally, the negative log-likelihood loss is calculated based on $\Y_{sub}$ and $\P_{sub}$. Since the row indices and the column indices are equal, the pairs for which $i=j$ are guaranteed to lie on the main diagonal of the loss matrix. Hence, correct behavior is ensured by simply removing the entries on the main diagonal before summarizing the total loss. 
         \xeq{\xtex/equations/{BatchIndex}}
         
         This strategy is easy to implement, making sure all combinations of nodes are compared over time by random sampling indices. By using the same set of indices to index the sociomatrix along both dimensions, the placement of the looping $i=j$ pairs is fixed, thus allowing for quick removal of the desired loss entries.
-        An immediate improvement is to sample without replacement, avoiding duplicate indices in batches and ensuring that all nodes are sampled each epoch. However, a much more significant improvement is to represent the sociomatrix $Y$ sparsely.
+        An immediate improvement is to sample without replacement, avoiding duplicate indices in batches and ensuring that all nodes are sampled each epoch. However, a much more significant improvement is to represent the sociomatrix $\Y$ sparsely.
         
     \subsubsection{Sparse Sociomatrix}
     
-        A sparse matrix stores only non-zero elements, which is quite convenient considering the sparsity of real-life networks. To illustrate, one of the datasets considered has a total of $N=1899$ unique nodes spanning $T=193$ days. The total number of elements in the sociomatrix is thus over half a billion ($N^2T \approx 696\cdot 10^6$), whereas the total number of non-zero elements is barely 34,000. The motivation for using a sparse sociomatrix is that 34,000 elements can easily be stored on the GPU, while reserving space for other computations.
+        A sparse matrix stores only non-zero elements, which is quite convenient considering the sparsity of real-life networks. To illustrate, one of the datasets considered has a total of $N=1899$ unique nodes spanning $T=193$ days. The total number of elements in the temporal sociomatrix $\tY$ is thus over half a billion ($N^2T \approx 696\cdot 10^6$), whereas the total number of non-zero elements is barely 34,000. The motivation for using a sparse sociomatrix is that 34,000 elements can easily be stored on the GPU, while reserving space for other computations.
         
         The only available sparse representation of a PyTorch tensor is the COO-format. COO is an abbreviation of coordinate list, where each non-zero value is associated with a pair of coordinates. Considering the previously used example sociomatrix in \Cref{BatchIndex}, the following information is stored:
         \xtab{\xtex{SparseContents}}
         
-        Hence, creating the submatrix $y$ using \citeauthor{jacobsen2018a}'s batching strategy requires looking up each individual pair of indices and inserting 1s and 0s depending on the contents of the sparse sociomatrix.
+        Hence, creating the submatrix $\Y_{sub}$ using \citeauthor{jacobsen2018a}'s batching strategy requires looking up each individual pair of indices and inserting 1s and 0s depending on the contents of the sparse sociomatrix.
     
     \subsubsection{Slicing}
     
@@ -176,10 +177,18 @@ The models and the MLE framework are implemented in PyTorch, an open-source deep
         The question that remains, is why exactly slices. Considering the sparse representation of the sociomatrix in \Cref{SparseContents}, the indices can easily be filtered by lower and upper bounds. By conveniently using the row and column slices as bounds on the row and column indices respectively, the result is combined by a logical \texttt{AND} operation. The combined row and column mask is then used to index the original arrays of row and column indices, getting each pair of coordinates for each non-zero value within the slices. Performing these operations on the example sparse sociomatrix with the same slices as before $\{(0,3), (5,8)\}$ is illustrated in \Cref{SparseMask}. The coloring represents the resulting bit masks after filtering, with highlighted areas as 1s and grayed out areas as 0s. The highlighted values are the result from combining row and column masks, indicating non-zero values at indices $\{(0,6),(1,6),(2,5) \text{ and } (2,7)\}$ as expected.
         \xtab{\xtex{SparseMask}}
         
-        The found indices are used to construct the smaller dense submatrix $y$, which is subsequently used to compute the negative log-likelihood loss as normal.
+        The found indices are used to construct the smaller dense submatrix $\Y_{sub}$, which is subsequently used to compute the negative log-likelihood loss as normal.
         Instead of constructing a dense matrix, an alternative approach is to construct a sparse matrix, and use the indices as a mask. PyTorch defines an operation \texttt{sparse\_mask} which selects values from a dense matrix based on the indices of a sparse matrix. The result of both approaches are equivalent, however the masking operation does not scale as drastically as the dense matrix multiplication as shown in \Cref{Method/Batch-Slicing-Mask}.
         
-        \xwrap{\ximg[width=0.5\textwidth]{Method/Batch-Slicing-Mask}}
+        \xfig{\ximg[width=0.5\textwidth]{Method/Batch-Slicing-Mask}}
         However, the operation's derivative is not yet implemented in PyTorch, such that it cannot currently be used for model optimization. Regardless, doing so would not result in any immediate performance gain, as the batch sizes used in this project is well below the time complexity trade-off point.
         
-        
+\subsection{Sparse Validation}
+
+    As previously mentioned in \Cref{sec:meval}, the performance of a model is evaluated in terms of its AUC score. During optimization, the model's performance is validated every ten epochs, being able to monitor the training progress. The validation score is used on several occasions, particularly as a stopping criteria, choosing when to stop training or increase the amount of training data. Moreover, the score is used to select which parameters to store, saving the model achieving the highest performance.
+    
+    Representing the $T\times N\times N$-dimensional sociomatrix $\tY$ sparsely allows efficient node batching by limiting data transfer between CPU and GPU. Doing so, networks of much larger size can be considered, as long as the sparse representation fits on the GPU. However, increasing the number of nodes to more than a thousand, another bottleneck emerges, namely validation. Validation is performed by computing individual AUC scores for each time step $t$, based on $\Y_t$ and $\Z_t$ for all $N$ nodes. Using the \href{https://scikit-learn.org/stable/}{scikit-learn} library to perform the actual calculations, validation suddenly requires a lot of data transfer.
+    
+    This is remedied by implementing a sparse validation technique, utilizing only a subset of nodes to acquire an estimate of the model's performance. While the idea is similar to node batching, there is one small subtlety to be aware of. Slicing blindly may result in a submatrix of $\Y_t$ containing only zeros (no links), for which the AUC is not defined. Hence, the slices are not chosen at random, but selected to ensure that there is at least one link present in the subset.
+    A downside is that the sparsely computed AUC score does not necessarily accurately reflect the model's true AUC score, where a larger subset increases the accuracy, but also the computation time.
+    
