@@ -1,0 +1,71 @@
+
+\section{EU Email Data}
+
+Results are only shown for the dataset spanning the first 200 time steps $[0-200)$ since the second segment $[200-400)$ produces very similar results. The edges (links) between nodes are depicted only for link probabilities higher than 1\% in terms of two-dimensional latent positions and 2.5\% for three dimensions to reduce clutter in the animations. As before, a higher link probability results in a darker edge, being able to get a sense of distances between nodes in three-dimensional plots as well.
+
+\subsection{Undirected}
+
+    % The link probabilities for undirected networks are much lower in general,  
+    The undirected latent space representation makes no distinction between senders and receivers, assuming reciprocity, such that if user $i$ is likely to send an email to user $j$, then $j$ is equally likely to send one back to $i$. This is not necessarily a valid assumption, which will be reflected by the performance of the undirected models.
+
+        \xfig[H]{\xdouble
+            {\ximg{Results/EUEmail0-200/Proba/StaticModel-AR(1)-Undirected-K(2)-NL}[LSM | U | K(2) | NL]}
+            {\ximg{Results/EUEmail0-200/Proba/StaticModel-AR(1)-Undirected-K(3)-NL}[LSM | U | K(3) | NL]}
+        }\xfig[H]{\xdouble
+            {\xanim|9|{Results/EUEmail0-200/Proba/DiffusionModel-AR(1)-Undirected-K(2)-GL-1}[DFM | U | K(2) | GL]}
+            {\xanim|9|{Results/EUEmail0-200/Proba/DiffusionModel-AR(1)-Undirected-K(3)-GL-1}[DFM | U | K(3) | GL]}
+        }\xfig[H]{\xdouble
+            {\xanim|9|{Results/EUEmail0-200/Proba/AutoregressiveModel-AR(1)-Undirected-K(2)-GL-1}[AR(1) | U | K(2) | GL]}
+            {\xanim|9|{Results/EUEmail0-200/Proba/AutoregressiveModel-AR(1)-Undirected-K(3)-GL-1}[AR(1) | U | K(3) | GL]}
+        }\xfig[H]{\xdouble
+            {\xanim|9|{Results/EUEmail0-200/Proba/AutoregressiveModel-AR(3)-Undirected-K(2)-GL-1}[AR(3) | U | K(2) | GL]}
+            {\xanim|9|{Results/EUEmail0-200/Proba/AutoregressiveModel-AR(3)-Undirected-K(3)-GL-1}[AR(3) | U | K(3) | GL]}
+        }\xfig[H]{\xdouble
+            {\xanim|9|{Results/EUEmail0-200/Proba/AutoregressiveModel-AR(7)-Undirected-K(2)-GL-1}[AR(7) | U | K(2) | GL]}
+            {\xanim|9|{Results/EUEmail0-200/Proba/AutoregressiveModel-AR(7)-Undirected-K(3)-GL-1}[AR(7) | U | K(3) | GL]}
+        }
+
+\newpage
+\subsection{Directed}
+
+    The directed latent space representation shows each user as both a sender (blue) and a receiver (orange), where links only occur between sender-receiver pairs. Doing so allows the modeling of a user's sending and receiving activity separately, in case some users frequently send emails without receiving any, or the other way around. 
+    Due to the size of the network and the huge amount of links, the latent space is only visualized every tenth time step. This can be a bit deceptive, as autoregressive processes tend to repeat a pattern with a frequency corresponding to their order. Hence, detailed animations are included in a separate appendix, with latent space representations for LL and GNV penalties as well.
+
+        \xfig[H]{\xdouble
+            {\ximg{Results/EUEmail0-200/Proba/StaticModel-AR(1)-Directed-K(2)-NL}[LSM | D | K(2) | NL]}
+            {\ximg{Results/EUEmail0-200/Proba/StaticModel-AR(1)-Directed-K(3)-NL}[LSM | D | K(3) | NL]}
+        }\xfig[H]{\xdouble
+            {\xanim|6|{Results/EUEmail0-200/Proba/DiffusionModel-AR(1)-Directed-K(2)-GL-1}[DFM | D | K(2) | GL]}
+            {\xanim|6|{Results/EUEmail0-200/Proba/DiffusionModel-AR(1)-Directed-K(3)-GL-1}[DFM | D | K(3) | GL]}
+        }\xfig[H]{\xdouble
+            {\xanim|6|{Results/EUEmail0-200/Proba/AutoregressiveModel-AR(1)-Directed-K(2)-GL-1}[AR(1) | D | K(2) | GL]}
+            {\xanim|6|{Results/EUEmail0-200/Proba/AutoregressiveModel-AR(1)-Directed-K(3)-GL-1}[AR(1) | D | K(3) | GL]}
+        }\xfig[H]{\xdouble
+            {\xanim|6|{Results/EUEmail0-200/Proba/AutoregressiveModel-AR(3)-Directed-K(2)-GL-1}[AR(3) | D | K(2) | GL]}
+            {\xanim|6|{Results/EUEmail0-200/Proba/AutoregressiveModel-AR(3)-Directed-K(3)-GL-1}[AR(3) | D | K(3) | GL]}
+        }\xfig[H]{\xdouble
+            {\xanim|6|{Results/EUEmail0-200/Proba/AutoregressiveModel-AR(7)-Directed-K(2)-GL-1}[AR(7) | D | K(2) | GL]}
+            {\xanim|6|{Results/EUEmail0-200/Proba/AutoregressiveModel-AR(7)-Directed-K(3)-GL-1}[AR(7) | D | K(3) | GL]}
+        }
+
+\subsection{Comparison}
+    
+    \xfig[H]{\xdouble
+        {\ximg{Results/EUEmail0-200/AUC-Undirected-K(2)-GL}[Test | U | K(2) | GL]}
+        {\ximg{Results/EUEmail0-200/AUC-Directed-K(2)-GL}[Test | D | K(2) | GL]}
+    }\xfig[H]{\xdouble
+        {\ximg{Results/EUEmail0-200/AUC-Undirected-K(3)-GL}[Test | U | K(3) | GL]}
+        {\ximg{Results/EUEmail0-200/AUC-Directed-K(3)-GL}[Test | D | K(3) | GL]}
+    }\xfig[H]{\xdouble
+        {\ximg{Results/EUEmail0-200/AUC-Undirected-K(10)-GL}[Test | U | K(10) | GL]}
+        {\ximg{Results/EUEmail0-200/AUC-Directed-K(10)-GL}[Test | D | K(10) | GL]}
+    }\xfig[H]{\xdouble
+        {\ximg{Results/EUEmail0-200/AUC-Directed-K(2)-LL}[Test | D | K(2) | LL]}
+        {\ximg{Results/EUEmail0-200/AUC-Directed-K(2)-GNV}[Test | D | K(2) | GNV]}
+    }\xfig[H]{\xdouble
+        {\ximg{Results/EUEmail0-200/AUC-Directed-K(3)-LL}[Test | D | K(3) | LL]}
+        {\ximg{Results/EUEmail0-200/AUC-Directed-K(3)-GNV}[Test | D | K(3) | GNV]}
+    }\xfig[H]{\xdouble
+        {\ximg{Results/EUEmail0-200/AUC-Directed-K(10)-LL}[Test | D | K(10) | LL]}
+        {\ximg{Results/EUEmail0-200/AUC-Directed-K(10)-GNV}[Test | D | K(10) | GNV]}
+    }

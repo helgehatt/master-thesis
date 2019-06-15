@@ -1,0 +1,22 @@
+\chapter{Results}\label{ch:Results}
+
+This chapter presents the results of applying the methodology in \Cref{ch:Method} to the datasets described in \Cref{ch:Data}. The synthetic data is examined first, including comparisons of the static latent space model, the diffusion model and autoregressive models of various order. The models are evaluated in terms of AUC scores on test data, as well as the learned latent representation of the underlying network. 
+
+The two real-life networks considered are directed and aggregated to a daily basis, having an expected seasonality of seven, corresponding to a week. Hence, the datasets are modeled using an additional autoregressive model of order seven. The EU email dataset exhibits a distinct periodic pattern, in which the email activity is much higher on weekdays opposed to weekends. Meanwhile, the cropped UC messaging dataset is quite irregular and sparse, having significantly less activity with twice the number of nodes. As a result, the dataset is likely more difficult to accurately predict.
+% Regardless, the unusual behavior can be used to more thoroughly analyze the effect of diffusion penalties.
+
+Each figure and animation include several labels in their captions, describing which model is used, whether it is undirected or directed, the dimensionality of the latent space and which cost function is used to penalize the addition of diffusion. 
+\Cref{AbbrvModels,AbbrvParams,AbbrvPenalties} list the abbreviations used for the different models, model parameters and diffusion penalties, respectively.
+\xtab[H]{\xdouble[0.6]
+    {\xtex{AbbrvModels}[Models]}
+    {\xtex{AbbrvParams}[Parameters]}
+}
+\xwrap[table]{\xtex{AbbrvPenalties}[Penalties]}[0.4\textwidth]
+There is a large number of different models to consider due to the number of ways to combine model types, parameters and diffusion penalties. First of all, there are three types of models, where the autoregressive model can have an arbitrary order. Each of these models can either be directed or undirected, and with an arbitrary dimensionality.
+Furthermore, there are four approaches to penalizing diffusion, which quickly gives rise to more than a hundred model variants using only three orders of $p$ and three values for $k$. Hence, testing all combinations is not feasible, especially considering that each model should preferably be run multiple times to ensure that maximal potential is reached. The solution to the combinatorial explosion, is to make conscious decisions on which models, parameters and penalties to select for each individual dataset.
+
+\input{mainmatter/results/synthetic-data}
+
+\input{mainmatter/results/eu-email-data}
+
+\input{mainmatter/results/uc-messaging-data}

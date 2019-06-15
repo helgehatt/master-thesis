@@ -1,0 +1,224 @@
+\documentclass[10pt,oneside]{book}
+
+\usepackage{LukeThesis}
+
+\input{preamble}
+
+\begin{document}
+
+\appendix
+\chapter{Appendix}
+
+The appendix is included as a separate document to limit the size of the thesis. This document contains complete latent space representations of the real-life networks, including additional results on other network segments.
+
+The animations are rasterized to reduce file size, in addition to being more CPU-friendly. This does effect the quality of the visualizations, but should ultimately be sufficient to view the emerging patterns.
+
+% Note that more than 500 models have been trained throughout the project, such that many results are still left out.
+
+\section{EU Email Data}
+
+    \subsection{0-200}
+    
+        % U | GL
+        \xfig[H]{\xdouble
+            {\ximg{Appendix/EUEmail0-200/Space/StaticModel-AR(1)-Undirected-K(2)-NL}[LSM | U | K(2) | NL]}
+            {\ximg{Appendix/EUEmail0-200/Space/StaticModel-AR(1)-Undirected-K(3)-NL}[LSM | U | K(3) | NL]}
+        }\xfig[H]{\xdouble
+            {\xanim|9|{Appendix/EUEmail0-200/Space/DiffusionModel-AR(1)-Undirected-K(2)-GL-1}[DFM | U | K(2) | GL]}
+            {\xanim|9|{Appendix/EUEmail0-200/Space/DiffusionModel-AR(1)-Undirected-K(3)-GL-1}[DFM | U | K(3) | GL]}
+        }\xfig[H]{\xdouble
+            {\xanim|9|{Appendix/EUEmail0-200/Space/AutoregressiveModel-AR(1)-Undirected-K(2)-GL-1}[AR(1) | U | K(2) | GL]}
+            {\xanim|9|{Appendix/EUEmail0-200/Space/AutoregressiveModel-AR(1)-Undirected-K(3)-GL-1}[AR(1) | U | K(3) | GL]}
+        }\xfig[H]{\xdouble
+            {\xanim|9|{Appendix/EUEmail0-200/Space/AutoregressiveModel-AR(3)-Undirected-K(2)-GL-1}[AR(3) | U | K(2) | GL]}
+            {\xanim|9|{Appendix/EUEmail0-200/Space/AutoregressiveModel-AR(3)-Undirected-K(3)-GL-1}[AR(3) | U | K(3) | GL]}
+        }\xfig[H]{\xdouble
+            {\xanim|9|{Appendix/EUEmail0-200/Space/AutoregressiveModel-AR(7)-Undirected-K(2)-GL-1}[AR(7) | U | K(2) | GL]}
+            {\xanim|9|{Appendix/EUEmail0-200/Space/AutoregressiveModel-AR(7)-Undirected-K(3)-GL-1}[AR(7) | U | K(3) | GL]}
+        }
+
+        % D | GL
+        \xfig[H]{\xdouble
+            {\ximg{Appendix/EUEmail0-200/Space/StaticModel-AR(1)-Directed-K(2)-NL}[LSM | D | K(2) | NL]}
+            {\ximg{Appendix/EUEmail0-200/Space/StaticModel-AR(1)-Directed-K(3)-NL}[LSM | D | K(3) | NL]}
+        }\xfig[H]{\xdouble
+            {\xanim|6|{Appendix/EUEmail0-200/Space/DiffusionModel-AR(1)-Directed-K(2)-GL-1}[DFM | D | K(2) | GL]}
+            {\xanim|6|{Appendix/EUEmail0-200/Space/DiffusionModel-AR(1)-Directed-K(3)-GL-1}[DFM | D | K(3) | GL]}
+        }\xfig[H]{\xdouble
+            {\xanim|6|{Appendix/EUEmail0-200/Space/AutoregressiveModel-AR(1)-Directed-K(2)-GL-1}[AR(1) | D | K(2) | GL]}
+            {\xanim|6|{Appendix/EUEmail0-200/Space/AutoregressiveModel-AR(1)-Directed-K(3)-GL-1}[AR(1) | D | K(3) | GL]}
+        }\xfig[H]{\xdouble
+            {\xanim|6|{Appendix/EUEmail0-200/Space/AutoregressiveModel-AR(3)-Directed-K(2)-GL-1}[AR(3) | D | K(2) | GL]}
+            {\xanim|6|{Appendix/EUEmail0-200/Space/AutoregressiveModel-AR(3)-Directed-K(3)-GL-1}[AR(3) | D | K(3) | GL]}
+        }\xfig[H]{\xdouble
+            {\xanim|6|{Appendix/EUEmail0-200/Space/AutoregressiveModel-AR(7)-Directed-K(2)-GL-1}[AR(7) | D | K(2) | GL]}
+            {\xanim|6|{Appendix/EUEmail0-200/Space/AutoregressiveModel-AR(7)-Directed-K(3)-GL-1}[AR(7) | D | K(3) | GL]}
+        }
+
+        % D | LL
+        \xfig[H]{\xdouble
+            {\xanim|6|{Appendix/EUEmail0-200/Space/DiffusionModel-AR(1)-Directed-K(2)-LL-1}[DFM | D | K(2) | LL]}
+            {\xanim|6|{Appendix/EUEmail0-200/Space/DiffusionModel-AR(1)-Directed-K(3)-LL-1}[DFM | D | K(3) | LL]}
+        }\xfig[H]{\xdouble
+            {\xanim|6|{Appendix/EUEmail0-200/Space/AutoregressiveModel-AR(1)-Directed-K(2)-LL-1}[AR(1) | D | K(2) | LL]}
+            {\xanim|6|{Appendix/EUEmail0-200/Space/AutoregressiveModel-AR(1)-Directed-K(3)-LL-1}[AR(1) | D | K(3) | LL]}
+        }\xfig[H]{\xdouble
+            {\xanim|6|{Appendix/EUEmail0-200/Space/AutoregressiveModel-AR(3)-Directed-K(2)-LL-1}[AR(3) | D | K(2) | LL]}
+            {\xanim|6|{Appendix/EUEmail0-200/Space/AutoregressiveModel-AR(3)-Directed-K(3)-LL-1}[AR(3) | D | K(3) | LL]}
+        }\xfig[H]{\xdouble
+            {\xanim|6|{Appendix/EUEmail0-200/Space/AutoregressiveModel-AR(7)-Directed-K(2)-LL-1}[AR(7) | D | K(2) | LL]}
+            {\xanim|6|{Appendix/EUEmail0-200/Space/AutoregressiveModel-AR(7)-Directed-K(3)-LL-1}[AR(7) | D | K(3) | LL]}
+        }
+
+        % D | GNV
+        \xfig[H]{\xdouble
+            {\xanim|6|{Appendix/EUEmail0-200/Space/DiffusionModel-AR(1)-Directed-K(2)-GNV-1}[DFM | D | K(2) | GNV]}
+            {\xanim|6|{Appendix/EUEmail0-200/Space/DiffusionModel-AR(1)-Directed-K(3)-GNV-1}[DFM | D | K(3) | GNV]}
+        }\xfig[H]{\xdouble
+            {\xanim|6|{Appendix/EUEmail0-200/Space/AutoregressiveModel-AR(1)-Directed-K(2)-GNV-1}[AR(1) | D | K(2) | GNV]}
+            {\xanim|6|{Appendix/EUEmail0-200/Space/AutoregressiveModel-AR(1)-Directed-K(3)-GNV-1}[AR(1) | D | K(3) | GNV]}
+        }\xfig[H]{\xdouble
+            {\xanim|6|{Appendix/EUEmail0-200/Space/AutoregressiveModel-AR(3)-Directed-K(2)-GNV-1}[AR(3) | D | K(2) | GNV]}
+            {\xanim|6|{Appendix/EUEmail0-200/Space/AutoregressiveModel-AR(3)-Directed-K(3)-GNV-1}[AR(3) | D | K(3) | GNV]}
+        }\xfig[H]{\xdouble
+            {\xanim|6|{Appendix/EUEmail0-200/Space/AutoregressiveModel-AR(7)-Directed-K(2)-GNV-1}[AR(7) | D | K(2) | GNV]}
+            {\xanim|6|{Appendix/EUEmail0-200/Space/AutoregressiveModel-AR(7)-Directed-K(3)-GNV-1}[AR(7) | D | K(3) | GNV]}
+        }
+    
+    \subsection{200-400}
+
+        \xfig[H]{\xdouble
+            {\ximg{Appendix/EUEmail200-400/Space/StaticModel-AR(1)-Directed-K(2)-NL}[LSM | K(2) | NL]}
+            {\ximg{Appendix/EUEmail200-400/Space/StaticModel-AR(1)-Directed-K(3)-NL}[LSM | K(3) | NL]}
+        }\xfig[H]{\xdouble
+            {\xanim|6|{Appendix/EUEmail200-400/Space/DiffusionModel-AR(1)-Directed-K(2)-GL-1}[DFM | K(2) | GL]}
+            {\xanim|6|{Appendix/EUEmail200-400/Space/DiffusionModel-AR(1)-Directed-K(3)-GL-1}[DFM | K(3) | GL]}
+        }\xfig[H]{\xdouble
+            {\xanim|6|{Appendix/EUEmail200-400/Space/AutoregressiveModel-AR(1)-Directed-K(2)-GL-1}[AR(1) | K(2) | GL]}
+            {\xanim|6|{Appendix/EUEmail200-400/Space/AutoregressiveModel-AR(1)-Directed-K(3)-GL-1}[AR(1) | K(3) | GL]}
+        }\xfig[H]{\xdouble
+            {\xanim|6|{Appendix/EUEmail200-400/Space/AutoregressiveModel-AR(3)-Directed-K(2)-GL-1}[AR(3) | K(2) | GL]}
+            {\xanim|6|{Appendix/EUEmail200-400/Space/AutoregressiveModel-AR(3)-Directed-K(3)-GL-1}[AR(3) | K(3) | GL]}
+        }\xfig[H]{\xdouble
+            {\xanim|6|{Appendix/EUEmail200-400/Space/AutoregressiveModel-AR(7)-Directed-K(2)-GL-1}[AR(7) | K(2) | GL]}
+            {\xanim|6|{Appendix/EUEmail200-400/Space/AutoregressiveModel-AR(7)-Directed-K(3)-GL-1}[AR(7) | K(3) | GL]}
+        }
+        
+        \xfig[H]{\xdouble
+            {\xanim|6|{Appendix/EUEmail200-400/Space/DiffusionModel-AR(1)-Directed-K(3)-GNV-1}[AR(3) | K(3) | GNV]}
+            {\xanim|6|{Appendix/EUEmail200-400/Space/AutoregressiveModel-AR(1)-Directed-K(3)-GNV-1}[AR(3) | K(3) | GNV]}
+        }\xfig[H]{\xdouble
+            {\xanim|6|{Appendix/EUEmail200-400/Space/AutoregressiveModel-AR(3)-Directed-K(3)-GNV-1}[AR(7) | K(3) | GNV]}
+            {\xanim|6|{Appendix/EUEmail200-400/Space/AutoregressiveModel-AR(7)-Directed-K(3)-GNV-1}[AR(7) | K(3) | GNV]}
+        }
+
+        \xfig[H]{\ximg[width=0.6\textwidth]{Appendix/EUEmail200-400/AUC-Directed-K(2)-GL}[K(2) | GL | Test]}
+        \xfig[H]{\ximg[width=0.6\textwidth]{Appendix/EUEmail200-400/AUC-Directed-K(3)-GL}[K(3) | GL | Test]}
+        \xfig[H]{\ximg[width=0.6\textwidth]{Appendix/EUEmail200-400/AUC-Directed-K(10)-GL}[K(10) | GL | Test]}
+
+\section{UC Messaging Data}
+
+    \subsection{10-60}
+
+        \xfig[H]{\xdouble
+            {\ximg{Appendix/UCMessaging10-60/Space/StaticModel-AR(1)-Directed-K(2)-NL}[LSM | K(2) | NL]}
+            {\ximg{Appendix/UCMessaging10-60/Space/StaticModel-AR(1)-Directed-K(3)-NL}[LSM | K(3) | NL]}
+        }\xfig[H]{\xdouble
+            {\xanim|6|{Appendix/UCMessaging10-60/Space/DiffusionModel-AR(1)-Directed-K(2)-GL-1}[DFM | K(2) | GL]}
+            {\xanim|6|{Appendix/UCMessaging10-60/Space/DiffusionModel-AR(1)-Directed-K(3)-GL-1}[DFM | K(3) | GL]}
+        }\xfig[H]{\xdouble
+            {\xanim|6|{Appendix/UCMessaging10-60/Space/AutoregressiveModel-AR(1)-Directed-K(2)-GL-1}[AR(1) | K(2) | GL]}
+            {\xanim|6|{Appendix/UCMessaging10-60/Space/AutoregressiveModel-AR(1)-Directed-K(3)-GL-1}[AR(1) | K(3) | GL]}
+        }\xfig[H]{\xdouble
+            {\xanim|6|{Appendix/UCMessaging10-60/Space/AutoregressiveModel-AR(3)-Directed-K(2)-GL-1}[AR(3) | K(2) | GL]}
+            {\xanim|6|{Appendix/UCMessaging10-60/Space/AutoregressiveModel-AR(3)-Directed-K(3)-GL-1}[AR(3) | K(3) | GL]}
+        }\xfig[H]{\xdouble
+            {\xanim|6|{Appendix/UCMessaging10-60/Space/AutoregressiveModel-AR(7)-Directed-K(2)-GL-1}[AR(7) | K(2) | GL]}
+            {\xanim|6|{Appendix/UCMessaging10-60/Space/AutoregressiveModel-AR(7)-Directed-K(3)-GL-1}[AR(7) | K(3) | GL]}
+        }
+    
+    \subsection{75-195}
+    
+        % U | GL
+        \xfig[H]{\xdouble
+            {\ximg{Appendix/UCMessaging75-195/Space/StaticModel-AR(1)-Undirected-K(2)-NL}[LSM | U | K(2) | NL]}
+            {\ximg{Appendix/UCMessaging75-195/Space/StaticModel-AR(1)-Undirected-K(3)-NL}[LSM | U | K(3) | NL]}
+        }\xfig[H]{\xdouble
+            {\xanim|9|{Appendix/UCMessaging75-195/Space/DiffusionModel-AR(1)-Undirected-K(2)-GL-1}[DFM | U | K(2) | GL]}
+            {\xanim|9|{Appendix/UCMessaging75-195/Space/DiffusionModel-AR(1)-Undirected-K(3)-GL-1}[DFM | U | K(3) | GL]}
+        }\xfig[H]{\xdouble
+            {\xanim|9|{Appendix/UCMessaging75-195/Space/AutoregressiveModel-AR(1)-Undirected-K(2)-GL-1}[AR(1) | U | K(2) | GL]}
+            {\xanim|9|{Appendix/UCMessaging75-195/Space/AutoregressiveModel-AR(1)-Undirected-K(3)-GL-1}[AR(1) | U | K(3) | GL]}
+        }\xfig[H]{\xdouble
+            {\xanim|9|{Appendix/UCMessaging75-195/Space/AutoregressiveModel-AR(3)-Undirected-K(2)-GL-1}[AR(3) | U | K(2) | GL]}
+            {\xanim|9|{Appendix/UCMessaging75-195/Space/AutoregressiveModel-AR(3)-Undirected-K(3)-GL-1}[AR(3) | U | K(3) | GL]}
+        }\xfig[H]{\xdouble
+            {\xanim|9|{Appendix/UCMessaging75-195/Space/AutoregressiveModel-AR(7)-Undirected-K(2)-GL-1}[AR(7) | U | K(2) | GL]}
+            {\xanim|9|{Appendix/UCMessaging75-195/Space/AutoregressiveModel-AR(7)-Undirected-K(3)-GL-1}[AR(7) | U | K(3) | GL]}
+        }
+
+        % D | GL
+        \xfig[H]{\xdouble
+            {\ximg{Appendix/UCMessaging75-195/Space/StaticModel-AR(1)-Directed-K(2)-NL}[LSM | D | K(2) | NL]}
+            {\ximg{Appendix/UCMessaging75-195/Space/StaticModel-AR(1)-Directed-K(3)-NL}[LSM | D | K(3) | NL]}
+        }\xfig[H]{\xdouble
+            {\xanim|6|{Appendix/UCMessaging75-195/Space/DiffusionModel-AR(1)-Directed-K(2)-GL-1}[DFM | D | K(2) | GL]}
+            {\xanim|6|{Appendix/UCMessaging75-195/Space/DiffusionModel-AR(1)-Directed-K(3)-GL-1}[DFM | D | K(3) | GL]}
+        }\xfig[H]{\xdouble
+            {\xanim|6|{Appendix/UCMessaging75-195/Space/AutoregressiveModel-AR(1)-Directed-K(2)-GL-1}[AR(1) | D | K(2) | GL]}
+            {\xanim|6|{Appendix/UCMessaging75-195/Space/AutoregressiveModel-AR(1)-Directed-K(3)-GL-1}[AR(1) | D | K(3) | GL]}
+        }\xfig[H]{\xdouble
+            {\xanim|6|{Appendix/UCMessaging75-195/Space/AutoregressiveModel-AR(3)-Directed-K(2)-GL-1}[AR(3) | D | K(2) | GL]}
+            {\xanim|6|{Appendix/UCMessaging75-195/Space/AutoregressiveModel-AR(3)-Directed-K(3)-GL-1}[AR(3) | D | K(3) | GL]}
+        }\xfig[H]{\xdouble
+            {\xanim|6|{Appendix/UCMessaging75-195/Space/AutoregressiveModel-AR(7)-Directed-K(2)-GL-1}[AR(7) | D | K(2) | GL]}
+            {\xanim|6|{Appendix/UCMessaging75-195/Space/AutoregressiveModel-AR(7)-Directed-K(3)-GL-1}[AR(7) | D | K(3) | GL]}
+        }
+
+        % D | LL
+        \xfig[H]{\xdouble
+            {\xanim|6|{Appendix/UCMessaging75-195/Space/DiffusionModel-AR(1)-Directed-K(2)-LL-1}[DFM | D | K(2) | LL]}
+            {\xanim|6|{Appendix/UCMessaging75-195/Space/DiffusionModel-AR(1)-Directed-K(3)-LL-1}[DFM | D | K(3) | LL]}
+        }\xfig[H]{\xdouble
+            {\xanim|6|{Appendix/UCMessaging75-195/Space/AutoregressiveModel-AR(1)-Directed-K(2)-LL-1}[AR(1) | D | K(2) | LL]}
+            {\xanim|6|{Appendix/UCMessaging75-195/Space/AutoregressiveModel-AR(1)-Directed-K(3)-LL-1}[AR(1) | D | K(3) | LL]}
+        }\xfig[H]{\xdouble
+            {\xanim|6|{Appendix/UCMessaging75-195/Space/AutoregressiveModel-AR(3)-Directed-K(2)-LL-1}[AR(3) | D | K(2) | LL]}
+            {\xanim|6|{Appendix/UCMessaging75-195/Space/AutoregressiveModel-AR(3)-Directed-K(3)-LL-1}[AR(3) | D | K(3) | LL]}
+        }\xfig[H]{\xdouble
+            {\xanim|6|{Appendix/UCMessaging75-195/Space/AutoregressiveModel-AR(7)-Directed-K(2)-LL-1}[AR(7) | D | K(2) | LL]}
+            {\xanim|6|{Appendix/UCMessaging75-195/Space/AutoregressiveModel-AR(7)-Directed-K(3)-LL-1}[AR(7) | D | K(3) | LL]}
+        }
+
+        % D | GNV
+        \xfig[H]{\xdouble
+            {\xanim|6|{Appendix/UCMessaging75-195/Space/DiffusionModel-AR(1)-Directed-K(2)-GNV-1}[DFM | D | K(2) | GNV]}
+            {\xanim|6|{Appendix/UCMessaging75-195/Space/DiffusionModel-AR(1)-Directed-K(3)-GNV-1}[DFM | D | K(3) | GNV]}
+        }\xfig[H]{\xdouble
+            {\xanim|6|{Appendix/UCMessaging75-195/Space/AutoregressiveModel-AR(1)-Directed-K(2)-GNV-1}[AR(1) | D | K(2) | GNV]}
+            {\xanim|6|{Appendix/UCMessaging75-195/Space/AutoregressiveModel-AR(1)-Directed-K(3)-GNV-1}[AR(1) | D | K(3) | GNV]}
+        }\xfig[H]{\xdouble
+            {\xanim|6|{Appendix/UCMessaging75-195/Space/AutoregressiveModel-AR(3)-Directed-K(2)-GNV-1}[AR(3) | D | K(2) | GNV]}
+            {\xanim|6|{Appendix/UCMessaging75-195/Space/AutoregressiveModel-AR(3)-Directed-K(3)-GNV-1}[AR(3) | D | K(3) | GNV]}
+        }\xfig[H]{\xdouble
+            {\xanim|6|{Appendix/UCMessaging75-195/Space/AutoregressiveModel-AR(7)-Directed-K(2)-GNV-1}[AR(7) | D | K(2) | GNV]}
+            {\xanim|6|{Appendix/UCMessaging75-195/Space/AutoregressiveModel-AR(7)-Directed-K(3)-GNV-1}[AR(7) | D | K(3) | GNV]}
+        }
+    
+    \subsection{0-195}
+
+        \xfig[H]{\xdouble
+            {\ximg{Appendix/UCMessaging/AUC-Directed-K(10)-NL-Train}[K(10) | NL | Train]}
+            {\ximg{Appendix/UCMessaging/AUC-Directed-K(10)-NL}[K(10) | NL | Test]}
+        }\xfig[H]{\xdouble
+            {\ximg{Appendix/UCMessaging/AUC-Directed-K(10)-GL-Train}[K(10) | GL | Train]}
+            {\ximg{Appendix/UCMessaging/AUC-Directed-K(10)-GL}[K(10) | GL | Test]}
+        }\xfig[H]{\xdouble
+            {\ximg{Appendix/UCMessaging/AUC-Directed-K(10)-LL-Train}[K(10) | LL | Train]}
+            {\ximg{Appendix/UCMessaging/AUC-Directed-K(10)-LL}[K(10) | LL | Test]}
+        }\xfig[H]{\xdouble
+            {\ximg{Appendix/UCMessaging/AUC-Directed-K(10)-GNV-Train}[K(10) | GNV | Train]}
+            {\ximg{Appendix/UCMessaging/AUC-Directed-K(10)-GNV}[K(10) | GNV | Test]}
+        }
+
+\end{document}

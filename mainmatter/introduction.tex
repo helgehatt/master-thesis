@@ -25,21 +25,21 @@ Network analysis is becoming increasingly important in many fields, including in
 
 \section{Dynamic Models}
 
-    Temporal networks have complex underlying structure, where entities and relationships appear and disappear over time. To analyze a specific state of a network, a snapshot is created and a static model is developed to capture the inherent structures.
-    Doing so does however leave out all the temporal information, such as how the structures evolve over time.
+    Temporal networks have complex underlying structure, where entities and relationships appear and disappear over time. To analyze a specific state of a network, a snapshot is created and static models are developed to capture the inherent structure.
+    Doing so does however leave out all the temporal information, such as how the structure evolves over time.
     
     Instead of analyzing a single snapshot of a network, the thesis is concerned with dynamic models capable of capturing the temporal aspects of a network. This is achieved using an \emph{autoregressive} (AR) model, performing linear regression of previous network states to find a correlation between past and present. More complex models can also be considered, however due to the additional time dimension, complex models quickly become infeasible to apply to large networks.
     
     Using an AR model opposed to a static model or diffusion model enables the modeling of a fixed set of lags, capturing diffusion, acceleration as well as periodic behavior of the considered network.
-    Hopefully, analyzing temporal networks with dynamic models can help better understand the relationships between actors, being able to predict which actors interact in the future.
+    Hopefully, temporal analysis of networks with dynamic models can help better understand the relationships between actors, being able to predict which actors interact in the future.
 
 \section{Link Prediction}
     % The dynamic latent space models are evaluated in terms of link prediction, aiming to predict new links or deleted links between entities for a future time steps, or missing links in the current network.
 
-    The performance of a static model is evaluated in terms of \emph{missing} link prediction, where a small portion of links are removed. The goal of a static model is to tell which links are likely to be present, predicting which links were initially removed. The missing link performance measure is however only suitable for models having no temporal aspect.
+    Considering non-temporal networks, the performance of a model is evaluated in terms of \emph{missing} link prediction, where a small portion of links are removed. The model's goal is then to predict which links were initially removed, assigning each link a probability of being present. The missing link performance measure is however not suited for temporal networks, giving rise to an alternative measure called \emph{temporal} link prediction.
     
-    Another alternative is \emph{temporal} link prediction, where the goal is to predict the relationships at time $T+1$ given link data for the $T$ previous time steps.
-    This measure can also be extended to \emph{periodic} temporal link prediction, where the aim is to predict the relationships at times $T+1, T+2, ..., T+L$ for a periodic pattern of length $L$. Such problems arise in many real-life scenarios, where  the periodic behavior differs from weekdays and weekends.  communication networks 
+    The goal of temporal link prediction is to predict which links are present at time $T+1$ given link data for the $T$ previous time steps.
+    This measure can also be extended to \emph{periodic} temporal link prediction, where the aim is to predict the relationships at times $T+1, T+2, ..., T+L$ for a periodic pattern of length $L$. Such problems arise in many real-life scenarios, where the periodic behavior differs from weekdays and weekends. 
 
 
 % \section{Scope}
