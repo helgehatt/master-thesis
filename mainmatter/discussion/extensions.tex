@@ -1,0 +1,39 @@
+\section{Extensions}
+
+This section discusses possible extensions, considering how the project can be improved, as well as giving insight into why some of the features have not been implemented and which features will have the highest impact for future development.
+
+\subsection{Model Parameters}
+
+    Optimizing hyperparameters has not been a primary concern, using approximate values for training and validation batch sizes, a constant learning rate and rough estimates for the stopping criterion.
+    Moreover, latent space initialization uses the uniform Xavier method described in \cite{glorot2011understanding}, while the model bias and innovations are initialized to zero. 
+    A more thorough analysis should be carried out to understand the impact of the various hyperparameters, especially in terms of initialization.
+    
+    Another interesting aspect to analyze, is how much a model with the exact same parameters differ from run to run. Does the same latent space pattern emerge every time? Is there a combination of parameters which results in faster convergence?
+    How many times must the model be trained to achieve its best possible score?
+    
+\subsection{Parallelization}
+
+    Parallelizing the optimization procedure was one of the initial project goals, as the models can be trained on multiple GPUs simultaneously.
+    However, the current bottleneck is not GPU utilization, but the iterative computation of the autoregressive latent positions. The LSM and DFM are in fact already capable of running on networks with more than 10,000 nodes, converging faster than AR models on networks with only 1,000 nodes.
+    
+    Sample run times for the different datasets are listed in \Cref{RunTimes} with timings in seconds, using an i5-9600K CPU and RTX-2080 GPU. The timings do of course vary from run to run, as well as depend on the model parameters, e.g. diffusion penalty, directionality and so on. Hence, the result simply provide a rough estimate of how the number of nodes and time steps affect the convergence of the various models.
+    
+    \xtab{\xtex{RunTimes}[Sample run times (in seconds) for the different datasets and models]}
+
+\subsection{Approximate Likelihood}
+
+    Approximating the likelihood using the case-control approach in \Cref{sec:case-control} was one of the performance optimizations considered for the thesis, reducing the time complexity of calculating the likelihood to $O(N)$ down from $O(N^2)$. 
+    However, considering that the computation of the likelihood is not currently the bottleneck of the implementation, adapting this approach to the temporal scenario is left as a future extension.
+
+\subsection{Direct AR Computation}
+
+    Direct AR computation refers to the LSM and DFM models' ability to compute the latent positions at time $t$ directly from the initial positions. Doing so, the latent positions at $t=500$ are computed just as quickly as the positions at $t=5$. This is not the case for the AR models, where calculating the positions at $t=500$ requires the computation of all 499 previous sets of positions, thus scaling linearly with $t$. This is a critical limitation of the AR models, which must be solved before analyzing networks over an increased period of time.
+
+\subsection{GPU Validation}
+
+    Performing model validation during training is essential to control the warm start optimization for autoregressive models. With a direct approach to AR computation, warm starting would not necessary, since the time between parameter updates would no longer scale with the time step $t$. As a result, intermediate model validation could be avoided altogether, however, another solution is to use the \href{https://github.com/h2oai/h2o4gpu}{\color{blue}{H2O4GPU}} library, being a GPU implementation of the currently used scikit-learn API. GPU-based AUC scoring has been requested, and will likely be implemented in the near future.
+    
+\subsection{Procrustean Transformation}
+
+    As mentioned several times before, the latent space positions are invariant under rotation, translation, reflection and scaling. This is evident in many of the animations depicting autoregressive latent representations over time. The AR coefficients are responsible for producing these effects, where certain combinations give rise to certain patterns.
+    Having no impact on the link probabilities, these effects can be removed by applying a Procrustean transformation, as done in \cite{hoff2002latent}. Doing so would leave out only the essential dynamic changes, providing more readable visualizations.

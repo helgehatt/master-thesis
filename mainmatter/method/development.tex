@@ -80,14 +80,14 @@ Few additions are required to capture the temporal aspect with respect to diffus
     \citeauthor*{sarkar2005dynamic} does so by developing a two-stage learning algorithm, starting with generalized multidimensional scaling to find initial latent positions followed by applying nonlinear conjugate gradient optimization.
     
     \citeauthor{zangenberg2018a} uses these elements in \cite{zangenberg2018a} to extend the static latent space model to a simple dynamic diffusion model, applying a standard Markov assumption.
-    % for the temporal aspect, a simple diffusion model is formalized in \Cref{eq:dsnl-model} by applying a standard Markov assumption, where $\bm{\sigma}_\epsilon$ is the $k$-dimensional vector of variances for each latent dimension. 
+    % for the temporal aspect, a simple diffusion model is formalized in \Cref{eq:dsnl-model} by applying a standard Markov assumption, where $\bmsigma_\epsilon$ is the $k$-dimensional vector of variances for each latent dimension. 
     % \begin{equation}\label{eq:dsnl-model}
-    %     P(\Y_t|\Z_t,\beta,\bm{\sigma}_\epsilon) = \prod_t P(\Z_t|\Z_{t-1}) P(\Y_t,\Z_t|\beta,\bm{\sigma}_\epsilon)
+    %     P(\Y_t|\Z_t,\beta,\bmsigma_\epsilon) = \prod_t P(\Z_t|\Z_{t-1}) P(\Y_t,\Z_t|\beta,\bmsigma_\epsilon)
     % \end{equation}
-    The link probability $\sub(p)^\t$ at time $t$ is calculated as before (eq. \ref{eq:lsm-proba}), however with the latent space at time $t$ modeled as the previous latent space at time $t-1$ with added diffusion, shown in \Cref{eq:dsnl-space}. The diffusion is assumed to follow a Gaussian with zero mean and $\bm{\sigma}_\epsilon^2$ variance. The variance, also known as the diffusion rate, is a $k$-dimensional vector with separate variances for each of the latent dimension.
+    The link probability $\sub(p)^\t$ at time $t$ is calculated as before (eq. \ref{eq:lsm-proba}), however with the latent space at time $t$ modeled as the previous latent space at time $t-1$ with added diffusion, shown in \Cref{eq:dsnl-space}. The diffusion is assumed to follow a Gaussian with zero mean and $\bmsigma_\epsilon^2$ variance. The variance, also known as the diffusion rate, is a $k$-dimensional vector with separate variances for each of the latent dimension.
     
     \begin{equation}\label{eq:dsnl-space}
-        \Z_t = \Z_{t-1} + \bm{\epsilon}_t \qquad\qquad \bm{\epsilon} \sim N(\bm{0},\bm{\sigma}_\epsilon^2)
+        \Z_t = \Z_{t-1} + \bmepsilon_t \qquad\qquad \bmepsilon \sim N(\bm{0},\bmsigma_\epsilon^2)
     \end{equation}
     
     The diffusion rate determines how far observations can drift in a single time step, such that a fairly low diffusion rate results in the observations staying more or less in place, while a high diffusion rate makes the observations drift apart, resulting in radical changes to the relationships. With the addition of the diffusion rate, the number of parameters to estimate is increased by $k$, to $N\cdot k + k + 1$. Note that even though $\tZ$ is of size $T\times N\times k$, only the initial latent positions at $t=0$ are model parameters, computing the remaining $(T-1)\cdot N\cdot k$ positions. 
@@ -100,10 +100,10 @@ Few additions are required to capture the temporal aspect with respect to diffus
 
     Temporal autoregressive (AR) network models are discussed by \citeauthor{sewell2018simultaneous} in \cite{sewell2018simultaneous}, arguing that the assumption of conditional independence can be quite strong and difficult to justify. Their proposal is a general observation-driven model using a flexible autoregressive approach, extending the diffusion model by allowing predictions to be based on a number of past observations, thus moving away from the standard Markov assumption. 
     
-    \citeauthor{zangenberg2018a} formalizes an autoregressive latent space model in \cite{zangenberg2018a} using the same measure of link probability $\sub(p)^\t$, but considers the change in latent positions $\Z$ to be defined by the AR process in \Cref{eq:ar-model}. Here, $c$ is a constant, $p$ indicates the order of the AR process, $\bm{\phi}$ is the $p\times k$ matrix of AR coefficients weighing the impact of the previous sets of latent positions, and $\bm{\epsilon}_t$ the $k$-dimensional error vector at time $t$ as before. \citeauthor{zangenberg2018a} used $\bm{\phi}$ as a $p$-dimensional vector for simplicity.
+    \citeauthor{zangenberg2018a} formalizes an autoregressive latent space model in \cite{zangenberg2018a} using the same measure of link probability $\sub(p)^\t$, but considers the change in latent positions $\Z$ to be defined by the AR process in \Cref{eq:ar-model}. Here, $c$ is a constant, $p$ indicates the order of the AR process, $\bmphi$ is the $p\times k$ matrix of AR coefficients weighing the impact of the previous sets of latent positions, and $\bmepsilon_t$ the $k$-dimensional error vector at time $t$ as before. \citeauthor{zangenberg2018a} uses $\bmphi$ as a $p$-dimensional vector for simplicity.
     
     \begin{equation}\label{eq:ar-model}
-        \Z_t = c+\sum_{i=1}^p \bm{\phi}_i \Z_{t-i} + \bm{\epsilon}_t \qquad\qquad \bm{\epsilon} \sim N(\bm{0},\bm{\sigma}_\epsilon^2)
+        \Z_t = c+\sum_{i=1}^p \bmphi_i \Z_{t-i} + \bmepsilon_t \qquad\qquad \bmepsilon \sim N(\bm{0},\bmsigma_\epsilon^2)
     \end{equation}
     
     A first-order autoregressive process, denoted AR(1) as $p=1$, is a generalization of the previously described diffusion process, using only the most recent value in its prediction. Hence, the AR model is capable of capturing diffusion, while extending to periodic behavior as well for higher-order processes ($p>1$). 

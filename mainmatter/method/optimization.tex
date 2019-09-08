@@ -1,16 +1,16 @@
 \section{Model Optimization}\label{sec:model-opt}
 
-The latent space positions and model parameters are estimated using maximum likelihood estimation (MLE). The inference for the latent space model introduced by \citeauthor*{hoff2002latent} and for the case-control approximate likelihood by \citeauthor*{raftery2012fast} is based on Markov chain Monte Carlo (MCMC) algorithms, while the dynamic model developed by \citeauthor{sarkar2005dynamic} uses KD-trees as an adaptation of multidimensional scaling. Here, we consider an alternative approach presented by \citeauthor{jacobsen2018a} for static latent space models, adapting the method to account for the temporal aspect. The main advantage is that this approach facilitates the use of GPU computability, allowing for analysis of much larger networks.
+The latent space positions and model parameters are estimated using maximum likelihood estimation (MLE). The inference for the latent space model introduced by \citeauthor*{hoff2002latent} and for the case-control approximate likelihood by \citeauthor*{raftery2012fast} is based on Markov chain Monte Carlo (MCMC) algorithms, while the dynamic model developed by \citeauthor{sarkar2005dynamic} uses KD-trees as an adaptation of multidimensional scaling. An alternative approach is presented by \citeauthor{jacobsen2018a} for static latent space models, adapting the method to account for the temporal aspect. The main advantage is that this approach facilitates the use of GPU computability, allowing for analysis of much larger networks.
 
 \subsection{Gradient Descent}
 
-    The open-source \href{https://ml-cheatsheet.readthedocs.io/en/latest/index.html}{Machine Learning Cheatsheet} website describes gradient descent very succinctly as follows:
+    The open-source \href{https://ml-cheatsheet.readthedocs.io/en/latest/index.html}{\color{blue}{Machine Learning Cheatsheet}} website describes gradient descent very succinctly as follows:
     \begin{displayquote}\itshape
         Gradient descent is an optimization algorithm used to minimize a function by iteratively moving in the direction of the steepest descent as defined by the negative of the gradient. 
     \end{displayquote}
     
     To understand how this is achieved, \citeauthor{nielsen2018neural} introduces the concept using an example cost function in \cite{nielsen2018neural}.
-    Consider a function $C(v)$ of many variables $\bm{v} = v_1, v_2, \dots$ shaping a multi-dimensional landscape. For a function of just two variables, the landscape can be illustrated in a three-dimensional plot as shown in \Cref{Method/Gradient-Descent}. 
+    Consider a function $C(\bm{v})$ of many variables $\bm{v} = v_1, v_2, \dots$ shaping a multi-dimensional landscape. For a function of just two variables, the landscape can be illustrated in a three-dimensional plot as shown in \Cref{Method/Gradient-Descent}. 
     \xfig{\ximg{Method/Gradient-Descent}}
     Starting at an arbitrary point on the graph, the goal is to find the values for $v_1$ and $v_2$ where $C$ achieves its global minimum. One way of doing so, is computing the derivatives and find for which pair of $(v_1,v_2)$ values $C$ is an extremum, analyzing the given minima and maxima for a global minimum. This approach does however quickly become computationally infeasible as the number of variables increases. 
     
@@ -96,13 +96,13 @@ The latent space positions and model parameters are estimated using maximum like
     \subsection{Cost Functions}
     
         There are several popular cost functions (also referred to as objective functions or loss functions), and which function to use often depends on the problem the optimizer is attempting to solve. 
-        In terms of a linear regression problem, the goal involve finding a linear mapping between input and output, such that the cost (or loss) should be minimum for the line of best fit. Hence, an appropriate cost function penalizes the difference between the target output $\bm{y}$ and the predicted output $\bm{\hat{y}}$ given by the line. 
+        In terms of a linear regression problem, the goal involves finding a linear mapping between input and output, such that the cost (or loss) should be minimal for the line of best fit. Hence, an appropriate cost function penalizes the difference between the target output $\bm{y}$ and the predicted output $\bm{\hat{y}}$ given by the line. 
         There are several ways of penalizing this difference, and some of the most common measures are \emph{Mean Aboslute Error (MAE)} and \emph{Mean Squared Error (MSE)}. The latter is shown in \Cref{eq:mopt-mseloss} as an example.
         \begin{equation}\label{eq:mopt-mseloss}
             MSE = \frac{1}{N}\sum_{i=1}^N(y_i-\hat{y}_i)^2
         \end{equation}
         
-        For classification tasks the essence is similar, however the cost function is quite dissimilar. The biggest difference is that the predicted output $\bm{\hat{y}}$ is not a quantity, but a probability. Knowing that a probability ranges from zero to one, we can use the fact that the logarithm becomes increasingly negative as $\bm{\hat{y}}\rightarrow0$. Then, by taking the negative of the logarithm, we have a function that increases as $\bm{\hat{y}}$ becomes less certain, depicted in \Cref{Method/Negative-Log-Probability}.
+        For classification tasks the essence is similar, however the cost function is quite dissimilar. The biggest difference is that the predicted output $\bm{\hat{y}}$ is not a quantity, but a probability. Knowing that a probability ranges from zero to one, the fact that the logarithm becomes increasingly negative as $\bm{\hat{y}}\rightarrow0$ can be used. Then, by taking the negative of the logarithm, the function increases as $\bm{\hat{y}}$ becomes less certain, depicted in \Cref{Method/Negative-Log-Probability}.
         \xfig{\ximg[width=0.7\textwidth]{Method/Negative-Log-Probability}}
         This is the foundation of the most common cost function for classification problems, which is referred to as \emph{Binary Cross-Entropy (BCE)} for the two-class scenario, shown in \Cref{eq:mopt-bceloss} for targets $\sub(y)$ and predictions (or probabilities) $\sub(p)$ in matrix-form, excluding the diagonal.
         \begin{equation}\label{eq:mopt-bceloss}
@@ -110,7 +110,7 @@ The latent space positions and model parameters are estimated using maximum like
         \end{equation}
         The first term $\sub(y)\log(\sub(p))$ penalizes a low probability $\sub(p)$ when the target $\sub(y)$ is 1, while the second term penalizes a high probability when the target is 0. As a result, the cost function facilitates class separation when minimized by an optimizer.
         
-        Considering that $\sub(p)=\sigma(\sub(\eta))$, where $\sigma$ is the sigmoid function (cf. eq. \ref{eq:lsm-proba}), the binary cross-entropy can be rewritten in the log-domain to omit the sigmoid function entirely, and for numerical stability. The log-domain cross-entropy function is defined as follows
+        Considering that $\sub(p)=\sigma(\sub(\eta))$, where $\sigma$ is the sigmoid function (cf. eq. \ref{eq:lsm-proba}), the binary cross-entropy can be rewritten in the log-domain for numerical stability, omitting the sigmoid function entirely. The log-domain cross-entropy function is defined as follows
         \begin{equation}\label{eq:bce-log-domain}
             BCE = -\sum_{i\neq j} \sub(y)\log\left(\frac{\sub(p)}{1-\sub(p)}\right) + \log(1-\sub(p))
         \end{equation}
@@ -124,7 +124,7 @@ The latent space positions and model parameters are estimated using maximum like
             \log(1-\sub(p))=-\log(1+e^{\sub(\eta)})=-\log(e^0+e^{\sub(\eta)})
         \end{equation}
         
-        The rewriting in \Cref{eq:bce-rewrite-second} allows the use of the \emph{LogSumExp (LSE)} trick to compute the logarithm of the sum of exponentials numerically stable. Similar to how multiplication in linear-scale becomes addition in log-scale, addition in linear-scale becomes the \emph{LSE} in the log-domain. Log-domain computations are used to increase accuracy by avoiding underflow and overflow when very small or large numbers are represented in a linear domain using limited-precision floating point numbers. Hence, the resulting binary cross-entropy is shown in \Cref{eq:bce-log-domain-rewrite}.
+        The reformulation in \Cref{eq:bce-rewrite-second} allows the use of the \emph{LogSumExp (LSE)} trick to compute the logarithm of the sum of exponentials numerically stable. Similar to how multiplication in linear-scale becomes addition in log-scale, addition in linear-scale becomes the \emph{LSE} in the log-domain. Log-domain computations are used to increase accuracy by avoiding underflow and overflow when very small or large numbers are represented in a linear domain using limited-precision floating point numbers. Hence, the resulting binary cross-entropy is shown in \Cref{eq:bce-log-domain-rewrite}.
         
         \begin{equation}\label{eq:bce-log-domain-rewrite}
             BCE = -\sum_{i\neq j}\{ \sub(y) \sub(\eta) - LSE(0,\sub(\eta)) \}

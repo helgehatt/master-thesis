@@ -1,1 +1,18 @@
 \chapter{Conclusion}\label{ch:Conclusion}
+
+% Development
+The thesis has successfully improved upon \citeauthor{zangenberg2018a}'s work on dynamic latent space models, by adapting \citeauthor{jacobsen2018a}'s GPU-based modeling framework. 
+As a simple measure of improvement, \citeauthor{zangenberg2018a}'s implementation used three hours on a dataset with 30 nodes over 23 time steps, running multi-threaded on a high-performance computer, whereas the current framework uses half an hour on a dataset with almost 2,000 nodes over 120 time steps, running on an above-average desktop computer.
+This is mostly due to the use of maximum likelihood estimation instead of Bayesian inference, as well as the ability to use GPU computations. Regardless, the thesis is in many ways a direct improvement of \citeauthor{jacobsen2018a}'s work as well, using a more efficient method for pairwise distance computation, calculating the binary cross-entropy loss in the log-domain for numerical stability, and most importantly, devising a GPU-based batching strategy.
+
+% Results
+\citeauthor{zangenberg2018a}'s results on synthetic data has been replicated, showing the advantages of using an autoregressive model opposed to a static model or a simple diffusion model. Furthermore, two real-life networks have been analyzed, verifying that the modeling framework generalizes to other datasets as well. The results illustrate the models' capabilities of capturing the underlying network structure, achieving AUC scores above 90\% in both cases. Visualization has been a major focus during the course of the project, providing visual representations of the synthetic data as well as all the two- and three-dimensional latent spaces. The goal is to help the reader better understand how the models operate, and how the link probabilities are derived, using figures and animations wherever possible.
+
+% Scientific Q's
+The thesis aimed to answer the following questions:
+\begin{itemize}\itshape
+    \item Will a GPU-based framework allow the modeling of large dynamic complex networks for several time steps?
+    \item Is a simple AR model sufficient to capture dynamic relations of complex networks, or will the task require more advanced models?
+\end{itemize}
+The answer to the first question is yes, given that networks of up to 2,000 nodes are considered large, and that 200 time steps are several. With a few improvements, or specifically direct AR computation, the modeling framework can easily be applied to even larger networks over a longer time span.
+The answer to the second question depends entirely on the network itself, seeing that a seemingly complex network (EU email) was readily modeled by the simplest of models with an AUC score as high as 98\%. Instead of answering the question directly, the thesis will serve as motivation for the reformulated question; \textit{How many complex networks is the AR model capable of capturing the dynamic relations of?}

@@ -47,21 +47,21 @@
 
 \NewDocumentCommand{\ximg}{ O{width=\textwidth} D//{figures} m O{} }{
     {\centering
-    \includegraphics[#1]{#2/#3}
+    \includegraphics[#1]{contents/#2/#3}
     \captionof{figure}{#4} 
     \label{#3}\par}
 }
 
 \NewDocumentCommand{\xtex}{ O{table} D//{tables} m O{} }{
     {\centering
-    \input{#2/#3}
+    \input{contents/#2/#3}
     \caption{#4}
     \label{#3}\par}
 }
 
 \NewDocumentCommand{\xanim}{ O{width=\textwidth} D||{12} m O{} }{
     {\centering
-    \animategraphics[#1]{#2}{figures/#3}{}{}
+    \animategraphics[#1]{#2}{contents/figures/#3}{}{}
     \captionof{animation}{#4}
     \label{#3}\par}
 }

@@ -1,4 +1,4 @@
-\section{Case-Control Approximate Likelihood}
+\section{Case-Control Approximate Likelihood}\label{sec:case-control}
 
 Due to the structure of the latent space model's likelihood function (eq.~\ref{eq:lsm-likelihood}), the computational complexity is $O(N^2)$, having to sum over $N(N-1)$ terms. This issue is studied in \cite{raftery2012fast} by \citeauthor{raftery2012fast}, where a case-control idea from epidemiology is used to estimate the full likelihood at a cost of only $O(N)$. This is achieved by exploiting the fact that large networks are usually sparse, having a small number of highly connected hub nodes while the majority of nodes have low degree.
 

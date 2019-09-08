@@ -1,0 +1,34 @@
+\section{Model Variations}
+
+There are several factors that contribute to the final performance of the models, such as model type, directionality, diffusion penalty, the number of latent dimensions and so on. This section will discuss the main observations regarding each of these variations.
+
+\subsection{Static vs Dynamic}
+
+    One of the biggest questions is whether additional information is captured using a dynamic model opposed to a static model. This is clearly the case looking at the results for the synthetic datasets, however, the distinction is not as prominent in terms of real-life networks.
+    The EU email dataset poses no difference using a dynamic model, suggesting that the periodic pattern in link activity (cf. \cref{Data/EUEmail/Links0-200}) is static over time. The UC messaging dataset on the other hand, gives reason to believe that the dynamic models have a slight advantage, possibly due to the negative trend in the link activity (cf. \cref{Data/UCMessaging/Links75-195}).
+    Whether or not dynamic models exceed the performance of the static model depends entirely on the dataset, which does not necessarily evolve over time. However, if it does, the results have shown that the dynamic models are able to capture the temporal changes.
+
+\subsection{Autoregressive Order}
+
+    The syntheric periodic dataset shows the effect of using autoregressive models of varying order, where a sufficient amount of lags is required to correctly model the dynamic changes. A similar observation was expected from the EU email dataset, where an AR(7) process could potentially model the weekly periodicity. However, even though the total link activity has a very distinct pattern, this periodic behavior does not necessarily apply on a per-observation basis. Simply put, the same people do not necessarily communicate on the same day every week. Hence, the overall link activity is just as easily modeled using a static latent space model. Other datasets should be analyzed to further investigate the effects of the autoregressive order on real-life networks.
+
+\subsection{Undirected vs Directed}
+
+    Undirected models have a very distinct latent space representation, with all observations scattered around a dense core. This gives reason to believe that the network's actors are ranked according to their activity, with the most active actors centered at the origin. 
+    This representation is severely limited by the dimensionality of the latent space, as it constrains the number of ways the observations can be placed relative to one another. However, a result of the restriction is transitivity, which is a valid assumption in many communication networks.
+    
+    Directed models produce quite different latent spaces, where the models are only concerned with the distances between the groups of senders and receivers. This often gives rise to two or more clusters, where the outermost observations correspond to the most active senders and receivers. For a reciprocal pair, the distance $\sub(d)$ should be similar to $\sub(d)(ji)$. While undirected models are not capable of modeling non-reciprocal pairs, the directed models should be readily able to model undirected networks. This should be further analyzed by also considering undirected real-life networks.
+
+\subsection{\texorpdfstring{$k$}{k}-Dimensional}
+
+    The number of latent dimensions $k$ has a huge impact on the performance of the models, relating to the complexity of the latent space. Consider the simplest scenario with a one-dimensional space, where the observations are placed on a line. Doing so, $i$ can either be placed to the left of $j$, or to the right. Depending on this decision, the link probabilities to all other observations are determined, being closer to either the observations to the left, or to the right. Adding another dimension however, allows placing $i$ above or below $j$, such that $i$ can be equally close to either side, while still maintaining a distance to $j$. This describes the essence of the latent dimensionality, where a higher value of $k$ allows for an increasingly complex placement of observations.
+    
+    Now why are networks modeled using two and three dimensions, knowing that a ten-dimensional fit will likely perform better? This is because low-dimensional spaces can be easily visualized, providing insight regarding how the model interprets the network structure and captures the link probabilities.
+    As a result, two and three-dimensional latent positions have been used for illustrative purposes, comparing the results with more complex ten-dimensional models. Further analysis should be carried out in terms of the latent dimensionality; Does the performance increase linearly or logarithmicly in terms of $k$? Does the maximum value of $k$ scale with the number of observations $N$? Is it possible to devise a method for finding the optimal $k$?
+
+\subsection{Diffusion Penalty}
+
+    From the synthetic data, it was observed that using no diffusion penalty resulted in overfitting, and worse performance in general, regardless of whether the underlying data included none or a lot of diffusion. Furthermore, when the temporal changes consisted solely of diffusion, the Gaussian penalty limited the model convergence, while the GNV provided a decent fit.
+    A dynamic dataset based on diffusion following a Laplace distribution could shed more light on the differences between GL and LL, showing the impact of using the correct distribution for the diffusion penalty.
+
+    The real-life datasets show some differences in performance using the various diffusion penalties, however not significant enough to conclude which performs the best. Further experiments should be conducted, not just regarding final AUC score, but also in terms of how the diffusion penalty affects convergence time and even the deviation in results. For instance, is the optimization procedure more stable using the GNV penalty?

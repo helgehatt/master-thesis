@@ -5,7 +5,12 @@
 \usepackage{subcaption}
 \usepackage{animate}
 
-\newfloat{animation}{thp}{loa}[chapter]
+\makeatletter
+\@ifclassloaded{book}
+    {\newfloat{animation}{thp}{loa}[chapter]}
+    {\newfloat{animation}{thp}{loa}}
+\makeatother
+
 \floatname{animation}{Animation}
 \crefname{animation}{animation}{animations}
 \Crefname{animation}{Animation}{Animations}
